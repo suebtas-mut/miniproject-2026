@@ -1,78 +1,171 @@
-# ===== Flutter / Dart (T-013, app/) =====
+# =====================================================================
+#  .gitignore  —  ระบบรับส่งรถรับส่ง (Shuttle Bus) สำนักงานเขตหนองจอก
+#  อ้างอิง : chapter-17-fullstack.md (17.3) / chapter-18-development-plan.md (18.8)
+#  รวมจาก 2 branch : sukhsorn (78 บรรทัด) + kaengkarn (124 บรรทัด)
+#  ⚠️ ห้าม ignore ไฟล์ *.sql และ *.md เด็ดขาด (คืองานส่งมอบ/ฐานข้อมูลของทีม)
+#  ⚠️ ห้ามใส่ "report/" ตรง ๆ เด็ดขาด เพราะจะไป ignore docs/report/ ด้วย
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 1) Secret / Credentials  (AR-03 : ห้ามขึ้น Git เด็ดขาด)
+# ---------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.jks
+*.keystore
+secrets/
+secrets.json
+credentials.json
+service-account*.json
+.env.production
+
+# ---------------------------------------------------------------------
+# 2) Node.js / Backend (Node.js 20 LTS + Express 4)
+# ---------------------------------------------------------------------
+node_modules/
+backend/node_modules/
+backend/coverage/
+npm-debug.log*
+npm-debug.log
+yarn-error.log*
+yarn-error.log
+yarn-debug.log
+pnpm-debug.log*
+.npm/
+.eslintcache
+coverage/
+.nyc_output/
+allure-results/
+junit.xml
+lcov.info
+
+# ---------------------------------------------------------------------
+# 3) Flutter / Dart  (app/)
+# ---------------------------------------------------------------------
 .dart_tool/
 .packages
 .pub-cache/
 .pub/
 build/
-.flutter-plugins
-.flutter-plugins-dependencies
 app/.dart_tool/
+app/.packages
+app/.pub-cache/
+app/.pub/
 app/build/
+app/coverage/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.metadata
+app/**/GeneratedPluginRegistrant.*
+app/android/.gradle/
 app/android/local.properties
 app/android/key.properties
+app/android/app/debug/
+app/android/app/profile/
+app/android/app/release/
 app/ios/Pods/
 app/ios/.symlinks/
-app/**/GeneratedPluginRegistrant.*
+app/ios/Flutter/Flutter.framework
+app/ios/Flutter/Flutter.podspec
+app/macos/Pods/
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
 
-# ===== Android (app/android/) =====
+# ---------------------------------------------------------------------
+# 4) Android (app/android/)
+# ---------------------------------------------------------------------
 *.jks
-*.keystore
 debug/
 release/
 captures/
 .externalNativeBuild/
 .cxx/
 
-# ===== Node.js / Express (T-011, backend/) =====
-node_modules/
-npm-debug.log*
-yarn-error.log*
-.env
-.env.*
-!.env.example
-backend/node_modules/
-backend/coverage/
+# ---------------------------------------------------------------------
+# 5) ไฟล์ Build / แพ็กเกจที่ได้จากการ Build  (ห้ามขึ้น Git)
+# ---------------------------------------------------------------------
+*.apk
+*.aab
+*.ipa
+*.app
+*.msi
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.jar
+*.war
 
-# ===== Oracle / Database (T-007, database/) =====
-*.log
+# ---------------------------------------------------------------------
+# 6) Oracle Database  (dump / log / trace / wallet)
+# ---------------------------------------------------------------------
 *.dmp
+*.ctl
+*.log
+*.trc
+*.rdb
+*.rdf
+*.sga
+*.sga.*
+core.*
+ora_*
+pdb_*
+sqlnet.log
+listener.log
+tnsnames.ora
+sqlplus.log
 *.bak
 *.tmp
+*.temp
+# Docker volume ของ Oracle XE
+oracle-data/
+docker/volumes/
 database/*.log
 
-# ===== Secret / Credentials — ห้าม commit (AR-03) =====
-*.pem
-*.key
-secrets.json
-credentials.json
-service-account*.json
-.env.production
+# ---------------------------------------------------------------------
+# 7) รูปภาพ — เก็บเฉพาะของที่เป็น "งานส่งมอบ" ไว้ใน docs/ เท่านั้น
+#    ของอื่นทั่ว repo (build, screenshot ชั่วคราว, node_modules ฯลฯ) ให้ ignore
+# ---------------------------------------------------------------------
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.dot
+docs/diagrams/*/out/
 
-# ===== IDE / Editor =====
-.idea/
-.vscode/*
-!.vscode/settings.json
-*.iml
+# ✅ ยกเว้นคืน: ไดอะแกรม + Mockup ที่ต้องอยู่ในรายงานต้อง commit ได้
+!docs/**/*.svg
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.jpeg
+
+# ---------------------------------------------------------------------
+# 8) ไฟล์ชั่วคราว / ระบบปฏิบัติการ / เครื่องมือ
+# ---------------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+desktop.ini
+Desktop.ini
+.DS_Store
+$RECYCLE.BIN/
 *.swp
 *.swo
 *~
-
-# ===== OS =====
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-.DS_Store
-
-# ===== Logs & Temp =====
-npm-debug.log
-yarn-debug.log
-yarn-error.log
-*.log
-coverage/
 tmp/
 temp/
+.vscode/*
+!.vscode/settings.json
+.idea/
+*.iml
 
-# ===== หมายเหตุ =====
-# - ไฟล์ .puml และ PNG/SVG ที่ export จาก PlantUML ใต้ docs/ ให้ commit ไว้ เพราะต้องใช้ในรายงาน
+# ---------------------------------------------------------------------
+# 9) หมายเหตุ
+# ---------------------------------------------------------------------
+# - ไฟล์ .puml (source ของ PlantUML) ใต้ docs/ ให้ commit เสมอ
+# - PNG/SVG ที่ export แล้ว ถ้าอยู่ใต้ docs/ จะถูกยกเว้นให้ commit (ดูข้อ 7)
 # - app/ (Flutter), backend/ (Node), database/ (SQL) จะถูกสร้างใน Sprint 3 (T-011, T-013) และ Sprint 1 (T-007)
+# - เมื่อรวม 2 branch: ใช้รายการนี้แทนทั้งสองฝั่ง ตอน resolve conflict ของ .gitignore ให้เลือกฝั่งนี้
