@@ -726,7 +726,7 @@ async function initPool() {
   pool = await oracledb.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    connectString: `${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_SID}`,
+    connectString: `${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_SERVICE_NAME}`,
     poolMin: 2, poolMax: 10, poolIncrement: 1,
     poolTimeout: 60,              // คืน connection เข้า pool หลัง 60 วินาที
     stmtCacheSize: 25
@@ -1420,7 +1420,7 @@ PORT=3000
 # Oracle
 DB_HOST=localhost
 DB_PORT=1521
-DB_SID=XEPDB1
+DB_SERVICE_NAME=XEPDB1
 DB_USER=shuttle_app
 DB_PASS=********
 

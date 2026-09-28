@@ -1,0 +1,116 @@
+# =====================================================================
+#  .gitignore  —  ระบบรับส่งรถรับส่ง (Shuttle Bus) สำนักงานเขตหนองจอก
+#  อ้างอิง : chapter-17-fullstack.md (17.3) / chapter-18-development-plan.md (18.8)
+#  ⚠️ ห้าม ignore ไฟล์ *.sql และ *.md เด็ดขาด (คืองานส่งมอบ/ฐานข้อมูลของทีม)
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# 1) Secret / Credentials  (AR-03 : ห้ามขึ้น Git เด็ดขาด)
+# ---------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.jks
+secrets/
+
+# ---------------------------------------------------------------------
+# 2) Node.js / Backend (Node.js 20 LTS + Express 4)
+# ---------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.eslintcache
+coverage/
+.nyc_output/
+
+# ---------------------------------------------------------------------
+# 3) Flutter / Dart  (app/)
+# ---------------------------------------------------------------------
+app/.dart_tool/
+app/.packages
+app/.pub-cache/
+app/.pub/
+app/build/
+app/coverage/
+app/android/.gradle/
+app/android/local.properties
+app/android/app/debug/
+app/android/app/profile/
+app/android/app/release/
+app/ios/Pods/
+app/ios/.symlinks/
+app/ios/Flutter/Flutter.framework
+app/ios/Flutter/Flutter.podspec
+app/macos/Pods/
+app/linux/flutter/ephemeral/
+app/windows/flutter/ephemeral/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.metadata
+
+# ---------------------------------------------------------------------
+# 4) ไฟล์ Build / แพ็กเกจที่ได้จากการ Build  (ห้ามขึ้น Git)
+# ---------------------------------------------------------------------
+*.apk
+*.aab
+*.ipa
+*.app
+*.msi
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.jar
+*.war
+
+# ---------------------------------------------------------------------
+# 5) Oracle Database  (dump / log / trace / wallet)
+# ---------------------------------------------------------------------
+*.dmp
+*.ctl
+*.log
+*.trc
+*.rdb
+*.rdf
+*.sga
+*.sga.*
+core.*
+ora_*
+pdb_*
+sqlnet.log
+listener.log
+tnsnames.ora
+sqlplus.log
+# Docker volume ของ Oracle XE 19c
+oracle-data/
+docker/volumes/
+
+# ---------------------------------------------------------------------
+# 6) ไฟล์ชั่วคราว / ของระบบปฏิบัติการ / เครื่องมือ
+# ---------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store
+$RECYCLE.BIN/
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+.vscode/*
+!.vscode/settings.json.example
+.idea/
+*.iml
+
+# ---------------------------------------------------------------------
+# 7) Test / Coverage / Report ที่สร้างอัตโนมัติ
+#    ⚠️ ห้ามใส่ "report/" ตรง ๆ เด็ดขาด เพราะจะไป ignore docs/report/ ด้วย
+# ---------------------------------------------------------------------
+allure-results/
+junit.xml
+lcov.info

@@ -1,0 +1,43 @@
+# =====================================================================
+#  docker-compose.yaml  —  ฐานข้อมูล Oracle XE สำหรับ DEV (T-001)
+#  ระบบรับส่งรถรับส่ง (Shuttle Bus) สำนักงานเขตหนองจอก
+#
+#  คู่มือฉบับเต็ม : docs/requirements/oracle-xe19c-setup.md
+#  ⚠️ ไฟล์นี้ไม่มีรหัสผ่านจริง — ทุกค่ามาจากไฟล์ .env (ถูก .gitignore ไว้) และ .env.example
+# =====================================================================
+
+services:
+  oracle-xe:
+    # 21c เป็นเวอร์ชันที่ 17.0 อนุญาต ("ทดสอบได้ทั้ง 21c / XE")
+    # ไม่มี 19c บน Docker Hub — ดูหัวข้อ "ทำไมถึงใช้ 21c" ในคู่มือ
+    image: gvenzl/oracle-xe:21-slim
+    container_name: shuttle-oracle-xe
+    restart: unless-stopped
+
+    ports:
+      # 1521 = Oracle Listener (Backend ของเก่งกาญต่อเข้ามาที่นี่)
+      - "1521:1521"
+
+    environment:
+      # รหัสผ่านของ SYS / SYSTEM (ผู้ดูแล DB) — ต้องตั้งค่าใน .env
+      ORACLE_PASSWORD: "${ORACLE_PASSWORD:?กรุณาตั้งค่า ORACLE_PASSWORD ในไฟล์ .env ก่อน (คัดลอกจาก .env.example)}"
+
+      # User สำหรับแอป (Backend ใช้ตัวนี้) — ถูกสร้างใน PDB XEPDB1 ให้อัตโนมัติ
+      APP_USER: "${APP_USER:-SHUTTLE_APP}"
+      APP_USER_PASSWORD: "${APP_USER_PASSWORD:?กรุณาตั้งค่า APP_USER_PASSWORD ในไฟล์ .env ก่อน (คัดลอกจาก .env.example)}"
+
+    volumes:
+      # เก็บข้อมูลถาวร — ถ้าลบ volume ข้อมูลทั้งหมดจะหาย
+      - oracle-xe-data:/opt/oracle/oradata
+
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      # ครั้งแรกต้องใช้เวลานานมาก (สร้างฐานข้อมูล) — รอได้ถึง 3 นาที
+      start_period: 180s
+
+volumes:
+  oracle-xe-data:
+    name: shuttle-oracle-xe-data
