@@ -1,0 +1,61 @@
+@startuml usecase-06-actor-relation
+' T-004 — ความสัมพันธ์ระหว่าง Actor กับ Use Case (แบบย่อ ใช้อธิบายในรายงาน)
+' แสดงว่าบทบาทไม่ได้ "ตายตัว" — เมนู/สิทธิ์มาจากฐานข้อมูล (R-03)
+
+title Actor x Use Case (แผนภาพความสัมพันธ์)
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "Admin" as A
+actor "Staff" as S
+actor "Driver" as D
+actor "Customer" as C
+
+usecase "จัดการพนักงาน" as U1
+usecase "จัดการสิทธิ์ (Matrix)" as U2
+usecase "จัดการเส้นทาง/จุดจอด" as U3
+usecase "จัดรอบเวลา/มอบหมายคนขับ-รถ" as U4
+usecase "จองรถ + QR + ยกเลิก" as U5
+usecase "ตารางงาน/สแกน QR/ปิดงาน" as U6
+usecase "รายงาน R1/R4/R6" as U7
+usecase "Login / Logout" as U8
+
+A -- U1
+A -- U2
+A -- U3
+A -- U4
+A -- U7
+A -- U8
+S -- U1
+S -- U3
+S -- U4
+S -- U7
+S -- U8
+D -- U6
+D -- U8
+C -- U5
+C -- U8
+
+note bottom of U2
+  <<extend>> การกำหนดว่า Actor ใด
+  ใช้ Use Case ใดได้บ้าง
+  = ตาราง role_permission
+  (ปรับได้ตลอดเวลา ไม่ hardcode)
+end note
+
+note bottom of U8
+  ทุกบทบาทใช้แอป Flutter เดียวกัน
+  เมนูถูกสร้าง Dynamic ตาม
+  permission.screen_key ที่ Login ได้รับ
+  (R-07 ไม่มี Web / React)
+end note
+
+@enduml

@@ -1,0 +1,95 @@
+@startuml usecase-01-auth-master
+' T-004 — Use Case: M1 / M2 / M3 (บทบาท Admin, Staff)
+
+title Use Case — M1 พนักงาน · M2 สิทธิ์ · M3 Login/Logout
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "ผู้ดูแลระบบ (Admin)" as Admin
+actor "พนักงานสำนักงาน (Staff)" as Staff
+actor "ผู้ใช้ทุกบทบาท" as User
+
+rectangle "ระบบ SHUTTLE BUS" {
+  usecase "UC-01 เข้าสู่ระบบ" as UC01
+  usecase "UC-02 ออกจากระบบ" as UC02
+  usecase "UC-03 เปลี่ยนรหัสผ่าน" as UC03
+
+  usecase "UC-04 เพิ่มพนักงาน" as UC04a
+  usecase "UC-04 แก้ไขข้อมูลพนักงาน" as UC04b
+  usecase "UC-04 ปิดใช้งาน/ลบพนักงาน" as UC04c
+  usecase "UC-04 ค้นหาและดูรายชื่อพนักงาน" as UC04d
+
+  usecase "UC-05 เพิ่ม/แก้ไข/ลบแผนก" as UC05
+  usecase "UC-06 เพิ่ม/แก้ไข/ลบตำแหน่ง" as UC06
+
+  usecase "UC-07 เพิ่ม/แก้ไข/ลบบทบาท" as UC07
+  usecase "UC-08 เพิ่ม/แก้ไข/ลบสิทธิ์" as UC08
+  usecase "UC-09 กำหนดสิทธิ์ให้บทบาท\n(Permission Matrix)" as UC09
+  usecase "UC-10 กำหนดบทบาทให้พนักงาน" as UC10
+
+  usecase "ยืนยันตัวตนด้วยรหัสผ่าน (bcrypt)" as VERIFY
+  usecase "ตรวจสิทธิ์จากฐานข้อมูล" as AUTHZ
+  usecase "ออก JWT พร้อมรายการ permission" as ISSUE
+  usecase "เพิ่ม jti ลง token_blacklist" as BLACKLIST
+  usecase "สร้างเมนูแบบไดนามิกตาม permission" as MENU
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+User -- UC01
+User -- UC02
+User -- UC03
+Admin -- UC04a
+Admin -- UC04b
+Admin -- UC04c
+Admin -- UC04d
+Admin -- UC05
+Admin -- UC06
+Admin -- UC07
+Admin -- UC08
+Admin -- UC09
+Admin -- UC10
+Staff -- UC04d
+
+UC01 ..> VERIFY : <<include>>
+UC01 ..> AUTHZ : <<include>>
+UC01 ..> ISSUE : <<include>>
+UC01 ..> MENU   : <<include>>
+UC02 ..> BLACKLIST : <<include>>
+
+UC03 ..> VERIFY : <<include>>
+
+UC04a ..> AUDIT : <<include>>
+UC04b ..> AUDIT : <<include>>
+UC04c ..> AUDIT : <<include>>
+UC05   ..> AUDIT : <<include>>
+UC06   ..> AUDIT : <<include>>
+UC07   ..> AUDIT : <<include>>
+UC08   ..> AUDIT : <<include>>
+UC09   ..> AUDIT : <<include>>
+UC10   ..> AUDIT : <<include>>
+
+note right of UC04a
+  M1 : เพิ่มพนักงานต้องระบุ
+  - แผนก (dept_id)
+  - ตำแหน่ง (position_id)
+  - ชื่อผู้ใช้ (username)
+  รหัสผ่านเก็บเป็น bcrypt (R-04)
+end note
+
+note bottom of UC09
+  M2 : เปลี่ยนสิทธิ์ได้ตลอดเวลา
+  บันทึกแล้วผู้ใช้ที่มีบทบาทนั้น
+  Login ใหม่แล้วเมนูเปลี่ยนทันที
+  โดยไม่ต้องแก้โค้ดและไม่ต้อง
+  restart server  (R-03)
+end note
+
+@enduml

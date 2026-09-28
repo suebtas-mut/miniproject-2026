@@ -1,0 +1,102 @@
+@startuml usecase-04-driver
+' T-004 — Use Case: D1-D4 ระบบสำหรับคนขับรถ
+
+title Use Case — D1 ตารางงาน · D2 เริ่มเดินทาง · D3 สแกน QR · D4 ปิดงาน
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "คนขับรถ (Driver)" as Driver
+actor "ผู้โดยสาร" as Passenger
+actor "ระบบตรวจจับ QR" as QRSys
+
+rectangle "ระบบ SHUTTLE BUS" {
+  usecase "UC-22 ดูตารางงานรายวัน" as UC22
+  usecase "UC-23 เริ่มการเดินทางของรอบ" as UC23
+  usecase "UC-24 ดูรายชื่อผู้โดยสารขึ้น-ลง\nรายจุดจอด (Manifest)" as UC24
+  usecase "UC-25 สแกน QR เช็คอินขึ้นรถ" as UC25
+  usecase "UC-26 ปิดรอบการเดินทางและดูสรุป" as UC26
+
+  usecase "แจ้งเตือนว่ามีงานอื่นค้าง/ชนกัน" as WARN
+  usecase "เทียบ booking.sched_id กับ\ntrip ที่กำลังเดิน (BR-09)" as CHK_TRIP
+  usecase "เปลี่ยนสถานะ booking ที่ยัง\nreserved เป็น no_show (BR-10)" as MARK_NOSHOW
+  usecase "สรุปยอดผู้โดยสารและรายชื่อ No Show" as SUMMARY
+  usecase "ตรวจสิทธิ์การเข้าถึง" as AUTHZ
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+Driver -- UC22
+Driver -- UC23
+Driver -- UC24
+Driver -- UC25
+Driver -- UC26
+Passenger -- UC25 : แสดง QR ให้คนขับสแกน
+QRSys   -- UC25 : อ่านค่าจากกล้อง
+
+UC22 ..> AUTHZ : <<include>>
+UC23 ..> AUTHZ : <<include>>
+UC24 ..> AUTHZ : <<include>>
+UC25 ..> AUTHZ : <<include>>
+UC25 ..> CHK_TRIP : <<include>>
+UC26 ..> AUTHZ : <<include>>
+UC26 ..> MARK_NOSHOW : <<include>>
+UC26 ..> SUMMARY : <<include>>
+UC23 ..> WARN : <<include>>
+
+UC22 ..> AUDIT : <<include>>
+UC23 ..> AUDIT : <<include>>
+UC25 ..> AUDIT : <<include>>
+UC26 ..> AUDIT : <<include>>
+
+note right of UC22
+  D1
+  คนขับเห็นตารางการทำงาน
+  ของตัวเองแยกตามวัน
+  (ตารางเวลา + จุดจอด + เวลาที่ถึง
+   + จำนวนผู้โดยสารคร่าว ๆ)
+end note
+
+note right of UC23
+  D2
+  - กดเริ่มได้ในแต่ละรอบเวลา
+  - ระบบต้องแสดงชัดเจนว่า
+    ณ เวลานั้น ๆ มีงานอื่นที่ต้อง
+    ทำอยู่หรือไม่ (BR-04)
+end note
+
+note right of UC24
+  D2
+  เห็นว่าในรอบนั้นมีผู้ใช้บริการ
+  ขึ้นกี่คน ลงกี่คน ในแต่ละ
+  สถานี และเป็นใครบ้าง
+  ใช้ LISTAGG รวมชื่อเป็นบรรทัดเดียว
+end note
+
+note right of UC25
+  D3
+  คนขับสแกน QR จากผู้ใช้บริการ
+  - ถ้าผิดรอบจะไม่สามารถ
+    ขึ้นรถได้ (BR-09)
+  - ASM-07-3 (สมมติฐาน) : QR
+    ใช้ได้ 1 ครั้งต่อ 1 การจอง
+  ⚠ ใช้กล้องมือถือ = เหตุผลที่
+    ต้องเป็น Mobile App (R-07)
+end note
+
+note bottom of UC26
+  D4
+  - เมื่อถึงจุดปลายทาง คนขับกดปิดรอบ
+  - ระบบสรุปว่าเส้นทางนี้มีผู้ใช้บริการ
+    ทั้งหมดกี่คน
+  - และใครบ้างที่ไม่ได้มาใช้บริการ
+    ตามที่จองไว้ (No Show)  (BR-10)
+end note
+
+@enduml

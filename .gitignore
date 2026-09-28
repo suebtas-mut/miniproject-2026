@@ -1,0 +1,78 @@
+# ===== Flutter / Dart (T-013, app/) =====
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+app/.dart_tool/
+app/build/
+app/android/local.properties
+app/android/key.properties
+app/ios/Pods/
+app/ios/.symlinks/
+app/**/GeneratedPluginRegistrant.*
+
+# ===== Android (app/android/) =====
+*.jks
+*.keystore
+debug/
+release/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# ===== Node.js / Express (T-011, backend/) =====
+node_modules/
+npm-debug.log*
+yarn-error.log*
+.env
+.env.*
+!.env.example
+backend/node_modules/
+backend/coverage/
+
+# ===== Oracle / Database (T-007, database/) =====
+*.log
+*.dmp
+*.bak
+*.tmp
+database/*.log
+
+# ===== Secret / Credentials — ห้าม commit (AR-03) =====
+*.pem
+*.key
+secrets.json
+credentials.json
+service-account*.json
+.env.production
+
+# ===== IDE / Editor =====
+.idea/
+.vscode/*
+!.vscode/settings.json
+*.iml
+*.swp
+*.swo
+*~
+
+# ===== OS =====
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# ===== Logs & Temp =====
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+*.log
+coverage/
+tmp/
+temp/
+
+# ===== หมายเหตุ =====
+# - ไฟล์ .puml และ PNG/SVG ที่ export จาก PlantUML ใต้ docs/ ให้ commit ไว้ เพราะต้องใช้ในรายงาน
+# - app/ (Flutter), backend/ (Node), database/ (SQL) จะถูกสร้างใน Sprint 3 (T-011, T-013) และ Sprint 1 (T-007)

@@ -1,0 +1,175 @@
+@startuml usecase-00-overview
+' MINI PROJECT : ระบบ SHUTTLE BUS — Use Case Diagram ระดับภาพรวม (T-004)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' ข้อกำหนดอ้างอิง: PDF ข้อ M1-M3, F1-F2, B1-B3, D1-D4, R1/R4/R6
+
+title Use Case Diagram ระดับภาพรวม — ระบบ SHUTTLE BUS (ภายในระบบ)
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "ผู้ดูแลระบบ\n(Admin)" as Admin
+actor "พนักงานสำนักงาน\n(Staff)" as Staff
+actor "คนขับรถ\n(Driver)" as Driver
+actor "นักศึกษา / เจ้าหน้าที่\n(Customer)" as Customer
+
+rectangle "ระบบ SHUTTLE BUS\nFlutter (Android / แท็บเล็ต)" {
+  usecase "UC-01 เข้าสู่ระบบ" as UC01
+  usecase "UC-02 ออกจากระบบ" as UC02
+  usecase "UC-03 เปลี่ยนรหัสผ่าน" as UC03
+
+  usecase "UC-04 จัดการข้อมูลพนักงาน" as UC04
+  usecase "UC-05 จัดการแผนก" as UC05
+  usecase "UC-06 จัดการตำแหน่ง" as UC06
+  usecase "UC-07 จัดการบทบาท (Role)" as UC07
+  usecase "UC-08 จัดการสิทธิ์ (Permission)" as UC08
+  usecase "UC-09 กำหนดสิทธิ์ให้บทบาท" as UC09
+  usecase "UC-10 กำหนดบทบาทให้พนักงาน" as UC10
+
+  usecase "UC-11 จัดการจุดจอด" as UC11
+  usecase "UC-12 จัดการเส้นทาง" as UC12
+  usecase "UC-13 จัดการประเภทรถและรถ" as UC13
+  usecase "UC-14 จัดรอบเวลาเดินรถ" as UC14
+  usecase "UC-15 มอบหมายคนขับ (ตรวจชนกัน)" as UC15
+  usecase "UC-16 มอบหมายรถ (ตรวจชนกัน)" as UC16
+
+  usecase "UC-17 ดูรอบเวลาที่สามารถจองได้" as UC17
+  usecase "UC-18 จองรถ" as UC18
+  usecase "UC-19 ดูรายการเดินทางของฉัน" as UC19
+  usecase "UC-20 แสดง QR Code" as UC20
+  usecase "UC-21 ยกเลิกการจอง" as UC21
+
+  usecase "UC-22 ดูตารางงานรายวัน" as UC22
+  usecase "UC-23 เริ่มการเดินทาง" as UC23
+  usecase "UC-24 ดูรายชื่อผู้โดยสารรายจุดจอด" as UC24
+  usecase "UC-25 สแกน QR เช็คอิน" as UC25
+  usecase "UC-26 ปิดงานและสรุปผล" as UC26
+
+  usecase "UC-27 รายงาน R1 คนขึ้น/ลงรายสัปดาห์" as UC27
+  usecase "UC-28 รายงาน R4 สรุปยอดผู้ใช้รายวันรายเส้นทาง" as UC28
+  usecase "UC-29 รายงาน R6 สรุปการมอบหมายงานคนขับ" as UC29
+  usecase "UC-30 เลือกช่วงวันที่/ปี และส่งออกรายงาน" as UC30
+
+  usecase "ตรวจสิทธิ์การเข้าถึง" as AUTHZ
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+Admin  -- UC01
+Admin  -- UC02
+Admin  -- UC03
+Admin  -- UC04
+Admin  -- UC05
+Admin  -- UC06
+Admin  -- UC07
+Admin  -- UC08
+Admin  -- UC09
+Admin  -- UC10
+Admin  -- UC11
+Admin  -- UC12
+Admin  -- UC13
+Admin  -- UC14
+Admin  -- UC15
+Admin  -- UC16
+Admin  -- UC19
+Admin  -- UC27
+Admin  -- UC28
+Admin  -- UC29
+Admin  -- UC30
+
+Staff -- UC01
+Staff -- UC02
+Staff -- UC03
+Staff  -- UC04
+Staff  -- UC11
+Staff  -- UC12
+Staff  -- UC13
+Staff  -- UC14
+Staff  -- UC15
+Staff  -- UC16
+Staff  -- UC27
+Staff  -- UC28
+Staff  -- UC29
+Staff  -- UC30
+
+Driver -- UC01
+Driver -- UC02
+Driver -- UC03
+Driver -- UC22
+Driver -- UC23
+Driver -- UC24
+Driver -- UC25
+Driver -- UC26
+
+Customer -- UC01
+Customer -- UC02
+Customer -- UC03
+Customer -- UC17
+Customer -- UC18
+Customer -- UC19
+Customer -- UC20
+Customer -- UC21
+
+UC01 ..> AUTHZ : <<include>>
+UC11 ..> AUTHZ : <<include>>
+UC12 ..> AUTHZ : <<include>>
+UC13 ..> AUTHZ : <<include>>
+UC14 ..> AUTHZ : <<include>>
+UC15 ..> AUTHZ : <<include>>
+UC16 ..> AUTHZ : <<include>>
+UC17 ..> AUTHZ : <<include>>
+UC18 ..> AUTHZ : <<include>>
+UC22 ..> AUTHZ : <<include>>
+UC23 ..> AUTHZ : <<include>>
+UC24 ..> AUTHZ : <<include>>
+UC25 ..> AUTHZ : <<include>>
+UC26 ..> AUTHZ : <<include>>
+UC27 ..> AUTHZ : <<include>>
+UC28 ..> AUTHZ : <<include>>
+UC29 ..> AUTHZ : <<include>>
+
+UC04 ..> AUDIT : <<include>>
+UC05 ..> AUDIT : <<include>>
+UC06 ..> AUDIT : <<include>>
+UC07 ..> AUDIT : <<include>>
+UC08 ..> AUDIT : <<include>>
+UC09 ..> AUDIT : <<include>>
+UC10 ..> AUDIT : <<include>>
+UC11 ..> AUDIT : <<include>>
+UC12 ..> AUDIT : <<include>>
+UC13 ..> AUDIT : <<include>>
+UC14 ..> AUDIT : <<include>>
+UC15 ..> AUDIT : <<include>>
+UC16 ..> AUDIT : <<include>>
+UC18 ..> AUDIT : <<include>>
+UC21 ..> AUDIT : <<include>>
+UC22 ..> AUDIT : <<include>>
+UC23 ..> AUDIT : <<include>>
+UC25 ..> AUDIT : <<include>>
+UC26 ..> AUDIT : <<include>>
+UC30 ..> AUDIT : <<include>>
+
+note right of AUTHZ
+  Dynamic RBAC (R-03)
+  อ่านสิทธิ์จากตาราง
+  role_permission ทุกครั้ง
+  ห้าม hardcode บทบาท
+end note
+
+note right of Customer
+  R-07 : ไม่มี Web / React
+  ทุกบทบาทใช้แอป Flutter
+  เดียวกัน ต้องเป็น
+  Adaptive UI
+end note
+
+@enduml

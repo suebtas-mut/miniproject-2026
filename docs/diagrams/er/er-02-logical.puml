@@ -1,0 +1,272 @@
+@startuml er-02-logical
+' T-005 — ER Diagram ระดับ LOGICAL (โครงสร้างจริง + Key)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' แหล่งที่มา: docs/chapter-17-fullstack.md ข้อ 17.4.1 / 17.4.3 (DDL)
+
+title ER Diagram ระดับ LOGICAL — ระบบ SHUTTLE BUS (20 ตาราง)
+
+skinparam shadowing false
+skinparam entity {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam linetype ortho
+
+' ================= MASTER : บุคคลและสิทธิ์ (8 ตาราง) =================
+
+entity "DEPARTMENT" as department {
+  * dept_id   <<PK>>
+  --
+  dept_name  <<UK>>
+  created_at
+}
+
+entity "JOB_POSITION" as job_position {
+  * position_id   <<PK>>
+  --
+  position_name  <<UK>>
+}
+
+entity "EMPLOYEE" as employee {
+  * emp_id        <<PK>>
+  --
+  emp_code       <<UK>>
+  username       <<UK>>
+  password_hash
+  first_name
+  last_name
+  phone
+  email
+  is_active  0/1
+  created_at
+  --
+  dept_id       <<FK>>
+  position_id   <<FK>>
+}
+
+entity "APP_ROLE" as app_role {
+  * role_id     <<PK>>
+  --
+  role_name    <<UK>>
+  description
+  is_active 0/1
+}
+
+entity "PERMISSION" as permission {
+  * perm_id    <<PK>>
+  --
+  perm_code   <<UK>>
+  perm_name
+  module
+  screen_key
+  sort_no
+}
+
+entity "ROLE_PERMISSION" as role_permission {
+  * role_id   <<PK,FK>>
+  * perm_id   <<PK,FK>>
+}
+
+entity "EMPLOYEE_ROLE" as employee_role {
+  * emp_id    <<PK,FK>>
+  * role_id   <<PK,FK>>
+}
+
+entity "TOKEN_BLACKLIST" as token_blacklist {
+  * jti        <<PK>>
+  --
+  emp_id      <<FK>>
+  expires_at
+  revoked_at
+}
+
+' ================= FRONT : เส้นทาง / รอบ / ยานพาหนะ (9 ตาราง) =================
+
+entity "STOP" as stop {
+  * stop_id    <<PK>>
+  --
+  stop_name   <<UK>>
+  address
+  latitude
+  longitude
+  is_active 0/1
+}
+
+entity "ROUTE" as route {
+  * route_id      <<PK>>
+  --
+  route_name
+  total_minutes   "= SUM(route_stop)"
+  description
+  is_active 0/1
+}
+
+entity "ROUTE_STOP" as route_stop {
+  * route_id   <<PK,FK>>
+  * stop_seq   <<PK>>
+  --
+  stop_id        <<FK>>
+  travel_minutes
+  --
+  "UQ(route_id, stop_id)  BR-03"
+}
+
+entity "VEHICLE_TYPE" as vehicle_type {
+  * vtype_id   <<PK>>
+  --
+  vtype_name  <<UK>>
+  capacity   "> 0"
+}
+
+entity "VEHICLE" as vehicle {
+  * veh_id     <<PK>>
+  --
+  plate_no    <<UK>>
+  is_active 0/1
+  --
+  vtype_id    <<FK>>
+}
+
+entity "SCHEDULE" as schedule {
+  * sched_id   <<PK>>
+  --
+  service_date
+  depart_at   "วัน+เวลาเต็ม"
+  is_active 0/1
+  --
+  route_id    <<FK>>
+  --
+  "UQ(route_id, depart_at)"
+}
+
+entity "SCHEDULE_STOP" as schedule_stop {
+  * sched_stop_id  <<PK>>
+  --
+  sched_id    <<FK>>
+  stop_id     <<FK>>
+  stop_seq
+  arrive_at
+  dwell_minutes
+  --
+  "UQ(sched_id, stop_seq)"
+}
+
+entity "DRIVER_ASSIGN" as driver_assign {
+  * assign_id  <<PK>>
+  --
+  assign_at
+  --
+  sched_id    <<FK>>
+  emp_id      <<FK>>
+  --
+  "UQ(sched_id, emp_id)"
+}
+
+entity "VEHICLE_ASSIGN" as vehicle_assign {
+  * assign_id  <<PK>>
+  --
+  assign_at
+  --
+  sched_id    <<FK>>
+  veh_id      <<FK>>
+  --
+  "UQ(sched_id, veh_id)"
+}
+
+' ================= BOOKING และ TRIP (3 ตาราง) =================
+
+entity "BOOKING" as booking {
+  * booking_id      <<PK>>
+  --
+  booking_code     <<UK>>  "seq_booking_code"
+  qr_token         <<UK>>
+  cust_id          <<FK>>
+  sched_id         <<FK>>
+  board_stop_id    <<FK>>
+  alight_stop_id   <<FK>>
+  seats            "1..4  BR-06"
+  status           "5 สถานะ"
+  book_time
+  cancel_time
+}
+
+entity "TRIP" as trip {
+  * trip_id     <<PK>>
+  --
+  sched_id     <<FK>>  "UQ = 1 รอบ = 1 trip"
+  driver_id    <<FK>>
+  veh_id       <<FK>>
+  start_time
+  end_time
+  status       "running|completed"
+}
+
+entity "TRIP_PASSENGER" as trip_passenger {
+  * trip_passenger_id  <<PK>>
+  --
+  checkin_time
+  checkin_stop_id  <<FK>>
+  board_seq
+  alight_seq
+  alight_time
+  --
+  trip_id       <<FK>>
+  booking_id    <<FK>>
+  --
+  "UQ(trip_id, booking_id)"
+}
+
+' ================= ความสัมพันธ์ =================
+
+department    ||--o{ employee        : "มีพนักงาน"
+job_position  ||--o{ employee        : "มีตำแหน่ง"
+employee      ||--o{ employee_role   : "มีบทบาท"
+app_role      ||--o{ employee_role   : "กำหนดให้"
+app_role      ||--o{ role_permission : "ได้รับสิทธิ์"
+permission    ||--o{ role_permission : "เปิดสิทธิ์ให้"
+employee      ||--o{ token_blacklist : "ถูก revoke"
+
+stop          ||--o{ route_stop      : "อยู่ในเส้นทาง"
+route         ||--o{ route_stop      : "ประกอบด้วย"
+vehicle_type  ||--o{ vehicle         : "จัดกลุ่ม"
+vehicle       ||--o{ vehicle_assign  : "ถูกใช้"
+vehicle       ||--o{ trip            : "ใช้เดินรถ"
+route         ||--o{ schedule        : "จัดรอบได้หลายรอบ"
+schedule      ||--o{ schedule_stop   : "มีจุดจอด"
+stop          ||--o{ schedule_stop   : "ใช้ซ้ำได้"
+schedule      ||--o{ driver_assign   : "มอบหมายคนขับ"
+employee      ||--o{ driver_assign   : "ขับรถ"
+schedule      ||--o{ vehicle_assign  : "มอบหมายรถ"
+
+employee      ||--o{ booking         : "จองรถ"
+schedule      ||--o{ booking         : "ถูกจอง"
+stop          ||--o{ booking         : "จุดขึ้น/ลง (2 คอลัมน์)"
+schedule      ||--o| trip            : "เดินรถจริง"
+trip          ||--o{ trip_passenger  : "มีผู้โดยสาร"
+booking       ||--o| trip_passenger  : "ถูกเช็คอิน"
+stop          ||--o{ trip_passenger  : "จุดที่เช็คอิน"
+
+note bottom of route_stop
+  <<BR-03>> จุดจอด 1 แห่งอยู่ได้หลายเส้นทาง
+  → ต้องเป็นตารางเชื่อม M:N
+  PK = (route_id, stop_seq) เพื่อกันลำดับซ้ำ
+  UNIQUE (route_id, stop_id) กันจุดซ้ำในเส้นทางเดียว
+end note
+
+note bottom of role_permission
+  <<M2 / R-03>> Dynamic RBAC
+  • PK 2 คอลัมน์ = ลบ Role แล้วสิทธิ์หาย CASCADE
+  • เพิ่ม/ลบ/แก้สิทธิ์ได้ตลอดเวลา
+  • ⛔ ห้าม if (role === 'admin')
+end note
+
+note bottom of booking
+  seats : CHECK (1..4)  ← BR-06
+  status : reserved | checked_in
+           | completed | cancelled
+           | no_show
+  ← BR-08 ที่นั่งคืนเมื่อ status='cancelled'
+end note
+
+@enduml

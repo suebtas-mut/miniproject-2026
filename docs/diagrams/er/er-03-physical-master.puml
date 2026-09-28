@@ -1,0 +1,178 @@
+@startuml er-03-physical-master
+' T-005 — ER Diagram ระดับ PHYSICAL : กลุ่ม MASTER (Oracle 19c)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' แหล่งที่มา: docs/chapter-17-fullstack.md ข้อ 17.4.3 (01_schema.sql)
+
+title ER PHYSICAL — MASTER : บุคคลและสิทธิ์ (8 ตาราง) — Oracle 19c
+
+skinparam shadowing false
+skinparam entity {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam linetype ortho
+
+entity "DEPARTMENT" as department {
+  * dept_id    NUMBER(10) IDENTITY
+  --
+  dept_name   VARCHAR2(120 CHAR) NOT NULL
+  created_at  TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+}
+note right of department
+  PK  : pk_department
+  UK  : uq_department_name
+  ────────────────
+  COMMENT ON TABLE:
+  'แผนก'
+end note
+
+entity "JOB_POSITION" as job_position {
+  * position_id     NUMBER(10) IDENTITY
+  --
+  position_name    VARCHAR2(120 CHAR) NOT NULL
+}
+note right of job_position
+  PK : pk_job_position
+  UK : uq_position_name
+  ────────────────
+  ⚠ ชื่อเดิม "position" เปลี่ยน
+    เพราะเป็นคำสงวน Oracle
+end note
+
+entity "EMPLOYEE" as employee {
+  * emp_id          NUMBER(10) IDENTITY
+  --
+  emp_code         VARCHAR2(20 CHAR)  NOT NULL
+  username         VARCHAR2(50 CHAR)  NOT NULL
+  password_hash    VARCHAR2(200 CHAR) NOT NULL
+  first_name       VARCHAR2(80 CHAR)  NOT NULL
+  last_name        VARCHAR2(80 CHAR)  NOT NULL
+  phone            VARCHAR2(20 CHAR)
+  email            VARCHAR2(120 CHAR)
+  is_active        NUMBER(1) DEFAULT 1 NOT NULL
+  created_at       TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+  --
+  dept_id          NUMBER(10)   <<FK>>
+  position_id      NUMBER(10)   <<FK>>
+}
+note right of employee #C8E6C9
+  PK : pk_employee
+  UK : uq_employee_code, uq_employee_user
+  CK : ck_employee_active  CHECK (is_active IN (0,1))
+  FK : fk_employee_dept     → department
+       fk_employee_position → job_position
+  ────────────────
+  COMMENT ON TABLE:
+  'พนักงาน/ผู้ใช้งานระบบทุกบทบาท'
+  password_hash = bcrypt (R-04)
+  ⛔ ห้ามเก็บ plaintext
+end note
+
+entity "APP_ROLE" as app_role {
+  * role_id      NUMBER(10) IDENTITY
+  --
+  role_name     VARCHAR2(50 CHAR)  NOT NULL
+  description   VARCHAR2(255 CHAR)
+  is_active     NUMBER(1) DEFAULT 1 NOT NULL
+}
+note right of app_role
+  PK : pk_app_role
+  UK : uq_app_role
+  CK : ck_app_role_active
+  ────────────────
+  ⚠ ชื่อเดิม "role" เปลี่ยน
+    เพราะ ROLE เป็นคำสงวน
+  ────────────────
+  COMMENT ON TABLE:
+  'บทบาท/กลุ่มสิทธิ์ (Admin,
+   Staff, Driver, Customer)'
+end note
+
+entity "PERMISSION" as permission {
+  * perm_id      NUMBER(10) IDENTITY
+  --
+  perm_code     VARCHAR2(80 CHAR)  NOT NULL
+  perm_name     VARCHAR2(120 CHAR) NOT NULL
+  module        VARCHAR2(50 CHAR)  NOT NULL
+  screen_key    VARCHAR2(80 CHAR)
+  sort_no       NUMBER(5) DEFAULT 0 NOT NULL
+}
+note right of permission #FFF3CD
+  PK : pk_permission
+  UK : uq_perm_code
+  ────────────────
+  COMMENT ON TABLE:
+  'สิทธิ์รายหน้าจอ/ฟังก์ชัน
+   เพื่อทำ Dynamic RBAC'
+  module =
+   master|front|booking
+   |driver|report
+  screen_key → ใช้สร้าง
+    Dynamic Menu ในแอป
+end note
+
+entity "ROLE_PERMISSION" as role_permission {
+  * role_id  NUMBER(10) NOT NULL  <<PK,FK>>
+  * perm_id  NUMBER(10) NOT NULL  <<PK,FK>>
+}
+note right of role_permission #C8E6C9
+  PK  : pk_role_perm (role_id, perm_id)
+  FK  : fk_rp_role → app_role
+         ON DELETE CASCADE
+       fk_rp_perm → permission
+         ON DELETE CASCADE
+  ────────────────
+  ★ ตารางหัวใจของ M2 / R-03
+  เพิ่ม/ลบ/แก้สิทธิ์ได้ตลอดเวลา
+  ผลมีผลทันทีที่ Login ใหม่
+  โดยไม่ต้อง restart server
+  และไม่ต้องแก้โค้ด Dart
+end note
+
+entity "EMPLOYEE_ROLE" as employee_role {
+  * emp_id   NUMBER(10) NOT NULL  <<PK,FK>>
+  * role_id  NUMBER(10) NOT NULL  <<PK,FK>>
+}
+note right of employee_role
+  PK : pk_emp_role (emp_id, role_id)
+  FK : fk_er_emp  → employee  CASCADE
+       fk_er_role → app_role  CASCADE
+  ────────────────
+  พนักงาน 1 คน มีได้หลายบทบาท
+  สิทธิ์รวม = ผลรวมของทุกบทบาท
+end note
+
+entity "TOKEN_BLACKLIST" as token_blacklist {
+  * jti          VARCHAR2(64 CHAR)
+  --
+  emp_id        NUMBER(10)  NOT NULL   <<FK>>
+  expires_at    TIMESTAMP   NOT NULL
+  revoked_at    TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+}
+note right of token_blacklist
+  PK : jti  (JWT ID ของ token)
+  FK : fk_tb_emp → employee  CASCADE
+  ────────────────
+  เก็บ jti ของ token ที่ถูก logout
+  เพื่อไม่ให้ใช้ซ้ำแม้ยังไม่หมดอายุ
+  (UC-02)
+end note
+
+' ---------- ความสัมพันธ์ ----------
+department    ||--o{ employee        : "fk_employee_dept"
+job_position  ||--o{ employee        : "fk_employee_position"
+employee      ||--o{ employee_role   : "fk_er_emp"
+app_role      ||--o{ employee_role   : "fk_er_role"
+app_role      ||--o{ role_permission : "fk_rp_role"
+permission    ||--o{ role_permission : "fk_rp_perm"
+employee      ||--o{ token_blacklist : "fk_tb_emp"
+
+note bottom of employee_role
+  ⚠ M2 : พนักงานที่ถูกปิดใช้งาน (is_active=0)
+  ยังมีแถวใน employee_role อยู่
+  → ต้องตรวจ is_active ที่ Middleware
+    ทุกครั้ง (ไม่พึ่งแค่ role)
+end note
+
+@enduml

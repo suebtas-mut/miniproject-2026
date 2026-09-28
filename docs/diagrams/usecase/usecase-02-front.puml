@@ -1,0 +1,116 @@
+@startuml usecase-02-front
+' T-004 — Use Case: F1 เส้นทาง/จุดจอด · F2 รอบเวลา/รถ/คนขับ
+
+title Use Case — F1 เส้นทาง · F2 รอบเวลาและการมอบหมาย
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "พนักงานสำนักงาน (Staff)" as Staff
+actor "ผู้ดูแลระบบ (Admin)" as Admin
+
+rectangle "ระบบ SHUTTLE BUS" {
+  usecase "UC-11 เพิ่ม/แก้ไข/ปิดใช้งานจุดจอด" as UC11
+  usecase "UC-12 เพิ่ม/แก้ไขเส้นทาง" as UC12a
+  usecase "UC-12 เรียงลำดับจุดจอดในเส้นทาง\nและกำหนดนาที" as UC12b
+  usecase "UC-12 คำนวณเวลารวมทั้งเส้นทางอัตโนมัติ" as UC12c
+  usecase "UC-12 ดูรายละเอียดเส้นทาง" as UC12d
+
+  usecase "UC-13 เพิ่ม/แก้ไขประเภทรถและรถ" as UC13
+  usecase "UC-14 สร้างรอบเวลาเดินรถ" as UC14a
+  usecase "UC-14 แก้ไข/ยกเลิกรอบเวลา" as UC14b
+  usecase "UC-15 มอบหมายคนขับให้รอบเวลา" as UC15
+  usecase "UC-16 มอบหมายรถให้รอบเวลา" as UC16
+
+  usecase "สร้าง schedule_stop\nอัตโนมัติจากเส้นทาง" as GENSS
+  usecase "ตรวจชนกันของคนขับ/รถ (BR-04)" as CONFLICT
+  usecase "ตรวจสิทธิ์การเข้าถึง" as AUTHZ
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+Staff -- UC11
+Staff -- UC12a
+Staff -- UC12b
+Staff -- UC12c
+Staff -- UC12d
+Staff -- UC13
+Staff -- UC14a
+Staff -- UC14b
+Staff -- UC15
+Staff -- UC16
+Admin  -- UC11
+Admin  -- UC12a
+Admin  -- UC13
+Admin  -- UC14a
+Admin  -- UC15
+Admin  -- UC16
+
+UC11 ..> AUTHZ : <<include>>
+UC12a ..> AUTHZ : <<include>>
+UC12b ..> AUTHZ : <<include>>
+UC12c ..> AUTHZ : <<include>>
+UC12d ..> AUTHZ : <<include>>
+UC13  ..> AUTHZ : <<include>>
+UC14a ..> AUTHZ : <<include>>
+UC14b ..> AUTHZ : <<include>>
+UC15   ..> AUTHZ : <<include>>
+UC16   ..> AUTHZ : <<include>>
+
+UC12b ..> UC12c : <<include>>
+UC14a ..> GENSS   : <<include>>
+UC15   ..> CONFLICT : <<include>>
+UC16   ..> CONFLICT : <<include>>
+
+UC11 ..> AUDIT : <<include>>
+UC12a ..> AUDIT : <<include>>
+UC12b ..> AUDIT : <<include>>
+UC12c ..> AUDIT : <<include>>
+UC13  ..> AUDIT : <<include>>
+UC14a ..> AUDIT : <<include>>
+UC14b ..> AUDIT : <<include>>
+UC15  ..> AUDIT : <<include>>
+UC16  ..> AUDIT : <<include>>
+
+note right of UC12b
+  F1
+  - 1 เส้นทางมีหลายจุดจอด
+  - 1 จุดจอดอยู่ได้หลายเส้นทาง (BR-03)
+  - เก็บ "ใช้เวลากี่นาที" ต่อจุดจอด
+  - ตัวอย่าง: เส้นทาง 1 = 30 นาที (7 จุด)
+           เส้นทาง 2 = 13 นาที (4 จุด)
+           เส้นทาง 3 = 12 นาที (5 จุด)
+end note
+
+note bottom of UC12c
+  BR-01 : route.total_minutes
+  = SUM(route_stop.travel_minutes)
+  คำนวณใหม่ทุกครั้งที่แก้จุดจอด
+  ผู้ใช้ห้ามพิมพ์ค่าเอง
+end note
+
+note right of UC14a
+  F2
+  - รอบตัวอย่าง 9:30 / 11:00 / 13:00 / 15:00
+  - แต่ละเส้นทางมีจำนวนรอบเท่ากัน
+    หรือไม่เท่ากันก็ได้
+  - BR-02 : เวลาถึงจุดจอด =
+    depart_at + ผลรวมนาทีถึงจุดนั้น
+  - ปรับการจัดการได้ใหม่ตลอดเวลา
+end note
+
+note bottom of CONFLICT
+  BR-04 : "ชนกัน" = คนขับคนเดียวกัน
+  หรือรถคันเดียวกัน ถูกมอบหมาย
+  ในช่วงเวลาที่ทับกันจริง
+  (สมมติฐาน ASM-07-1 : เทียบช่วงเวลา
+   เดินทางที่ซ้อนทับกัน)
+end note
+
+@enduml
