@@ -19,43 +19,59 @@ actor "Staff" as S
 actor "Driver" as D
 actor "Customer" as C
 
-usecase "จัดการพนักงาน" as U1
-usecase "จัดการสิทธิ์ (Matrix)" as U2
-usecase "จัดการเส้นทาง/จุดจอด" as U3
-usecase "จัดรอบเวลา/มอบหมายคนขับ-รถ" as U4
-usecase "จองรถ + QR + ยกเลิก" as U5
-usecase "ตารางงาน/สแกน QR/ปิดงาน" as U6
-usecase "รายงาน R1/R4/R6" as U7
-usecase "Login / Logout" as U8
+usecase "UC-01..03\nLogin / Logout / เปลี่ยนรหัสผ่าน" as U08
+usecase "UC-04..06\nพนักงาน / แผนก / ตำแหน่ง" as U01
+usecase "UC-07..10\nRole / Permission / Matrix" as U02
+usecase "UC-11..12\nจุดจอด / เส้นทาง" as U03
+usecase "UC-13..16\nรถ / รอบเวลา / มอบหมายคนขับ" as U04
+usecase "UC-17..21\nจองรถ + QR + ยกเลิก + คืนที่นั่ง" as U05
+usecase "UC-22..26\nตารางงาน / เริ่ม-ปิดงาน / สแกน QR" as U06
+usecase "UC-27..30\nรายงาน R1 / R4 / R6" as U07
 
-A -- U1
-A -- U2
-A -- U3
-A -- U4
-A -- U7
-A -- U8
-S -- U1
-S -- U3
-S -- U4
-S -- U7
-S -- U8
-D -- U6
-D -- U8
-C -- U5
-C -- U8
+A -- U01
+A -- U02
+A -- U03
+A -- U04
+A -- U05
+A -- U07
+A -- U08
+S -- U01
+S -- U03
+S -- U04
+S -- U07
+S -- U08
+D -- U06
+D -- U08
+C -- U05
+C -- U08
 
-note bottom of U2
+note bottom of U02
   <<extend>> การกำหนดว่า Actor ใด
   ใช้ Use Case ใดได้บ้าง
   = ตาราง role_permission
   (ปรับได้ตลอดเวลา ไม่ hardcode)
 end note
 
-note bottom of U8
+note bottom of U05
+  Customer ใช้ครบ UC-17..21
+  Admin ใช้เฉพาะ UC-19
+  (ดูรายการจองของผู้โดยสาร)
+end note
+
+note bottom of U08
   ทุกบทบาทใช้แอป Flutter เดียวกัน
   เมนูถูกสร้าง Dynamic ตาม
   permission.screen_key ที่ Login ได้รับ
   (R-07 ไม่มี Web / React)
+end note
+
+note as N1
+  <b>ที่มา : </b> ย่อจาก 5 โมดูลใน usecase-01..05
+  <b>ตรวจสอบแล้วตรงกัน : </b>
+  Admin 21 · Staff 14 · Driver 8 · Customer 8
+  (นับรวม UC-01..03)
+  แต่ละช่องคืช่วง UC ย่อ — ดูความสัมพันธ์
+  รายตัวที่ละเอียดใน usecase-00-overview.puml
 end note
 
 @enduml
