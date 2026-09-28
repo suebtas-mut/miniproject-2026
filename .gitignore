@@ -86,9 +86,17 @@ sqlnet.log
 listener.log
 tnsnames.ora
 sqlplus.log
-# Docker volume ของ Oracle XE 19c
+# Docker volume ของ Oracle XE
 oracle-data/
 docker/volumes/
+
+# ไฟล์ render ของไดอะแกรม (PlantUML / Graphviz) — เก็บเฉพาะไฟล์ .puml (source)
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.dot
+docs/diagrams/*/out/
 
 # ---------------------------------------------------------------------
 # 6) ไฟล์ชั่วคราว / ของระบบปฏิบัติการ / เครื่องมือ
