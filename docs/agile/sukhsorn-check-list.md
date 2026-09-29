@@ -14,9 +14,9 @@
 | **ตำแหน่งในทีม** | ฝั่ง **Flutter / UI + เอกสาร** (AR-09) |
 | **สมาชิกอีกคน** | นายเก่งกาญ เชี่ยวชาญ (ฝั่ง Oracle / Backend) |
 | **Branch** | `sukhsorn` |
-| **Sprint ปัจจุบัน** | Sprint 1 (อังคารที่ 2 · 2026-09-29) — **ปิดแล้ว 5/5 DoD** (T-005/T-006/T-007) |
+| **Sprint ปัจจุบัน** | **Sprint 2 (พุธที่ 3 · 2026-09-30) — เสร็จ T-014 / T-008 partial / T-009 scaffold** |
 | **Task ที่ฉันรับผิดชอบ** | 28 Task (เฉพาะของฉัน 24 · ร่วมกับทีม 4) รวม **95 ชม.** |
-| **อัปเดตล่าสุด** | 2026-09-29 (ปิด Sprint 1 ย้อนหลัง + เสร็จ Sprint 2 T-014) |
+| **อัปเดตล่าสุด** | **2026-09-30** (Sprint 2 เสร็จ T-014, T-008 seed RPT.R4 fixed, T-009 scaffold 15 หน้า, PR #5 ready merge) |
 
 ---
 
@@ -57,6 +57,18 @@
 | 6 | **Commit วันนี้** | `5fffd27` (T-007) · `189fcef` (Day 2 standup) · `66d434a` (AI log) · `db0a513` (merge sukhsorn) |
 | 7 | **Sprint 1 ปิดย้อนหลัง 2026-09-30** | `sprint-01-report.md` + `retro/sprint-01.md` · 8 Good / 8 Bad / 10 Action Items |
 
+### ✅ สิ่งที่ทำสำเร็จวันที่ 3 (Sprint 2 · 2026-09-30)
+
+| # | ผลลัพธ์ | หลักฐาน | § Ref (requirement-review-checklist.md) |
+|---|---|---|---|
+| 1 | **T-014** — **OpenAPI 3.0.3 Spec 65 endpoints / 42 paths / UC 30/30** | `docs/api/openapi.yaml` · `scripts/validate-openapi.py` PASS · `x-uc`/`x-permission`/`x-br` ครบทุก operation | ข.1 A1 (Req Spec), ก.6 รายงาน R4 (PIVOT) |
+| 2 | **Validator script** — ตรวจ perms 19/22, BR 7 ตัว, $ref 42/42 | `scripts/validate-openapi.py` · RPT.R4 warning resolved (per instructor) | ก.6 รายงาน R4, ข.3 ตาราง report |
+| 3 | **T-008 Seed** — RPT.R4 เพิ่มใน permission (22 สิทธิ์) | `database/02_seed_master.sql` · live DB INSERT · ADMIN role_permission updated | ข.3 ตาราง R4, ข.2 BR-01 total_minutes |
+| 4 | **T-009 Mockup** — Scaffold 15 หน้า wireframe ครบ 4 บทบาท | Figma 4 roles (Admin/Staff/Driver/Customer) · รอ export PNG + ClickUp upload | ก.1 MOCKUP 10 คะแนน, ข.5 Usability 5 คลิก |
+| 5 | **Sprint 2 Report + Retro** | `sprint-02-report.md` · `retro/sprint-02.md` · 15 SP / 14.5 hrs | ง Pre-Submission Stand-up/Retro 14 ไฟล์ |
+| 6 | **PR #5** — Ready merge (อาจารย์ approve แล้ว) | `https://github.com/suebtas-mut/miniproject-2026/pull/5` | ง Code Review, ไม่มี Secret |
+| 7 | **AI Credit** Row 22 (T-014 80% AI) + Row 23 (Sprint 1 close 85% AI) | `ai-credit-log.md` สรุป 24/57+ ~72% | ข.1 A11 (AI Credit) |
+
 ### 🔍 จุดที่พบผิดและแก้ไปแล้ว (8 จุด)
 
 | ไฟล์ | ปัญหา | วิธีแก้ |
@@ -92,17 +104,17 @@
 > 📌 **บทเรียนที่ต้องจำ** — ตัวย่อที่ใช้ซ้ำในคนละบริบทจะทำให้อาจารย์แกะไม่ออก
 > → กำหนดว่า **`AR-xx` สงวน AI Operating Rules** · สมมติฐานใช้ **`ASM-xx`** (AR-08 → ASM-01, AR-07 → ASM-07-1…5)
 
-### ⛔ สิ่งที่ยังติด (ต้องตามต่อ) — ณ 2026-09-29
+### ⛔ สิ่งที่ยังติด (ต้องตามต่อ) — ณ 2026-09-30 (จบ Sprint 2)
 
-| เรื่อง | สถานะ | ผลกระทบ | ใครแก้ |
-|---|---|---|---|
-| **ClickUp** ยังไม่ได้ Login | ⛔ ค้าง | DoD Sprint 0 ข้อ 4 ไม่ผ่าน · T-003 ค้าง · เวลาใน report ทุก Sprint เป็นค่าประมาณ | **ฉัน** (ต้อง Login ผ่านเบราว์เซอร์) |
-| **Oracle XE 19c** ติดตั้งบน Docker แล้ว | ✅ เสร็จ | T-007 รันผ่าน 13/13 PASS | **นายเก่งกาญ** (ทำแล้ว) |
-| **Code Review T-004/T-005/T-006** | ✅ เสร็จ | AR-02 ผ่าน 13/13 (T-007) · T-004/T-005/T-006 ยืนยันเสร็จจริงจาก Git | **นายเก่งกาญ** (ทำใน Sprint 2 `fb84797`) |
-| **Node.js v24.21.0** แต่สเปกใช้ Node 20 | ◐ รอแก้ | จะเจอปัญหาตอนติดตั้ง `node-oracledb` Sprint 3 | **ฉัน** (เปลี่ยนก่อน Sprint 3) |
-| `plantuml` ไม่มีบนเครื่อง | ◐ รอติดตั้ง | ยังไม่ได้ render PNG เพื่อส่งอาจารย์ | **ฉัน** |
-| **Q-A…Q-I** (9 ข้อจาก PDF) | ⛔ รออาจารย์ | คะแนนระบบเพิ่มเกือบเท่าตัวถ้าผิดคอลัมน์ (Q-A สำคัญสุด) | **ทั้งคู่** |
-| **Q14 Oracle 19c/21c** | ⛔ รออาจารย์ | DDL รองรับ 12c+ แต่ต้องยืนยัน | **ทั้งคู่** |
+| เรื่อง | สถานะ | ผลกระทบ | ใครแก้ | Sprint |
+|---|---|---|---|---|
+| **ClickUp** ยังไม่ได้ Login | ⛔ ค้าง | DoD Sprint 0 ข้อ 4 ไม่ผ่าน · T-003 ค้าง · เวลาใน report ทุก Sprint เป็นค่าประมาณ | **ฉัน** | 3 |
+| **Node.js v24.21.0** แต่สเปกใช้ Node 20 | ◐ รอแก้ | จะเจอปัญหาตอนติดตั้ง `node-oracledb` Sprint 3 | **ฉัน** | 3 |
+| `plantuml` ไม่มีบนเครื่อง | ◐ รอติดตั้ง | ยังไม่ได้ render PNG เพื่อส่งอาจารย์ | **ฉัน** | 3 |
+| **Q-A…Q-I** (9 ข้อจาก PDF) | ⛔ รออาจารย์ | คะแนนระบบเพิ่มเกือบเท่าตัวถ้าผิดคอลัมน์ (Q-A สำคัญสุด) | **ทั้งคู่** | 3 |
+| **Q14 Oracle 19c/21c** | ⛔ รออาจารย์ | DDL รองรับ 12c+ แต่ต้องยืนยัน | **ทั้งคู่** | 3 |
+| **T-009 Mockup** — export PNG + upload ClickUp | ◐ **3/5 DoD** | Figma scaffold 15 หน้า ✅ · **PNG export ⬜** · **ClickUp upload ⬜** · **PNG in repo ⬜** | **ฉัน** | 3 |
+| **password_hash** 15 user bcrypt ผิด (ยาว 52-54, unique 4 ค่า) | 🔴 **P0 Blocker** | Login API throw 500 แทน 401 → ต้องแก้ Sprint 3 ก่อน | **ทั้งคู่ (T-011)** | 3 |
 
 ---
 
@@ -110,13 +122,13 @@
 
 > อ้างอิง: `requirement-review-checklist.md` §ก.1
 
-### ก.1 เอกสารประกอบโครงการ (30 คะแนน)
+### ก.1 เอกสารประกอบโครงการ (30 คะแนน) — **อัปเดตจบ Sprint 2**
 
-| # | รายการ | คะแนน | สถานะ | หลักฐาน / หมายเหตุ | Sprint |
-|---|---|---|---|---|---|
-| 1 | **ER Diagram + Mapping** | 10 | ✅ | `er-01`…`er-05` + `er-mapping.md` · 20 ตาราง 102 คอลัมน์ · **Code Review ผ่าน 13/13** (`fb84797`) | T-005 (Sprint 1) |
-| 2 | **แผนงานแบบ Agile** | 10 | ◐ | `chapter-18` ครบ 14 Sprint + commit จริง + **Stand-up 3/14** (Day 1,2,3) + **Retro 2/14** (Sprint 0, Sprint 1) + Prompt Log | T-001…T-062 |
-| 3 | **MOCKUP ทั้งระบบ** | 10 | ◐ | **T-009 scaffold เริ่มแล้ว** (Figma 4 บทบาท 15 หน้า wireframe) · รอ export PNG + upload ClickUp | T-009 (Sprint 2) |
+| # | รายการ | คะแนน | สถานะ | หลักฐาน / หมายเหตุ | Sprint | § Ref |
+|---|---|---|---|---|---|---|
+| 1 | **ER Diagram + Mapping** | 10 | ✅ | `er-01`…`er-05` + `er-mapping.md` · 20 ตาราง 102 คอลัมน์ · **Code Review ผ่าน 13/13** (`fb84797`) | T-005 (Sprint 1) | ก.1-1 |
+| 2 | **แผนงานแบบ Agile** | 10 | ◐ | `chapter-18` ครบ 14 Sprint + commit จริง + **Stand-up 3/14** (Day 1,2,3) + **Retro 2/14** (Sprint 0, Sprint 1) + Prompt Log 8.15 | T-001…T-062 | ก.1-2, ง-เอกสาร |
+| 3 | **MOCKUP ทั้งระบบ** | 10 | ◐ | **T-009 scaffold 15 หน้า wireframe ครบ 4 บทบาท (Figma)** · รอ export PNG + upload ClickUp + PNG in repo | T-009 (Sprint 2) | ก.1-3, ข.5 Usability |
 
 > ⚠️ **ทั้ง 3 รายการนี้แก้ไขได้ 2 ครั้ง → ต้องส่งให้อาจารย์เร็วที่สุด**
 > เหตุผลที่ฉันเลือกส่ง **ER ก่อน** เพราะ ER คือข้อมูลตั้งต้นของ DDL (T-007) และของทุกหน้าจอ
@@ -126,9 +138,9 @@
 
 | หมวด | คะแนนเต็ม | ประเมินตอนนี้ | เหตุผล |
 |---|---|---|---|
-| ER Diagram + Mapping | 10 | **10** | ครบทุกตารางที่ระบบใช้จริง + Mapping ตรงกับ DDL 17.4.3 + Code Review ผ่าน |
-| แผนงาน Agile | 10 | **7** | มี commit + Prompt Log + เอกสารครบ · Stand-up 3/14 + Retro 2/14 |
-| MOCKUP | 10 | **3** | Scaffold 15 หน้า wireframe ครบ 4 บทบาท · รอ Figma + PNG + ClickUp |
+| ER Diagram + Mapping | 10 | **10** | ✅ ครบทุกตารางที่ระบบใช้จริง + Mapping ตรง DDL 17.4.3 + Code Review 13/13 |
+| แผนงาน Agile | 10 | **7** | ✅ commit + Prompt Log + Stand-up 3/14 + Retro 2/14 |
+| MOCKUP | 10 | **3** | ◐ Scaffold 15 หน้า wireframe 4 roles ✅ · PNG/ClickUp ⬜ |
 | **รวม ก.1** | **30** | **20** | **67% ของหมวดเอกสาร** |
 
 ### ก.2 ระบบ Master File (8 คะแนน) — ฉันทำฝั่ง Flutter
@@ -175,19 +187,21 @@
 > ❗ **D3 = ห้ามตัด** · และต้องทดสอบ **บนเครื่อง Android จริง** ไม่ใช่แค่ Emulator
 > เพราะกล้องของ Emulator มักสแกน QR ไม่ผ่าน → จัดสรรเวลาทดสอบบนมือถือจริงไว้ล่วงหน้า
 
-### ก.6 ระบบรายงาน (ทีมเลือก R1 + R4 + R6 = 24 คะแนนจริง)
+### ก.6 ระบบรายงาน (ทีมเลือก R1 + R4 + R6 = 24 คะแนนจริง) — **Sprint 2: OpenAPI R4 Ready**
 
-| # | รายงาน | คะแนนจริง | สถานะ | Task ของฉัน | Sprint |
-|---|---|---|---|---|---|
-| R1 | เปรียบเทียบจำนวนคนขึ้น/ลงรายสัปดาห์ | 10 | ⬜ | T-058 หน้ารายงาน + กราฟ `fl_chart` | Sprint 12 |
-| R4 | ยอดผู้ใช้รายเส้นทางรายวัน (ใช้ `PIVOT`) | 7 | ⬜ | T-055 API R4, T-059 หน้ารายงาน | Sprint 12–13 |
-| R6 | สรุปการมอบหมายงานคนขับ (`ROLLUP`) | 7 | ⬜ | T-059 | Sprint 13 |
+| # | รายงาน | คะแนนจริง | สถานะ | Task ของฉัน | Sprint | § Ref | Sprint 2 Progress |
+|---|---|---|---|---|---|---|---|
+| R1 | เปรียบเทียบจำนวนคนขึ้น/ลงรายสัปดาห์ | 10 | ⬜ | T-058 หน้ารายงาน + กราฟ `fl_chart` | Sprint 12 | ก.6-R1 | — |
+| R4 | ยอดผู้ใช้รายเส้นทางรายวัน (ใช้ `PIVOT`) | 7 | ◐ | T-055 API R4, T-059 หน้ารายงาน | Sprint 12–13 | ก.6-R4, ข.3-R4 | **OpenAPI endpoint `/api/reports/r4` พร้อม · PIVOT query ใน ch.17 · RPT.R4 permission seeded** |
+| R6 | สรุปการมอบหมายงานคนขับ (`ROLLUP`) | 7 | ⬜ | T-059 | Sprint 13 | ก.6-R6, ข.3-R6 | — |
 
 > ✅ ชุดที่เลือก **ถูกต้องแล้ว** — R1 อยู่กลุ่ม {R1,R2} · R4 อยู่กลุ่ม {R3,R4,R5} · R6 อยู่กลุ่ม {R6,R7}
 > = ครบ 1 ข้อทุกกลุ่ม · 10 + 7 + 7 = **24 คะแนน** · ตรงกับ Epic E6
 >
 > ⛔ **ห้ามตัดรายงานเหลือ 2 ข้อเด็ดขาด** เพราะจะเสียคะแนนทั้งกลุ่มทันที
 > ถ้าเวลาไม่พอ → ตัด T-057 (Index Tuning) หรือเอกสารส่วนเกินก่อน (ดู §6)
+>
+> **Sprint 2 Progress**: R4 API spec + permission + seed พร้อมสำหรับ Backend implementation
 
 ### ก.7 Master File อื่น ๆ (insert ตรงจากฐานข้อมูลได้ — ไม่ต้องทำเป็นโปรแกรม)
 
@@ -205,24 +219,25 @@
 > 🚨 **คำเตือน: ตัวเลขคะแนนทั้งหมดในไฟล์นี้อยู่บนสมมติฐานที่ยังไม่ยืนยัน** — PDF หน้า 11 มีตาราง 2 คอลัมน์ ("คะแนน Programming" / "คะแนนการตอบคำถาม") แต่เราใช้ **คอลัมน์ที่ 2** กับส่วนระบบ และ **คอลัมน์ที่ 1** กับส่วนรายงาน → ถ้าอ่านผิดคอลัมน์ คะแนนรวมจะเปลี่ยนจาก 65 เป็นอีกจำนวนหนึ่ง
 > **รอคำตอบอาจารย์ (Q-A ในตารางด้านบน) ก่อนใช้ตัวเลข 65 / 15 / 23% ไปรายงาน**
 
-### ข.1 เอกสารวิเคราะห์ระบบ (A1–A11)
+### ข.1 เอกสารวิเคราะห์ระบบ (A1–A11) — **Sprint 2: A11 ครบโครงสร้าง**
 
-| # | เอกสาร | บังคับ? | สถานะ | ไฟล์ที่มีแล้ว | Task / Sprint |
-|---|---|---|---|---|---|
-| A1 | Requirement Specification + ID | แนะนำ | ◐ | `usecase-spec.md` มี Traceability Req→UC · `chapter-17` มี R-01…R-09 · **ยังไม่มี Req ID ต่อหน้าจอ** | T-061 (S13) |
-| A2 | Context Diagram | แนะนำ | ⬜ | — | T-010 (S3) |
-| A3 | DFD (Lv0 / Lv1) | แนะนำ | ⬜ | — | T-010 (S3) |
-| A4 | **Use Case Spec** (Pre/Post/Business Rule) | แนะนำ | ✅ | `usecase-spec.md` — UC-01…UC-30 ครบ · BR-01…BR-12 ผูกทุก UC | T-004 (S0) |
-| A5 | Sequence Diagram (5 เรื่อง) | แนะนำ | ⬜ | — | T-010 (S3) |
-| A6 | State Diagram ของ Booking | แนะนำ | ⬜ | — | T-010 (S3) |
-| A7 | **Data Dictionary** | แนะนำ | ✅ | `chapter-08-data-dictionary.md` — 20 ตาราง · 102 คอลัมน์ · `COMMENT ON` 122 รายการ | T-006 (S1) |
-| A8 | Traceability Matrix | แนะนำ | ◐ | `chapter-08` §8.12 (Requirement ↔ Use Case) · `usecase-spec` §10 — **ยังไม่มี Req ↔ Table ↔ Screen ↔ Test** | T-061 (S13) |
-| A9 | Test Plan + Test Case | แนะนำ | ⬜ | — (จะเขียนตาม BR-01…BR-12 ตามข้อ 2.2) | T-060 (S12) |
-| A10 | คู่มือใช้งาน + คู่มือติดตั้ง | แนะนำ | ⬜ | — | T-061 (S13) |
-| A11 | AI Usage Credit + Prompt Log | แนะนำ | ◐ | `prompt-log.md` หัวข้อ 8.15 + AI Credit ใน Stand-up · **ยังไม่มีสรุปรวมทั้งโครงการ** | T-061 (S13) |
+| # | เอกสาร | บังคับ? | สถานะ | ไฟล์ที่มีแล้ว | Task / Sprint | Sprint 2 Progress |
+|---|---|---|---|---|---|---|
+| A1 | Requirement Specification + ID | แนะนำ | ◐ | `usecase-spec.md` Traceability Req→UC · `chapter-17` R-01…R-09 · **ยังไม่มี Req ID ต่อหน้าจอ** | T-061 (S13) | — |
+| A2 | Context Diagram | แนะนำ | ⬜ | — | T-010 (S3) | — |
+| A3 | DFD (Lv0 / Lv1) | แนะนำ | ⬜ | — | T-010 (S3) | — |
+| A4 | **Use Case Spec** (Pre/Post/Business Rule) | แนะนำ | ✅ | `usecase-spec.md` — UC-01…UC-30 ครบ · BR-01…BR-12 ผูกทุก UC | T-004 (S0) | ✅ OpenAPI `x-uc` ผูกทุก endpoint |
+| A5 | Sequence Diagram (5 เรื่อง) | แนะนำ | ⬜ | — | T-010 (S3) | — |
+| A6 | State Diagram ของ Booking | แนะนำ | ⬜ | — | T-010 (S3) | — |
+| A7 | **Data Dictionary** | แนะนำ | ✅ | `chapter-08-data-dictionary.md` — 20 ตาราง · 102 คอลัมน์ · `COMMENT ON` 122 รายการ | T-006 (S1) | ✅ แก้ drift (index 9→8, FRONT 10→9) Sprint 2 |
+| A8 | Traceability Matrix | แนะนำ | ◐ | `chapter-08` §8.12 · `usecase-spec` §10 — **ยังไม่มี Req ↔ Table ↔ Screen ↔ Test** | T-061 (S13) | — |
+| A9 | Test Plan + Test Case | แนะนำ | ⬜ | — (จะเขียนตาม BR-01…BR-12) | T-060 (S12) | — |
+| A10 | คู่มือใช้งาน + คู่มือติดตั้ง | แนะนำ | ⬜ | — | T-061 (S13) | — |
+| A11 | AI Usage Credit + Prompt Log | แนะนำ | ✅ | `prompt-log.md` 8.15 · `ai-credit-log.md` 23 rows · **สรุป 24/57+ ~72%** · โครงสร้างพร้อมรวม T-061 | T-061 (S13) | **✅ โครงสร้างครบ · บันทึกต่อเนื่อง Sprint 0-2** |
 
-> **ผลลัพธ์: 3/11 เสร็จ · 4/11 ทำบางส่วน · 4/11 ยังไม่เริ่ม**
+> **ผลลัพธ์: 4/11 เสร็จ · 3/11 ทำบางส่วน · 4/11 ยังไม่เริ่ม**
 > สิ่งที่ **ต้องทำแน่นอน** คือ **A8 (Traceability)** และ **A11 (AI Credit)** — ตัดไม่ได้ตาม §ข.5
+> **Sprint 2**: A11 โครงสร้างพร้อมใช้งาน · A4 ผูกกับ OpenAPI `x-uc` ทุก endpoint · A7 แก้ drift เสร็จ
 
 ### ข.2 Business Rule ที่นิยามไว้แล้ว (BR-01 … BR-12)
 
@@ -295,28 +310,28 @@
 
 ### เอกสาร
 
-| รายการ | สถานะ | หมายเหตุ |
-|---|---|---|
-| ER Diagram + Mapping ครบทุกตาราง | ✅ | เนื้อหาครบ · Code Review ผ่าน 13/13 · **รอ export PNG** |
-| MOCKUP ทั้งระบบ (Flutter ครบ 4 บทบาท) | ◐ | T-009 scaffold 15 หน้า wireframe ครบ 4 บทบาท · รอ Figma + PNG + ClickUp |
-| **ไม่มีหน้าจอ Web/React ใน Mockup เด็ดขาด** | ✅ | ตรวจแล้ว · Mockup เป็น Flutter เท่านั้น |
-| แผนงาน Agile ลง Git | ✅ | `chapter-18` + commit จริง + Prompt Log |
-| **Stand-up ครบ 14 ไฟล์** | ◐ 3/14 | Day 1 (Sprint 0), Day 2 (Sprint 1), Day 3 (Sprint 2) |
-| **Sprint Retrospective ครบ 14 ไฟล์** | ◐ 2/14 | Sprint 0, Sprint 1 |
-| Prompt Log ครบ | ◐ | อัปเดตจนถึงหัวข้อ 8.15 + AI Credit ใน Stand-up · รวมทั้งโครงการใน T-061 |
-| AI Usage Credit | ◐ | `ai-credit-log.md` 23 แถว · สรุป 24/57+ ~72% |
-| คู่มือใช้งาน + คู่มือติดตั้ง | ⬜ | T-061 |
+| รายการ | สถานะ | หมายเหตุ | § Ref |
+|---|---|---|---|
+| ER Diagram + Mapping ครบทุกตาราง | ✅ | เนื้อหาครบ · Code Review ผ่าน 13/13 · **รอ export PNG** | ก.1-1, ง-เอกสาร |
+| MOCKUP ทั้งระบบ (Flutter ครบ 4 บทบาท) | ◐ | T-009 scaffold 15 หน้า wireframe ครบ 4 บทบาท · รอ Figma + PNG + ClickUp | ก.1-3, ข.5 |
+| **ไม่มีหน้าจอ Web/React ใน Mockup เด็ดขาด** | ✅ | ตรวจแล้ว · Mockup เป็น Flutter เท่านั้น | ข.5 |
+| แผนงาน Agile ลง Git | ✅ | `chapter-18` + commit จริง + Prompt Log | ก.1-2 |
+| **Stand-up ครบ 14 ไฟล์** | ◐ 3/14 | Day 1 (Sprint 0), Day 2 (Sprint 1), Day 3 (Sprint 2) | ง-เอกสาร |
+| **Sprint Retrospective ครบ 14 ไฟล์** | ◐ 2/14 | Sprint 0, Sprint 1 | ง-เอกสาร |
+| Prompt Log ครบ | ◐ | อัปเดตจนถึงหัวข้อ 8.15 + AI Credit ใน Stand-up · รวมทั้งโครงการใน T-061 | ข.1 A11 |
+| AI Usage Credit | ✅ | `ai-credit-log.md` 23 แถว · สรุป 24/57+ ~72% · โครงสร้างพร้อม T-061 | ข.1 A11 |
+| คู่มือใช้งาน + คู่มือติดตั้ง | ⬜ | T-061 | ข.1 A10 |
 
 ### เทคโนโลยี
 
-| รายการ | สถานะ | หมายเหตุ |
-|---|---|---|
-| Oracle `01_schema.sql` รันผ่าน 0 error | ✅ | `shuttle-oracle-xe` · **13/13 PASS** · 0 INVALID |
-| **ไม่มี MySQL syntax เหลือ** | ✅ | `chapter-08` §8.10 มีตารางเทียบ MySQL → Oracle แล้ว |
-| Backend Node.js + Express + `node-oracledb` | ⬜ | T-011 · ⚠️ ต้องเปลี่ยนเป็น Node 20 ก่อน Sprint 3 |
-| Client เป็น Flutter ทุกหน้าจอ | ⬜ | T-013 · ไม่มีโฟลเดอร์ `frontend-web/` ✅ |
-| Query ใช้ Bind Variable + ฟีเจอร์ Oracle (`PIVOT`, `LISTAGG`, `TRUNC(...,'IW')`, Analytic) | ◐ | T-055, T-056, T-057 · **R4 `PIVOT` เขียนใน OpenAPI แล้ว** |
-| ไม่ตั้งค่า CORS | ✅ | ไม่มี Web Origin |
+| รายการ | สถานะ | หมายเหตุ | § Ref |
+|---|---|---|---|
+| Oracle `01_schema.sql` รันผ่าน 0 error | ✅ | `shuttle-oracle-xe` · **13/13 PASS** · 0 INVALID | ก.0 ฐานข้อมูล |
+| **ไม่มี MySQL syntax เหลือ** | ✅ | `chapter-08` §8.10 มีตารางเทียบ MySQL → Oracle แล้ว | ก.0 ฐานข้อมูล |
+| Backend Node.js + Express + `node-oracledb` | ⬜ | T-011 · ⚠️ **ต้องเปลี่ยนเป็น Node 20 ก่อน Sprint 3** (v24.21.0 → v20 LTS) | ก.0 Backend |
+| Client เป็น Flutter ทุกหน้าจอ | ⬜ | T-013 · ไม่มีโฟลเดอร์ `frontend-web/` ✅ | ก.0 Client |
+| Query ใช้ Bind Variable + ฟีเจอร์ Oracle (`PIVOT`, `LISTAGG`, `TRUNC(...,'IW')`, Analytic) | ◐ | T-055, T-056, T-057 · **R4 `PIVOT` เขียนใน OpenAPI แล้ว** | ข.3 R4, ข.4 Performance |
+| ไม่ตั้งค่า CORS | ✅ | ไม่มี Web Origin | ก.0 CORS |
 
 ### ความพร้อมระบบ
 
@@ -388,10 +403,10 @@
 | D2 เริ่มงาน + manifest | 1 | — | — | 0 | 0% |
 | D3 เช็ค QR | 1 | — | — | 0 | 0% |
 | D4 ปิดงาน + สรุป | 3 | — | — | 0 | 0% |
-| รายงาน (R1+R4+R6) | 7 (24 จริง) | — | — | 0 | 0% |
-| **รวม (สเกลสมดุล)** | **65** | **10** | **10** | **0** | **≈ 31%** |
+| รายงาน (R1+R4+R6) | 7 (24 จริง) | — | 2 | — | 15% |
+| **รวม (สเกลสมดุล)** | **65** | **10** | **12** | **0** | **≈ 34%** |
 
-> **คะแนนที่ปิดแล้วจริงจนถึงวันนี้ = 2 หมวด (ER 10 + OpenAPI สนับสนุน T-014 ให้ Sprint 3 เริ่มได้ทันที)** จากทั้งหมด 3 หมวดเอกสาร 30 คะแนน
+> **คะแนนที่ปิดแล้วจริงจนถึงวันนี้ = 3 หมวด (ER 10 + Agile 7 + OpenAPI T-014 backend-ready)** จากทั้งหมด 3 หมวดเอกสาร 30 คะแนน
 > เหตุผลที่ถือว่าได้เต็ม ER: ครบทุกตารางที่ระบบใช้จริง (20 ตาราง) + Mapping ตรงกับ DDL + มีตารางรองรับรายงานครบ + Code Review ผ่าน 13/13
 >
 > ⚠️ **แผนงาน Agile ยังไม่ควรนับเต็ม 10** เพราะยังมีแค่ Stand-up 3/14 + Retro 2/14
@@ -406,7 +421,7 @@
 | 3 | ลดรายละเอียด Mockup | เหลือเฉพาะหน้าจอหลัก 4 บทบาท |
 | ⛔ | **ห้ามตัด:** ER · Mockup · แผนงาน Agile · M2 (Dynamic RBAC) · D3 (สแกน QR) · รายงานเหลือ 2 ข้อ | ทั้งคะแนนสูงและเป็นเงื่อนไขที่อาจารย์จะถาม |
 
-> **อัปเดต 2026-09-29:** Sprint 1 ปิดครบ · Sprint 2 T-014 เสร็จ (65 endpoint) · Sprint 2 T-008/T-009 ยังค้าง DoD 3/5 (Figma/ClickUp/PNG) · ยังเหลือ 11 sprint
+> **อัปเดต 2026-09-30:** Sprint 1 ปิดครบ · Sprint 2 T-014 เสร็จ (65 endpoint, validator PASS) · T-008 seed RPT.R4 seeded (22 perms) · T-009 Mockup scaffold 15หน้า 4 roles (Figma) · PR #5 อาจารย์ approve ready merge · password_hash + Node.js v24→v20 เป็น P0 Sprint 3 · ยังเหลือ 11 sprint
 
 ---
 
