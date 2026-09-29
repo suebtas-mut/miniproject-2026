@@ -124,14 +124,19 @@
 | A1 | **Requirement Specification** พร้อม Requirement ID | ตอบคำถาม "ครบตามโจทย์ไหม" และใช้ทำ Traceability | แนะนำ | ☐ |
 | A2 | **Context Diagram** | ภาพรวมระบบทั้งหมดแบบ 1 หน้า | แนะนำ | ☐ |
 | A3 | **Data Flow Diagram (Lv0 / Lv1)** | หลักฐานว่าออกแบบกระบวนการจริง | แนะนำ | ☐ |
-| A4 | **Use Case Specification** (Precondition / Postcondition / Business Rule) | ตอบ "เงื่อนไขการจอง 5 ข้อ" ได้ชัด | แนะนำ | ☐ |
+| A4 | **Use Case Specification** (Precondition / Postcondition / Business Rule) | ตอบ "เงื่อนไขการจอง 5 ข้อ" ได้ชัด | แนะนำ | ☑ `docs/diagrams/usecase/usecase-spec.md` |
 | A5 | **Sequence Diagram** (Login, จองรถ, ยกเลิก, สแกน QR, ปิดรอบ) | แสดง Flow แบบเวลาจริง | แนะนำ | ☐ |
 | A6 | **State Diagram ของ Booking** | จำเป็นมาก เพราะรายงาน R2/R3 อาศัยสถานะพอดี | แนะนำ | ☐ |
-| A7 | **Data Dictionary** (ตาราง / ฟิลด์ / ชนิด / ขนาด / Key / Default) | หลักฐานว่า ER ครบและใช้งานได้จริง | แนะนำ | ☐ |
+| A7 | **Data Dictionary** (ตาราง / ฟิลด์ / ชนิด / ขนาด / Key / Default) | หลักฐานว่า ER ครบและใช้งานได้จริง | แนะนำ | ☑ `docs/report/chapter-08-data-dictionary.md` |
 | A8 | **Traceability Matrix** (Req ↔ Use Case ↔ Table ↔ Screen ↔ Test) | เครื่องมือพิสูจน์ความครบถ้วน | แนะนำ | ☐ |
 | A9 | **Test Plan + Test Case** | เตรียมคำถาม "ทดสอบอย่างไร / ผลเป็นอย่างไร" | แนะนำ | ☐ |
 | A10 | **คู่มือการใช้งาน + คู่มือติดตั้ง** | ให้อาจารย์รันระบบได้เอง | แนะนำ | ☐ |
-| A11 | **AI Usage Credit + Prompt Log** | กำกับการใช้ Agentic AI อย่างรับผิดชอบ | แนะนำ | ☐ |
+| A11 | **AI Usage Credit + Prompt Log** | กำกับการใช้ Agentic AI อย่างรับผิดชอบ | แนะนำ | ☑ `docs/ai-credit-log.md` + `docs/agile/ai-prompts/prompt-log.md` |
+
+> **สถานะ ณ 2026-09-29 (Sprint 0 ปิด):** ปิดแล้ว 3 ข้อ — A4 (T-004), A7 (T-006), A11 (AR-04/AR-06)
+> ที่เหลือ A1, A2, A3, A5, A6, A8, A9, A10 — ตามแผนจะทำต่อใน Sprint 2–12
+> **A8 (Traceability Matrix)** และ **A9 (Test Plan)** ผูกกับ T-059/T-060/T-061 จึงยังไม่ติ๊ก แม้จะมี Trace ในตัว `usecase-spec.md` แล้ว
+> **หมายเหตุ:** A11 ปิดในระดับ "มีโครงสร้างพร้อมใช้" — ต้องบันทึกต่อเนื่องทุก Sprint และรวมเป็นภาคผนวก ค ในรายงานตอน T-061 (Sprint 13)
 
 > **ทำ A1–A11 เพิ่ม = เก็บคะแนน "คะแนนการตอบคำถาม" ได้เกือบทั้งหมด**
 > เพราะคะแนนถามตอบมี 22 คะแนน (จาก 100) และคำถามส่วนใหญ่มาจากเอกสารเหล่านี้
