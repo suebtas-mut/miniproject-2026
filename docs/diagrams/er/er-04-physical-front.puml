@@ -1,0 +1,259 @@
+@startuml er-04-physical-front
+' T-005 — ER Diagram ระดับ PHYSICAL : กลุ่ม FRONT (Oracle 19c)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' แหล่งที่มา: docs/chapter-17-fullstack.md ข้อ 17.4.3 (01_schema.sql)
+
+title ER PHYSICAL — FRONT : เส้นทาง / รอบเวลา / ยานพาหนะ (9 ตาราง) — Oracle 19c
+
+skinparam shadowing false
+skinparam entity {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam linetype ortho
+
+entity "STOP" as stop {
+  * stop_id    NUMBER(10) IDENTITY
+  --
+  stop_name   VARCHAR2(150 CHAR) NOT NULL
+  address     VARCHAR2(255 CHAR)
+  latitude    NUMBER(10,7)
+  longitude   NUMBER(10,7)
+  is_active   NUMBER(1) DEFAULT 1 NOT NULL
+}
+note right of stop
+  PK : pk_stop
+  UK : uq_stop_name
+  CK : ck_stop_active
+  ────────────────
+  ⚠ stop_id ห้าม UNIQUE เดี่ยว ๆ
+    เพราะ BR-03 : 1 จุดจอดอยู่ได้
+    หลายเส้นทาง
+  UNIQUE อยู่ที่ route_stop
+  ────────────────
+  COMMENT ON TABLE: 'จุดจอด'
+end note
+
+entity "ROUTE" as route {
+  * route_id      NUMBER(10) IDENTITY
+  --
+  route_name     VARCHAR2(120 CHAR) NOT NULL
+  total_minutes  NUMBER(5) DEFAULT 0 NOT NULL
+  description    VARCHAR2(255 CHAR)
+  is_active      NUMBER(1) DEFAULT 1 NOT NULL
+}
+note right of route
+  PK : pk_route
+  CK : ck_route_min  (total_minutes >= 0)
+  CK : ck_route_act  (is_active IN (0,1))
+  ────────────────
+  ★ BR-01 : total_minutes
+    = SUM(route_stop.travel_minutes)
+    คำนวณอัตโนมัติโดย Service
+    ผู้ใช้ห้ามพิมพ์ค่าเอง
+  ────────────────
+  ตัวอย่างจาก PDF:
+   เส้นทาง 1 = 30 นาที (7 จุด)
+   เส้นทาง 2 = 13 นาที (4 จุด)
+   เส้นทาง 3 = 12 นาที (5 จุด)
+end note
+
+entity "ROUTE_STOP" as route_stop {
+  * route_id       NUMBER(10) NOT NULL   <<PK,FK>>
+  * stop_seq       NUMBER(5)  NOT NULL   <<PK>>
+  --
+  stop_id         NUMBER(10) NOT NULL   <<FK>>
+  travel_minutes  NUMBER(5)  NOT NULL
+}
+note right of route_stop #C8E6C9
+  PK : pk_route_stop (route_id, stop_seq)
+  UK : uq_route_stop_uk UNIQUE(route_id, stop_id) ← BR-03
+  FK : fk_rs_route → route  CASCADE
+       fk_rs_stop  → stop
+  CK : ck_rs_min  (travel_minutes >= 0)
+  ────────────────
+  COMMENT ON TABLE:
+  'จุดจอดในแต่ละเส้นทาง + นาทีที่ใช้
+   เดินทางถึงจุดนั้น'
+  PK เป็น route_id+stop_seq (ไม่ใช่ stop_id)
+    เพื่อกันลำดับซ้ำในเส้นทางเดียว
+end note
+
+entity "VEHICLE_TYPE" as vehicle_type {
+  * vtype_id    NUMBER(10) IDENTITY
+  --
+  vtype_name   VARCHAR2(80 CHAR) NOT NULL
+  capacity     NUMBER(5)  NOT NULL
+}
+note right of vehicle_type
+  PK : pk_vtype
+  UK : uq_vtype
+  CK : ck_vtype_cap  (capacity > 0)
+  ────────────────
+  ★ capacity คือ "ที่นั่งสูงสุด"
+    ที่ใช้ตรวจ BR-07
+    (เช่น 'รถตู้ 9 ที่นั่ง' = 9)
+end note
+
+entity "VEHICLE" as vehicle {
+  * veh_id     NUMBER(10) IDENTITY
+  --
+  plate_no    VARCHAR2(20 CHAR) NOT NULL
+  is_active   NUMBER(1) DEFAULT 1 NOT NULL
+  --
+  vtype_id    NUMBER(10)  NOT NULL   <<FK>>
+}
+note right of vehicle
+  PK : pk_vehicle
+  UK : uq_vehicle_plate
+  FK : fk_vehicle_type → vehicle_type
+  CK : ck_vehicle_act
+  ────────────────
+  1 รถ = 1 ประเภท
+  เช่น plate_no 'สย 2591'
+end note
+
+entity "SCHEDULE" as schedule {
+  * sched_id      NUMBER(10) IDENTITY
+  --
+  service_date   DATE      NOT NULL
+  depart_at      TIMESTAMP NOT NULL
+  is_active      NUMBER(1) DEFAULT 1 NOT NULL
+  --
+  route_id       NUMBER(10) NOT NULL   <<FK>>
+}
+note right of schedule #FFF3CD
+  PK : pk_schedule
+  UK : uq_route_depart UNIQUE(route_id, depart_at)
+  FK : fk_schedule_route → route
+  CK : ck_schedule_act
+  ────────────────
+  ★ เก็บทั้ง service_date (DATE)
+    และ depart_at (TIMESTAMP เต็ม)
+    เพื่อคำนวณเวลาได้ตรง
+    เช่น 2568-01-01 09:30
+  ────────────────
+  COMMENT ON TABLE:
+  'รอบเวลาการเดินรถ
+   (depart_at เก็บวัน+เวลาเต็ม)'
+  ────────────────
+  ⚠ Oracle ไม่มีชนิด TIME
+    → ต้องใช้ TIMESTAMP เต็มเสมอ
+    (17.4.3 หลักการข้อ 1)
+end note
+
+entity "SCHEDULE_STOP" as schedule_stop {
+  * sched_stop_id  NUMBER(10) IDENTITY
+  --
+  sched_id        NUMBER(10) NOT NULL   <<FK>>
+  stop_id         NUMBER(10) NOT NULL   <<FK>>
+  stop_seq        NUMBER(5)  NOT NULL
+  arrive_at       TIMESTAMP  NOT NULL
+  dwell_minutes   NUMBER(5) DEFAULT 0 NOT NULL
+}
+note right of schedule_stop #C8E6C9
+  PK : pk_sched_stop
+  UK : uq_sched_seq UNIQUE(sched_id, stop_seq)
+  FK : fk_ss_sched → schedule  CASCADE
+       fk_ss_stop  → stop
+  ────────────────
+  ★ BR-02 : arrive_at =
+    depart_at
+    + NUMTODSINTERVAL(
+        SUM(travel_minutes),'MINUTE')
+    คำนวณอัตโนมัติตอนสร้างรอบ
+  ────────────────
+  COMMENT ON TABLE:
+  'เวลาที่รถถึงแต่ละจุดจอด
+   ในแต่ละรอบ (คำนวณอัตโนมัติ)'
+  ────────────────
+  ★ ใช้ใน BR-05 : จองก่อนถึง 20 นาที
+    = schedule_stop.arrive_at
+      - SYSTIMESTAMP >= 20 นาที
+    (เทียบที่จุดขึ้นรถ ไม่ใช่จุดออก)
+end note
+
+entity "DRIVER_ASSIGN" as driver_assign {
+  * assign_id  NUMBER(10) IDENTITY
+  --
+  assign_at   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+  --
+  sched_id    NUMBER(10) NOT NULL   <<FK>>
+  emp_id      NUMBER(10) NOT NULL   <<FK>>
+}
+note right of driver_assign #FFE0B2
+  PK : pk_driver_assign
+  UK : uq_driver_sched UNIQUE(sched_id, emp_id)
+  FK : fk_da_sched → schedule  CASCADE
+       fk_da_emp   → employee
+  ────────────────
+  ★ BR-04 : ห้ามมอบหมายชนกัน
+    ช่วงเวลาที่ทับกัน =
+    [depart_at,
+     depart_at + total_minutes]
+    เทียบทั้ง emp_id และ veh_id
+  ────────────────
+  emp_id ต้องเป็นพนักงานที่มี
+    role = DRIVER → ตรวจที่ Service
+  ────────────────
+  ⚠ UK เป็น (sched_id, emp_id)
+    ไม่ใช่ (sched_id) เพราะ
+    BR-04 อนุญาตให้ 1 รอบ
+    มีคนขับสำรองได้
+end note
+
+entity "VEHICLE_ASSIGN" as vehicle_assign {
+  * assign_id  NUMBER(10) IDENTITY
+  --
+  assign_at   TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL
+  --
+  sched_id    NUMBER(10) NOT NULL   <<FK>>
+  veh_id      NUMBER(10) NOT NULL   <<FK>>
+}
+note right of vehicle_assign #FFE0B2
+  PK : pk_vehicle_assign
+  UK : uq_vehicle_sched UNIQUE(sched_id, veh_id)
+  FK : fk_va_sched → schedule  CASCADE
+       fk_va_veh   → vehicle
+  ────────────────
+  ★ BR-04 เช่นเดียวกับ driver_assign
+    ห้ามรถคันเดียวกันอยู่ 2 รอบ
+    ที่เวลาทับกัน
+  ────────────────
+  ★ capacity ที่ใช้ตรวจ BR-07
+    = vehicle → vehicle_type.capacity
+    ของรถที่ถูกมอบหมายในรอบนั้น
+end note
+
+' ---------- ความสัมพันธ์ ----------
+stop          ||--o{ route_stop      : "fk_rs_stop"
+route         ||--o{ route_stop      : "fk_rs_route  CASCADE"
+vehicle_type  ||--o{ vehicle         : "fk_vehicle_type"
+vehicle       ||--o{ vehicle_assign  : "fk_va_veh"
+route         ||--o{ schedule        : "fk_schedule_route"
+schedule      ||--o{ schedule_stop   : "fk_ss_sched  CASCADE"
+stop          ||--o{ schedule_stop   : "fk_ss_stop"
+schedule      ||--o{ driver_assign   : "fk_da_sched  CASCADE"
+employee      ||--o{ driver_assign   : "fk_da_emp"
+schedule      ||--o{ vehicle_assign  : "fk_va_sched  CASCADE"
+
+note bottom of route
+  ★ Index ที่ต้องสร้าง (17.4.3)
+    ix_sched_route_date     (route_id, service_date)
+    ix_schedstop_sched_seq  (sched_id, stop_seq)
+    ix_da_emp               (emp_id, sched_id)
+    ix_va_veh               (veh_id, sched_id)
+    ↑ ใช้ใน UC-17 ค้นรอบที่จองได้
+      และ UC-22 ดูตารางงานคนขับ
+end note
+
+note bottom of route_stop
+  ⚠ ไม่มี UNIQUE (route_id, stop_id)
+    เป็น FK เดี่ยว ๆ เพราะต้อง
+    เก็บ travel_minutes ด้วย
+    (ถ้าใส่ UNIQUE เฉพาะ stop_id
+     จะเกิน 1 เส้นทาง → ERROR)
+end note
+
+@enduml

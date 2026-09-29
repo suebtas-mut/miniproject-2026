@@ -1,0 +1,84 @@
+@startuml er-01-conceptual
+' T-005 — ER Diagram ระดับ CONCEPTUAL (แนวคิด)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' แหล่งที่มา: docs/chapter-17-fullstack.md ข้อ 17.4.1 / 17.4.2
+
+title ER Diagram ระดับ CONCEPTUAL — ระบบ SHUTTLE BUS
+
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam linetype ortho
+
+' ============ กลุ่ม MASTER : บุคคลและสิทธิ์ ============
+rectangle "ฝั่งบุคคล" as Master {
+  (แผนก) as Department
+  (ตำแหน่ง) as JobPosition
+  (พนักงาน) as Employee
+  (บทบาท) as Role
+  (สิทธิ์) as Permission
+}
+
+' ============ กลุ่ม FRONT : เส้นทาง / รอบ / ยานพาหนะ ============
+rectangle "ฝั่งเส้นทางและรถ" as Front {
+  (จุดจอด) as Stop
+  (เส้นทาง) as Route
+  (ประเภทรถ) as VehicleType
+  (รถยนต์) as Vehicle
+  (รอบเวลาเดินรถ) as Schedule
+}
+
+' ============ กลุ่ม BOOKING และ TRIP ============
+rectangle "ฝั่งบริการ" as Service {
+  (การจอง) as Booking
+  (การเดินทางจริง) as Trip
+  (ผู้โดยสารรายคน) as TripPassenger
+}
+
+' ---------- ความสัมพันธ์ ----------
+Department  "1" -- "0..*" Employee  : มีพนักงาน
+JobPosition "1" -- "0..*" Employee  : มีตำแหน่ง
+Employee    "0..*" -- "0..*" Role     : มีบทบาท (M:N)
+Role        "0..*" -- "0..*" Permission : ได้รับสิทธิ์ (M:N) «M2/R-03»
+
+Stop   "0..*" -- "0..*" Route    : จุดจอดถูกใช้ในเส้นทาง (M:N) «BR-03»
+Route  "0..*" -- "0..*" Schedule : ถูกจัดเป็นรอบเวลา
+Schedule "0..*" -- "0..*" Stop    : รอบเวลานี้ผ่านจุดจอดนี้
+Schedule "0..*" -- "0..*" Employee : มอบหมายคนขับ «BR-04»
+Schedule "0..*" -- "0..*" Vehicle   : มอบหมายรถ «BR-04»
+VehicleType "1" -- "0..*" Vehicle   : จัดกลุ่มรถ
+
+Employee "1" -- "0..*" Booking : ทำการจอง
+Schedule "1" -- "0..*" Booking : ถูกจอง
+Stop     "1" -- "0..*" Booking : เป็นจุดขึ้น/ลง
+
+Schedule "0..1" -- "1" Trip   : เดินรถจริง 1 ครั้ง «uq_trip_sched»
+Trip     "1" -- "0..*" TripPassenger : มีผู้โดยสาร
+Booking  "0..1" -- "0..1" TripPassenger : ถูกเช็คอิน
+
+note bottom of Role
+  M2 / R-03 — สิทธิ์เป็น Dynamic
+  เพิ่ม / ลบ / แก้ได้ตลอดเวลา
+  ไม่ hardcode ตามชื่อบทบาท
+  ทำให้ทั้ง 2 ความสัมพันธ์ M:N
+  ต้องแตกเป็นตารางเชื่อม
+end note
+
+note bottom of Booking
+  จุดขึ้น / จุดลง เป็น 2 ความสัมพันธ์
+  แยกจากกัน → ต้องเก็บเป็น
+  2 คอลัมน์ (board_stop_id,
+  alight_stop_id) ไม่ใช่ 1
+end note
+
+note bottom of Stop
+  BR-03 — 1 จุดจอดอยู่ได้หลาย
+  เส้นทาง (Many-to-Many)
+  ต้องมีตารางเชื่อม route_stop
+  ที่เก็บ "ใช้เวลากี่นาที" ด้วย
+end note
+
+@enduml

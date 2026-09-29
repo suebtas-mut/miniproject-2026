@@ -1,0 +1,96 @@
+@startuml usecase-05-report
+' T-004 — Use Case: ระบบรายงาน (ทีมเลือก R1 + R4 + R6 = 24 คะแนน)
+
+title Use Case — ระบบรายงาน R1 / R4 / R6
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "พนักงานสำนักงาน (Staff)" as Staff
+actor "ผู้ดูแลระบบ (Admin)" as Admin
+
+rectangle "ระบบ SHUTTLE BUS" {
+  usecase "UC-30 เลือกปี / ช่วงวันที่\nและส่งออกรายงาน" as UC30
+  usecase "UC-27 รายงานที่ 1 : เปรียบเทียบ\nจำนวนคนขึ้น/ลงรายสัปดาห์" as UC27
+  usecase "UC-28 รายงานที่ 4 : สรุปยอดผู้ใช้\nรายวันรายเส้นทาง" as UC28
+  usecase "UC-29 รายงานที่ 6 : สรุป\nการมอบหมายงานคนขับ" as UC29
+
+  usecase "สร้างกราฟเปรียบเทียบ" as CHART
+  usecase "ส่งออกเป็น PNG / PDF" as EXPORT
+  usecase "ตรวจสิทธิ์การเข้าถึง" as AUTHZ
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+Staff -- UC30
+Staff -- UC27
+Staff -- UC28
+Staff -- UC29
+Admin  -- UC30
+Admin  -- UC27
+Admin  -- UC28
+Admin  -- UC29
+
+UC27 ..> AUTHZ : <<include>>
+UC28 ..> AUTHZ : <<include>>
+UC29 ..> AUTHZ : <<include>>
+UC27 ..> CHART : <<include>>
+UC28 ..> CHART : <<include>>
+UC29 ..> CHART : <<include>>
+UC30 ..> EXPORT : <<include>>
+UC30 ..> AUDIT  : <<include>>
+
+note right of UC27
+  R1 ✅ เลือกทำจริง (10 คะแนน)
+  - เลือกปี พ.ศ. 2568
+  - แสดงรายละเอียด + กราฟ
+    เปรียบเทียบ
+  - นับ "ขึ้นจริง / ลงจริง" แยกกัน
+    จาก trip_passenger
+  - ใช้ TRUNC(date,'IW') + TO_CHAR(...,'IW')
+  ⚠ ห้าม COUNT(DISTINCT alight_time)
+    เพราะจะนับจำนวนเวลาที่ไม่ซ้ำ
+    ไม่ใช่จำนวนคน
+end note
+
+note right of UC28
+  R4 ✅ เลือกทำจริง (7 คะแนน)
+  - เลือกช่วงวันที่
+  - แยกตามวัน จ/อ/พ/พฤ/ศ/ส/อา
+    x เส้นทาง 1-3
+  - มีคอลัมน์ "รวมทั้งวัน"
+  - ใช้ PIVOT
+  - ถ้าช่วงที่เลือกมีวันจันทร์
+    มากกว่า 1 ครั้ง ให้รวม
+    จำนวนทั้งหมดของวันนั้น
+    (GROUP BY service_date เต็ม)
+end note
+
+note right of UC29
+  R6 ✅ เลือกทำจริง (7 คะแนน)
+  - เลือกช่วงวันที่
+  - คนขับ / รวมรอบ /
+    ก่อน 17:00 / หลัง 17:00
+  - ใช้ Analytic + ROLLUP
+    เพื่อได้แถว "รวมทั้งหมด"
+    ตามตัวอย่างในเอกสาร
+end note
+
+note bottom of UC30
+  เงื่อนไขรายงาน (ต้องทำครบ)
+  - ทุกรายงานมีทั้งตารางรายละเอียด
+    และกราฟ
+  - รันได้ < 3 วินาที ที่ข้อมูล
+    50,000 แถว
+  - R-07 : ทำบน Flutter เท่านั้น
+    ใช้ fl_chart + ปุ่ม Export
+    เพื่อนำกราฟไปใส่รายงานได้
+end note
+
+@enduml

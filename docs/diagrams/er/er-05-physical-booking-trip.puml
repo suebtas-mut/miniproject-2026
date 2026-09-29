@@ -1,0 +1,205 @@
+@startuml er-05-physical-booking-trip
+' T-005 — ER Diagram ระดับ PHYSICAL : กลุ่ม BOOKING และ TRIP (Oracle 19c)
+' เจ้าของเอกสาร: นางสาวสุขสรร มาณีศรี
+' AI Agent: @agent-architect
+' แหล่งที่มา: docs/chapter-17-fullstack.md ข้อ 17.4.3 (01_schema.sql)
+
+title ER PHYSICAL — BOOKING และ TRIP (3 ตาราง) — Oracle 19c
+
+skinparam shadowing false
+skinparam entity {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam linetype ortho
+
+entity "SEQ_BOOKING_CODE\n(SEQUENCE)" as seq {
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+}
+note right of seq
+  เลขที่เอกสาร ต่างจาก
+  รหัสอัตโนมัติตรง ๆ
+  (17.4.4) ใช้
+  seq_booking_code.NEXTVAL
+  ตอน INSERT booking
+end note
+
+entity "BOOKING" as booking {
+  * booking_id       NUMBER(10) IDENTITY
+  --
+  booking_code      VARCHAR2(20 CHAR)  NOT NULL
+  qr_token          VARCHAR2(64 CHAR)  NOT NULL
+  cust_id           NUMBER(10)  NOT NULL   <<FK>>
+  sched_id          NUMBER(10)  NOT NULL   <<FK>>
+  board_stop_id     NUMBER(10)  NOT NULL   <<FK>>
+  alight_stop_id    NUMBER(10)  NOT NULL   <<FK>>
+  seats             NUMBER(3) DEFAULT 1 NOT NULL
+  status            VARCHAR2(20 CHAR) DEFAULT 'reserved' NOT NULL
+  book_time         TIMESTAMP  DEFAULT SYSTIMESTAMP NOT NULL
+  cancel_time       TIMESTAMP
+}
+note right of booking #FFF3CD
+  PK : pk_booking
+  UK : uq_booking_code  UNIQUE(booking_code)
+       uq_booking_qr    UNIQUE(qr_token)
+  CK : ck_booking_seats  CHECK (seats BETWEEN 1 AND 4)  ← BR-06
+       ck_booking_status CHECK (status IN
+                ('reserved','checked_in',
+                 'completed','cancelled','no_show'))
+  FK : fk_bk_cust   → employee(emp_id)
+       fk_bk_sched  → schedule
+       fk_bk_board  → stop   (จุดขึ้น)
+       fk_bk_alight → stop   (จุดลง)
+  ────────────────
+  COMMENT ON TABLE:
+  'การจองรถของผู้ใช้บริการ
+   มี 5 สถานะ'
+  COMMENT ON COLUMN booking.status:
+  'reserved | checked_in | completed
+   | cancelled | no_show'
+  ────────────────
+  ★ BR-11 : board_stop_id ต้องมี
+    stop_seq < alight_stop_id
+    ใน schedule_stop ของรอบนั้น
+    → ตรวจที่ Service เพราะ
+      เป็นเงื่อนไขข้าม 2 ตาราง
+  ★ BR-12 : ทั้ง 2 จุดต้องอยู่ใน
+    schedule_stop ของรอบนั้น
+  ★ BR-05 : book_time ต้อง <=
+    schedule_stop.arrive_at − 20 นาที
+  ★ BR-08 : เมื่อ status='cancelled'
+    → ที่นั่งคืนให้อัตโนมัติ
+    เพราะนับเฉพาะ status='reserved'
+  ────────────────
+  Index ที่ต้องสร้าง:
+   ix_booking_sched_status (sched_id, status)
+   ix_booking_book_time    (book_time)
+   ix_booking_cust         (cust_id, book_time)
+end note
+
+entity "TRIP" as trip {
+  * trip_id      NUMBER(10) IDENTITY
+  --
+  sched_id      NUMBER(10) NOT NULL   <<FK>>
+  driver_id     NUMBER(10) NOT NULL   <<FK>>
+  veh_id        NUMBER(10) NOT NULL   <<FK>>
+  start_time    TIMESTAMP
+  end_time      TIMESTAMP
+  status        VARCHAR2(20 CHAR) DEFAULT 'running' NOT NULL
+}
+note right of trip #C8E6C9
+  PK : pk_trip
+  UK : uq_trip_sched UNIQUE(sched_id)  ← 1 รอบ = 1 trip
+  CK : ck_trip_status CHECK (status IN ('running','completed'))
+  FK : fk_tr_sched  → schedule
+       fk_tr_driver → employee(emp_id)
+       fk_tr_veh    → vehicle
+  ────────────────
+  COMMENT ON TABLE:
+  'การเดินรถจริงในแต่ละรอบ
+   (คนขับกดเริ่ม/ปิด)'
+  ────────────────
+  ★ ไม่มี FK ไปที่ driver_assign /
+    vehicle_assign โดยตรง
+    → เก็บ driver_id / veh_id
+      ซ้ำไว้ใน trip เพื่อเก็บ
+      "คนขับ/รถที่ใช้จริงในรอบนั้น"
+      (อาจเปลี่ยนคนขับสำรองได้)
+  ────────────────
+  ★ ใช้ uq_trip_sched กัน
+    กดเริ่มการเดินทางซ้ำ 2 ครั้ง
+    ในรอบเดียวกัน
+    (UC-23)
+end note
+
+entity "TRIP_PASSENGER" as trip_passenger {
+  * trip_passenger_id  NUMBER(10) IDENTITY
+  --
+  checkin_time        TIMESTAMP
+  checkin_stop_id     NUMBER(10)   <<FK>>
+  board_seq           NUMBER(5)
+  alight_seq          NUMBER(5)
+  alight_time         TIMESTAMP
+  --
+  trip_id             NUMBER(10) NOT NULL  <<FK>>
+  booking_id          NUMBER(10) NOT NULL  <<FK>>
+}
+note right of trip_passenger #C8E6C9
+  PK : pk_trip_passenger
+  UK : uq_trip_booking UNIQUE(trip_id, booking_id)
+  FK : fk_tp_trip    → trip     CASCADE
+       fk_tp_booking → booking
+       fk_tp_stop    → stop
+  ────────────────
+  COMMENT ON TABLE:
+  'รายละเอียดผู้โดยสารรายคนต่อรอบ
+   — จำเป็นสำหรับรายงาน 1,2,3,5'
+  ────────────────
+  ★ เป็นตารางที่ "ห้ามตัดออก"
+    เพราะ R1 (ที่ทำจริง) ต้องนับ
+    คนขึ้น/ลงจริงจากที่นี่
+    ถ้าไม่เก็บ checkin_time
+    จะรู้ได้แค่คน "จอง" ไม่ใช่
+    คนที่ "ขึ้นรถจริง"
+  ────────────────
+  ★ board_seq / alight_seq
+    = จุดจอดที่ขึ้น/ลงจริง
+    ใช้รายงาน R1 / R5
+  ────────────────
+  ★ BR-09 : ตอนสแกน QR ต้องเทียบ
+    booking.sched_id = trip.sched_id
+    ของ trip ที่กำลังเดิน
+    ⛔ ห้าม join ด้วย sched_id
+      เพราะจะเทียบตัวเองเสมอ
+      → ต้องส่ง trip_id มาด้วย
+        แล้ว join ผ่าน trip_id
+  ────────────────
+  Index ที่ต้องสร้าง:
+   ix_tp_trip    (trip_id)
+   ix_tp_booking (booking_id)
+end note
+
+' ---------- ความสัมพันธ์ ----------
+employee   ||--o{ booking        : "fk_bk_cust"
+schedule   ||--o{ booking        : "fk_bk_sched"
+stop       ||--o{ booking        : "fk_bk_board / fk_bk_alight"
+schedule   ||--o| trip           : "fk_tr_sched  0..1"
+employee   ||--o{ trip           : "fk_tr_driver"
+vehicle    ||--o{ trip           : "fk_tr_veh"
+trip       ||--o{ trip_passenger : "fk_tp_trip  CASCADE"
+booking    ||--o| trip_passenger : "fk_tp_booking"
+stop       ||--o{ trip_passenger : "fk_tp_stop"
+
+note bottom of booking
+  ★ เส้นทางของสถานะ (สำหรับ State Diagram
+    ใน T-010) :
+     reserved ──สแกน QR──▶ checked_in
+        │                      │
+     ยกเลิก (BR-08)         คนขับปิดรอบ
+        ▼                      ▼
+    cancelled              completed
+                               │
+                    ปิดรอบแล้วยังเป็น reserved
+                               ▼
+                            no_show  ← BR-10
+end note
+
+note bottom of trip_passenger
+  ★ ทำไม R1 ห้ามใช้ COUNT(DISTINCT alight_time)
+    เพราะ:
+      นับ "จำนวนเวลาที่ไม่ซ้ำกัน"
+    แต่ต้องการ:
+      นับ "จำนวนคน"
+    ตัวอย่าง: คน 3 คน ลงพร้อมกัน
+      เวลา 17:30
+      COUNT(DISTINCT alight_time) = 1  ✗
+      COUNT(DISTINCT booking_id)  = 3  ✓
+    ใช้:
+      COUNT(DISTINCT CASE WHEN
+        tp.checkin_time IS NOT NULL
+        THEN tp.booking_id END)
+end note
+
+@enduml

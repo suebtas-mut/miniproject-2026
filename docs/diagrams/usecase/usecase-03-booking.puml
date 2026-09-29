@@ -1,0 +1,102 @@
+@startuml usecase-03-booking
+' T-004 — Use Case: B1-B3 ระบบการจองรถของผู้ใช้บริการ
+
+title Use Case — B1 เงื่อนไขการจอง · B2 QR Code · B3 ยกเลิกการจอง
+
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "นักศึกษา / เจ้าหน้าที่ (Customer)" as Customer
+actor "ผู้ดูแลระบบ (Admin)" as Admin
+
+rectangle "ระบบ SHUTTLE BUS" {
+  usecase "UC-17 เลือกจุดขึ้น-ลงและ\nดูรอบเวลาที่จองได้" as UC17
+  usecase "UC-18 เลือกจำนวนที่นั่งและยืนยันการจอง" as UC18
+  usecase "UC-19 ดูรายการเดินทางของฉัน" as UC19
+  usecase "UC-20 แสดง QR Code สำหรับเช็คอิน" as UC20
+  usecase "UC-21 ยกเลิกการจองของตัวเอง" as UC21
+
+  usecase "ตรวจว่าจุดขึ้น-ลงอยู่ในเส้นทาง\nของรอบ (BR-12)" as CHK_ROUTE
+  usecase "ตรวจลำดับจุดขึ้นก่อนจุดลง (BR-11)" as CHK_ORDER
+  usecase "ตรวจเวลานำอย่างน้อย 20 นาที (BR-05)" as CHK_LEAD
+  usecase "ตรวจจำนวนที่นั่งไม่เกิน 4 (BR-06)" as CHK_SEATS
+  usecase "ตรวจที่นั่งว่างพอ พร้อมล็อกแถว (BR-07)" as CHK_AVAIL
+  usecase "สร้าง booking_code + qr_token" as GENQR
+  usecase "คืนที่นั่งเข้ารอบ (BR-08)" as RETURN_SEAT
+  usecase "ตรวจสิทธิ์การเข้าถึง" as AUTHZ
+  usecase "บันทึก Audit Log" as AUDIT
+}
+
+Customer -- UC17
+Customer -- UC18
+Customer -- UC19
+Customer -- UC20
+Customer -- UC21
+Admin    -- UC19
+
+UC17 ..> AUTHZ      : <<include>>
+UC17 ..> CHK_ROUTE  : <<include>>
+UC17 ..> CHK_ORDER  : <<include>>
+UC17 ..> CHK_LEAD   : <<include>>
+UC17 ..> CHK_AVAIL  : <<include>>
+
+UC18 ..> AUTHZ     : <<include>>
+UC18 ..> CHK_ROUTE : <<include>>
+UC18 ..> CHK_ORDER : <<include>>
+UC18 ..> CHK_LEAD  : <<include>>
+UC18 ..> CHK_SEATS : <<include>>
+UC18 ..> CHK_AVAIL : <<include>>
+UC18 ..> GENQR     : <<include>>
+
+UC21 ..> RETURN_SEAT : <<include>>
+UC21 ..> AUDIT       : <<include>>
+UC18 ..> AUDIT       : <<include>>
+
+note right of UC17
+  B1
+  - Login เข้าระบบก่อนจอง
+  - เลือกจุดจอดขึ้น และจุดจอดลง
+  - ระบบแสดงเฉพาะรอบที่
+    "จองได้จริง"
+  - กรองเฉพาะรอบที่
+    เหลือเวลา >= 20 นาที
+    ก่อนรถถึงจุดขึ้น
+end note
+
+note bottom of CHK_AVAIL
+  BR-07 : ที่นั่งว่าง =
+  capacity (จาก vehicle_type ของรถที่
+  ถูกมอบหมายในรอบนั้น)
+  - SUM(booking.seats) ที่
+    status = 'reserved'
+  - เช่น รถ 9 ที่นั่ง จองแล้ว 8
+    เหลือจองได้ 1 ที่นั่ง
+  - ต้องล็อกด้วย FOR UPDATE NOWAIT
+    กัน 2 คนจองที่นั่งสุดท้ายพร้อมกัน
+end note
+
+note right of UC21
+  B3
+  - ยกเลิกได้เฉพาะการจอง
+    ของตัวเอง
+  - เมื่อยกเลิก ที่นั่งถูกคืนทันที
+  - ASM-07-2 (สมมติฐาน) : ยกเลิกได้
+     ก่อนรถถึงจุดขึ้น 20 นาที
+end note
+
+note bottom of UC20
+  B2
+  - จองสำเร็จแล้ว generate QR Code
+  - QR ใช้สำหรับ check in ขึ้นรถ
+  - ASM-07-3 (สมมติฐาน) : ใช้ได้
+     1 ครั้งต่อ 1 การจอง
+end note
+
+@enduml
