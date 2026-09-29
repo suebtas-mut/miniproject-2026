@@ -107,9 +107,24 @@
 
 ### เกณฑ์เฉพาะ T-014
 
-- [ ] Endpoint ครบทุกตัวที่ปรากฏใน Use Case Spec
-- [ ] มี `request` / `response` / `error code` / ตัวอย่าง payload
-- [ ] ระบุ `BR-xx` ที่ Endpoint นั้นบังคับ
+> ✅ **ผล 2026-09-30** — `docs/api/openapi.yaml` (OpenAPI 3.0.3) · **41 paths / 59 operations / 47 schemas**
+> Validate แล้ว: `npx @redocly/cli lint docs/api/openapi.yaml` → **valid, 0 error, 4 warning**
+> (4 warning = `operation-2xx-response` ของ R2/R3/R5/R7 ที่คืน 501 ตาม 17.5.2 โดยตั้งใจ ไม่ใช่ข้อผิดพลาด)
+
+- [x] Endpoint ครบทุกตัวที่ปรากฏใน Use Case Spec — ✅ **59/59 operations ตรงกับ 17.5.2 ทุกตัว** (ตรวจด้วยสคริปต์นับ)
+      · ครอบคลุม UC-01…UC-30 = **29/30** (ยกเว้น UC-10 = Q22 ดูหมายเหตุล่าง)
+      · BR-01…BR-12 มีครบทั้ง 12 ตัวใน `x-business-rules`
+- [x] มี `request` / `response` / `error code` / ตัวอย่าง payload — ✅ ทุก operation มี `x-use-case` + ตัวอย่าง payload จริง
+      · error code แยกชัดเจน: 400 / 401 / 403 / 404 / 409 / 422 / 429 / 500 (+ 501 สำหรับรายงานที่ไม่ทำ)
+      · `operationId` ไม่ซ้ำ 59/59 · ทุก operation มี 401
+- [x] ระบุ `BR-xx` ที่ Endpoint นั้นบังคับ — ✅ 25 operation มี `x-business-rules` · 13 จุดที่ต้อง Transaction มี `x-transaction`
+      · 7 endpoint รายงานมี `x-report` + `x-pdf-condition` (R1/R4/R6 ทำจริง · R2/R3/R5/R7 คืน 501)
+- [x] P-04 ข้อ 1–4 สะท้อนในสเปก — ✅ ระบุ bind variable ทุก endpoint · ไม่มี `SELECT *` (มีแต่ข้อความ "ห้าม")
+      · ไม่มี `password_hash` ใน response ใดเลย · ไม่ hardcode รายชื่อ Role
+- [ ] ⛔ **UC-10 (กำหนดบทบาทให้พนักงาน)** — Use Case ไม่ระบุ API path และ 17.5.2 ไม่มี endpoint นี้
+      *P-04 ข้อ 9 ห้ามตัดสินใจเอง → บันทึกเป็น **Q22** ใน `info.description` แล้ว รออาจารย์ยืนยัน*
+      *มีอีก 2 ข้อเดียวกัน: **Q23** แก้เวลาออกของรอบ (UC-14.2) · **Q24** แก้/ลบสิทธิ์ (UC-08)*
+- [ ] Code Review โดยสุขสรร (AR-02) — *ผู้เขียนห้ามรีวิวงานตัวเอง*
 
 ---
 
@@ -212,7 +227,7 @@
 - [x] `database/02_seed_master.sql` — ✅ 12/12 PASS
 - [x] `database/03_seed_front.sql` — ✅ 9/9 PASS (เส้นทาง 2/3 · ข้ามเส้นทาง 1 รอ Q20)
 - [ ] `docs/mockup/` (PNG ทั้ง 4 บทบาท + ไฟล์อธิบาย) — สุขสรร · T-009
-- [ ] `docs/api/openapi.yaml` — T-014 · รอหลัง T-008
+- [x] `docs/api/openapi.yaml` — ✅ T-014 · 41 paths / 59 operations · Redocly lint valid (0 error)
 
 ### Milestone M1
 

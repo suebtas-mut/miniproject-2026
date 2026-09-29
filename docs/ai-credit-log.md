@@ -413,14 +413,30 @@
 
 ---
 
-## 📊 สรุปยอด Sprint 0 – 2 (ทั้งสองฝั่งรวมกัน)
+### แถวที่ 22 · เขียน OpenAPI Spec ครบทุก Endpoint (T-014)
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | T-014 — `docs/api/openapi.yaml` |
+| Agent | `@agent-doc` (ร่างสเปก) + `@agent-coder` (ตรวจเงื่อนไข P-04 ข้อ 1–9) |
+| ผู้ใช้ควบคุม | นายเก่งกาญ เชี่ยวชาญ |
+| Prompt | P-04 `rest-endpoint` (ดู `docs/ai-prompts/P-04_rest-endpoint.md`) — "สร้างสเปก OpenAPI ให้ครบทุก endpoint จาก Use Case Spec + chapter 17 + DDL" |
+| ไฟล์ที่เปลี่ยน | `docs/api/openapi.yaml` (ใหม่ · 5,600+ บรรทัด) · `docs/agile/sprints/sprint-02-plan.md` · `docs/ai-prompts/P-04_rest-endpoint.md` · `docs/ai-credit-log.md` · `docs/agile/standup/2026-09-30.md` |
+| ผลลัพธ์ | ✅ **41 paths / 59 operations / 47 schemas** · ตรงกับ 17.5.2 **ครบทุกตัว**<br>✅ ครอบคลุม UC-01…UC-30 = **29/30** · BR-01…BR-12 ครบ 12 ตัว · `operationId` ไม่ซ้ำ · ทุก operation มี 401<br>✅ Redocly lint **valid · 0 error** (4 warning = 501 ของ R2/R3/R5/R7 ตาม 17.5.2 โดยตั้งใจ)<br>✅ ยกเป็นคำถาม **Q22 / Q23 / Q24** ใน `info.description` แทนที่จะเดา endpoint (P-04 ข้อ 9) |
+| การตรวจสอบ | 🔍 สคริปต์นับเอง — operation/operationId ซ้ำ · `x-use-case` ครบทุก operation · BR ครบ · response code ครบ<br>🔍 `npx @redocly/cli lint` แก้จนเหลือ warning ที่ตั้งใจ · grep ยืนยันไม่มี `SELECT *` และไม่มี `password_hash` ใน response |
+| 🐛 ที่ AI ทำผิดและคนตรวจเจอ | 1) **เพิ่ม `GET /permission-matrix` เอง** ทั้งที่ 17.5.2 ไม่มี → นับ operation เทียบแล้วเหลือ 59 จึงตัดออก ย้าย `granted_perm_ids` ไปไว้ใน `GET /roles` แทน<br>2) **ห่อ response ซ้อนสองชั้น** ที่ `/auth/login` → Redocly เตือน example ไม่ตรง schema<br>3) **base64 ตัวอย่างไม่ตรง `format: byte`** → แก้เป็น base64 เปล่า |
+| ⚠️ ยังไม่ปิด | ⛔ **Q22 (UC-10)** — Use Case ไม่ระบุ API path และ 17.5.2 ไม่มี endpoint นี้ → คนต้องถามอาจารย์ (ห้าม AI ตัดสินเอง)<br>⛔ **Q23 / Q24** — เหมือนกัน · ⏳ รอ peer review จากสุขสรร (AR-02) |
+| สัดส่วน AI | 80% AI / 20% คน (คนต้องตรวจชื่อคอลัมน์เทียบ `01_schema.sql` จริง และตัดสินใจเรื่อง Q22–Q24) |
+
+---
+
 ## 📊 สรุปยอด Sprint 0 – 2 (ทั้งสองฝั่งรวมกัน)
 
 | สมาชิก | จำนวนครั้งที่ใช้ AI | ไฟล์ที่ AI สร้าง/แก้ | สัดส่วน AI เฉลี่ย |
 |---|---|---|---|
 | นางสาวสุขสรร มาณีศรี | 15 | 26 | ~70% |
-| นายเก่งกาญ เชี่ยวชาญ | 7 | 23+ | 74% |
-| **รวมทั้งโปรเจกต์** | **22** | **49+** | **~72%** |
+| นายเก่งกาญ เชี่ยวชาญ | 8 | 28+ | ~75% |
+| **รวมทั้งโปรเจกต์** | **23** | **54+** | **~72%** |
 
 > ตัวเลขนี้เป็น **ค่าประมาณ** (ประมาณจากจำนวนไฟล์ที่แก้และจำนวนจุดที่คนต้องตรวจแก้ไขเอง) ไม่ใช่การจับเวลาจริง
 > **ผู้รับผิดชอบเอกสารทุกชิ้นคือคน ไม่ใช่ AI** (AR-04)
