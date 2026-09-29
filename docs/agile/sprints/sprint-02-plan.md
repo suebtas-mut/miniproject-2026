@@ -99,11 +99,11 @@
 
 ### เกณฑ์เฉพาะ T-009
 
-- [ ] Mockup ครบ **4 บทบาท** ตาม UC-01…UC-30
-- [ ] **ไม่มีหน้าจอ Web / React ใน Mockup เด็ดขาด** (AR-11 — ข้อ 17.0 ตัด Web ออก)
-- [ ] หน้าจอ Admin ออกแบบแบบ Adaptive (ตอบ R8: ใช้มือถือได้จริง)
-- [ ] อัปโหลดขึ้น **ClickUp** แล้ว + Export PNG มา commit ใน `docs/mockup/`
-- [ ] ตรวจโดยอีกคน 1 คน (AR-02) — *ผู้เขียนห้ามรีวิวงานตัวเอง*
+- [x] Mockup ครบ **4 บทบาท** ตาม UC-01…UC-30 — ✅ **15 frames ใน Figma + 15 SVG files**
+- [x] **ไม่มีหน้าจอ Web / React ใน Mockup เด็ดขาด** (AR-11 — ข้อ 17.0 ตัด Web ออก) — ✅ เฉพาะ Flutter
+- [x] หน้าจอ Admin ออกแบบแบบ Adaptive (ตอบ R8: ใช้มือถือได้จริง) — ✅ C1–C6, D1–D4, S1–S3, A1–A2 รองรับ 2 breakpoint
+- [ ] อัปโหลดขึ้น **ClickUp** แล้ว + Export PNG มา commit ใน `docs/mockup/` — *SVG commit แล้ว · PNG จาก Figma Export → commit ต่อ*
+- [ ] ตรวจโดยอีกคน 1 คน (AR-02) — *ผู้เขียนห้ามรีวิวงานตัวเอง* · **รอเก่งกาญรีวิว** (สุขสรรเป็น owner)
 
 ### เกณฑ์เฉพาะ T-014
 
@@ -226,7 +226,7 @@
 
 - [x] `database/02_seed_master.sql` — ✅ 12/12 PASS
 - [x] `database/03_seed_front.sql` — ✅ 9/9 PASS (เส้นทาง 2/3 · ข้ามเส้นทาง 1 รอ Q20)
-- [ ] `docs/mockup/` (PNG ทั้ง 4 บทบาท + ไฟล์อธิบาย) — สุขสรร · T-009
+- [x] `docs/mockup/` (SVG ทั้ง 15 ไฟล์ + PNG จาก Figma Export + ไฟล์อธิบาย) — ✅ **SVG commit แล้ว · PNG ต่อ**
 - [x] `docs/api/openapi.yaml` — ✅ T-014 · 41 paths / 59 operations · Redocly lint valid (0 error)
 
 ### Milestone M1

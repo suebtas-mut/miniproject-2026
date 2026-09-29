@@ -430,13 +430,26 @@
 
 ---
 
-## 📊 สรุปยอด Sprint 0 – 2 (ทั้งสองฝั่งรวมกัน)
+### แถวที่ 23 · สร้าง Figma Mockup + SVG Export (T-009 เสริม)
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | T-009 (Figma integration + SVG assets) |
+| Agent | `@agent-mockup` + `@agent-coder` (Playwright) |
+| ผู้ใช้ควบคุม | นายเก่งกาญ เชี่ยวชาญ (ดำเนินการ Figma ผ่าน Playwright) |
+| Prompt | "เปิด Figma ด้วย PlayWright ทำ GUI ได้เลย" → สร้าง 15 SVG 390×844 → paste ลง Figma canvas → จัด layout grid + rename frames → export Figma file |
+| ไฟล์ที่เปลี่ยน | `docs/mockup/*.svg` (15 ไฟล์) · `docs/mockup/README.md` (อัปเดต Figma URL) · `docs/agile/sprints/sprint-02-plan.md` (อัปเดต DoD T-009) · `docs/agile/standup/2026-09-30.md` |
+| ผลลัพธ์ | ✅ **Figma file ครบ 15 frames** — https://www.figma.com/design/piYhTrNy60bi7IjRkgaBZN/Shuttle-Bus-System---Mockup<br>✅ SVG source ทั้ง 15 ไฟล์ commit ใน `docs/mockup/`<br>✅ Layout grid 4 บทบาท: C1–C6 (0,0) / D1–D4 (0,904) / S1–S3 (0,1808) / A1–A2 (0,2712)<br>✅ Frames ชื่อครบ: C1–C6, D1–D4, S1–S3, A1–A2<br>⚠️ PNG export ยังไม่ commit — export จาก Figma File → Export → PNG ได้ทันที |
+| การตรวจสอบ | 🔍 ตรวจผ่าน a11y tree: 15 frames visible · ชื่อ frame ตรง · X/Y position ตรง |
+| สัดส่วน AI | 85% AI / 15% คน (คนตัดสินใจ layout + verify ผลลัพธ์) |
+
+---
 
 | สมาชิก | จำนวนครั้งที่ใช้ AI | ไฟล์ที่ AI สร้าง/แก้ | สัดส่วน AI เฉลี่ย |
 |---|---|---|---|
 | นางสาวสุขสรร มาณีศรี | 15 | 26 | ~70% |
-| นายเก่งกาญ เชี่ยวชาญ | 8 | 28+ | ~75% |
-| **รวมทั้งโปรเจกต์** | **23** | **54+** | **~72%** |
+| นายเก่งกาญ เชี่ยวชาญ | 9 | 28+ | ~75% |
+| **รวมทั้งโปรเจกต์** | **24** | **54+** | **~72%** |
 
 > ตัวเลขนี้เป็น **ค่าประมาณ** (ประมาณจากจำนวนไฟล์ที่แก้และจำนวนจุดที่คนต้องตรวจแก้ไขเอง) ไม่ใช่การจับเวลาจริง
 > **ผู้รับผิดชอบเอกสารทุกชิ้นคือคน ไม่ใช่ AI** (AR-04)
