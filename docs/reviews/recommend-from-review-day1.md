@@ -17,18 +17,26 @@
 | Task ID | ชื่องาน | Owner | สถานะ | หมายเหตุ | เวลาที่ใช้จริง |
 |---|---|---|---|---|---|
 | **T-001** | Git Repo + โครงสร้าง + `.gitignore` + ติดตั้ง Oracle XE 19c | นายเก่งกาญ | ✅ ทำเสร็จ | Branch `kaengkarn` มี commit ครบ | 3.5 ชม. |
-| **T-002** | ติดตั้ง Android Studio + Flutter SDK + ทดสอบ Emulator | นางสาวสุขสรร | ✅ ทำเสร็จ | Branch `sukhsorn` มี Emulator ทำงาน | 3 ชม. |
+| **T-002** | ติดตั้ง Android Studio + Flutter SDK + ทดสอบ Emulator | นางสาวสุขสรร | ◐ ทำเกือบเสร็จ | `flutter doctor` ผ่าน · Emulator boot ได้ · **ยังไม่ได้ `flutter run`** (ยังไม่มี `pubspec.yaml`) | 3 ชม. |
 | **T-003** | ตั้ง ClickUp: Workspace/Project/List/Sprint | นางสาวสุขสรร | ✅ ทำเสร็จ | Task 62 รายการเข้า ClickUp แล้ว | 1.5 ชม. |
-| **T-004** | Requirement → Use Case Diagram + Use Case Spec | ทั้งคู่ | 🔄 อยู่ระหว่าง | PlantUML Use Case sketch ร่างแล้ว | 2/5 ชม. |
+| **T-004** | Requirement → Use Case Diagram + Use Case Spec | ทั้งคู่ | ✅ ทำเสร็จ | `docs/diagrams/usecase/` 7 ไฟล์ · UC-01…UC-30 ครบ · นับ link ได้ Admin 21 / Staff 14 / Driver 8 / Customer 8 | 5 ชม. |
+| **T-005** | ER Diagram 3 ระดับ + Mapping | นางสาวสุขสรร | ✅ ทำเสร็จ *(ทำล่วงหน้า ย้ายจาก Sprint 1)* | `docs/diagrams/er/` · Conceptual 13 entity · Logical/Physical 20 ตาราง / 102 คอลัมน์ · 18 UK / 12 CHECK | 4 ชม. |
+| **T-006** | Data Dictionary | นางสาวสุขสรร | ✅ ทำเสร็จ *(ทำล่วงหน้า ย้ายจาก Sprint 1)* | `docs/report/chapter-08-data-dictionary.md` · `COMMENT ON` 122 รายการ (20 TABLE + 102 COLUMN) | 2 ชม. |
+
+> ⚠️ **ฉบับนี้ปรับปรุงเมื่อ 2026-09-29** หลังตรวจสถานะจริงใน Git
+> รอบแรกของเอกสารนี้เขียนว่า T-004 อยู่ระหว่าง และ T-005/T-006 ยังไม่เริ่ม (รอวันอังคารเย็น)
+> แต่เมื่อตรวจ `git diff main..sukhsorn` จริง พบว่า **ทั้งสามงานอยู่ใน branch `sukhsorn` เสร็จเรียบร้อยแล้ว** จึงแก้สถานะให้ตรงกับความจริง
+> ผลกระทบ: **Sprint 1 เหลืองานเดียวคือ T-007 ของนายเก่งกาญ** (ดูส่วนที่ 7)
 
 #### ✅ Definition of Done (Sprint 0)
 
 | เกณฑ์ | ผลลัพธ์ |
 |---|---|
-| `git log` มี ≥ 1 commit ที่ clean | ✅ มี 5 commits ใน main + branch kaengkarn/sukhsorn |
+| `git log` มี ≥ 1 commit ที่ clean | ✅ 12 commits · merge `kaengkarn` + `sukhsorn` เข้า `main` แล้ว · สร้าง `develop` แล้ว |
 | Oracle XE 19c เชื่อมต่อได้ | ✅ `sqlplus shuttle_app/password@localhost:1521/XEPDB1` สำเร็จ |
-| `flutter run` ได้บน Emulator | ✅ Emulator เปิดแอปว่างเปล่า ✓ |
+| ⚠️ `flutter run` ได้บน Emulator | ◐ **ยังไม่ผ่าน** — `flutter doctor` ผ่าน และ Emulator boot ได้ แต่ยังไม่ได้สั่ง `flutter run` เพราะยังไม่มี `pubspec.yaml` → ยังพิสูจน์ไม่ได้ว่าแอปรันบน Android จริง |
 | ClickUp มี Backlog ครบ 62 Task | ✅ ป้อน Task ทั้งหมด พร้อมกำหนดการ Sprint |
+| ไม่มี Secret ใน Git | ✅ `.gitignore` รวม 2 ฝั่งเป็น union แล้ว · นายเก่งกาญ purge รหัสผ่าน Oracle ออกจาก history (`48af4a2`) |
 
 ---
 
@@ -47,26 +55,44 @@
 
 | # | ประเด็น | ผลกระทบ | สถาน | แนวทางแก้ไข |
 |---|---|---|---|---|
-| 1 | **T-004 ยังไม่เสร็จ (Use Case Diagram)** | ท่าทางจะ delay เข้า Sprint 1 | 🔴 High | ให้ทั้งคู่ commit Use Case เสร็จภายใน 2 ชั่วโมงก่อนไปเที่ยง ขั้นต่ำ sketch diagram ต้อง merge เข้า develop ก่อน Sprint 2 |
-| 2 | **ยังไม่มี Daily Stand-up Log** | ไม่มีหลักฐาน Agile + ไม่คิด Story Point | 🟡 Medium | วันที่ 2 เป็นต้นไป **บังคับต้องมี** `docs/agile/standup/YYYY-MM-DD.md` |
-| 3 | **ยังไม่มี Sprint Retrospective** | ไม่มี "บันทึกการเรียนรู้" + ไม่ปรับปรุง Prompt | 🟡 Medium | วันที่ 2 (Sprint 1 เสร็จ) ต้องมี `docs/agile/retro/sprint-00.md` + `sprint-01.md` |
-| 4 | **ไม่มี Prompt Library ในโปรเจกต์** | ตอนใช้ AI ต้องกลับหา Prompt เดิม (AR-06) | 🟡 Medium | สร้าง `docs/ai-prompts/P-01.md` ... `P-12.md` ก่อน Sprint 2 |
-| 5 | **ยังไม่มี AI Usage Credit / Prompt Log** | เสีย คะแนนเอกสารการใช้ AI (AR-04) | 🟡 Medium | เตรียมไฟล์ `docs/ai-credit-log.md` เพื่อบันทึก AI ที่ใช้ใน Sprint 1 เป็นต้นไป |
+| 1 | ~~**T-004 ยังไม่เสร็จ (Use Case Diagram)**~~ | ~~ท่าทางจะ delay เข้า Sprint 1~~ | ✅ **แก้แล้ว** | ปิด 2026-09-29 — UC-01…UC-30 ครบใน `docs/diagrams/usecase/` และ merge เข้า `develop` แล้ว ไม่กระทบ Sprint 1 |
+| 2 | **Daily Stand-up Log** | ไม่มีหลักฐาน Agile + ไม่คิด Story Point | 🟡 Medium | ✅ มีวันที่ 1 แล้ว (`2026-09-28-*.md`) · ตั้งแต่วันที่ 2 **บังคับต้องมี** `docs/agile/standup/YYYY-MM-DD.md` ทุกวัน · **ต้องครบ 14 ไฟล์** ก่อนส่งงาน |
+| 3 | **Sprint Retrospective** | ไม่มี "บันทึกการเรียนรู้" + ไม่ปรับปรุง Prompt | 🟡 Medium | ✅ Sprint 0 มีแล้ว (`retro-sprint-0-doc.md` + `sprint-00.md`) · ต้องมี `sprint-01.md`…`sprint-13.md` รวม **14 ไฟล์** ก่อนส่งงาน |
+| 4 | **ไม่ครบ Prompt Library** | ตอนใช้ AI ต้องกลับหา Prompt เดิม (AR-06) | 🟡 Medium | มีแล้ว 2 ไฟล์ (`docs/ai-prompts/2026-09-28-sprint-00-P-01-*.md` + `docs/agile/ai-prompts/prompt-log.md`) แต่ยังไม่ครบ P-01…P-12 → ให้สร้างต่อก่อน Sprint 2 |
+| 5 | ~~**ยังไม่มี AI Usage Credit / Prompt Log**~~ | ~~เสียคะแนนเอกสารการใช้ AI (AR-04)~~ | ✅ **แก้แล้ว** | ปิด 2026-09-29 — `docs/ai-credit-log.md` (7 รายการ Sprint 0 + บันทึกกรณี AI ตอบผิดตาม AR-07) · ต้องบันทึกต่อทุก Sprint และรวมเป็นภาคผนวก ค ตอน T-061 |
+| 6 | **ชื่อผู้ commit ไม่แยกกัน** | หลักฐาน AR-02 (peer review) ดูเหมือนคนคนเดียวทำงานทั้งหมด | 🔴 High | ⚠️ **พบตอนตรวจ 2026-09-29** — commit ทั้ง 2 branch เดิมใช้ author เดียวกัน `suebtas-mut` · แก้แล้วสำหรับ commit ใหม่ของสุขสรร (`Sukhsorn Maneesri`) · **นายเก่งกาญต้องตั้ง `git config user.name/email` ของตัวเองด้วย** · commit เก่าที่แก้ย้อนหลังไม่ได้ ต้องรับทราบ |
 
 ---
 
-## 🔄 ส่วนที่ 3: แนวทางการ Merge Branch เข้า main
+## ✅ ส่วนที่ 3: แนวทางการ Merge Branch เข้า main *(ปิดแล้ว 2026-09-29)*
 
 ### 📌 Strategy: Git Flow แบบปรับตัว
 
-**ปัจจุบัน Branches ที่มี:**
+**Branches ปัจจุบัน (หลังปิด Sprint 0):**
 ```
-main (e1343e36...)
-├─ kaengkarn (afc144b7...)  [Backend + Oracle]
-└─ sukhsorn (a4c14105...)   [Flutter + Docs]
+main (db0a513)      ← release branch · มี merge ครบทั้ง 2 ฝั่ง
+└─ develop (db0a513) ← integration branch · base สำหรับ Sprint 1
+   ├─ kaengkarn (afc144b)  [Backend + Oracle]
+   └─ sukhsorn (66d434a)   [Flutter + Docs + AI Credit]
 ```
 
-### ✅ ขั้นตอนการ Merge ก่อน Sprint 2
+**สิ่งที่ทำไปแล้ว (ตรวจจาก `git log --graph` เมื่อ 2026-09-29):**
+
+| ขั้นตอน | ผลลัพธ์จริง | สถานะ |
+|---|---|---|
+| 1 · Merge `kaengkarn` → `main` | commit `7beb27b` | ✅ |
+| 2 · Merge `sukhsorn` → `main` | commit `7b8da7c` | ✅ |
+| 3 · แก้ conflict `.gitignore` | ได้ **union ของทั้งสองฝั่ง** — เก็บ `!.vscode/settings.json` + `!.vscode/settings.json.example` + กฎ secret ครบ (AR-03) | ✅ |
+| 4 · สร้าง `develop` | commit `db0a513` · push แล้ว | ✅ |
+| 5 · Merge `sukhsorn` (รอบที่ 2) | commit `db0a513` — นำ `docs/ai-credit-log.md` + `session-*.md` เข้า `main` | ✅ |
+| 6 · เริ่มงานบน `develop` | สร้าง feature branch `docs/day2-sukhsorn` จาก `develop` | ✅ |
+
+> ⚠️ **หมายเหตุสำคัญเรื่อง worktree**
+> มี 3 worktree ในเครื่องนี้ และ `develop` ถูก checkout อยู่ที่ `D:/data/miniproject`
+> → **checkout `develop` ใน worktree นี้ไม่ได้** ต้องสร้าง feature branch จาก `origin/develop` แทน
+> รายชื่อ worktree: `D:/data/shuttle-sukhsorn` (สุขสรร) · `D:/data/shuttle-kaengkarn` (เก่งกาญ) · `D:/data/miniproject` (เก่งกาญ · `develop`)
+
+### 📖 ขั้นตอนการ Merge (บันทึกไว้เผื่อต้องทำซ้ำ)
 
 #### ขั้นที่ 1: Merge Branch `kaengkarn` เข้า `main`
 
@@ -195,23 +221,25 @@ git push origin --delete kaengkarn sukhsorn
 
 ## 📝 ส่วนที่ 5: งานที่ต้องทำก่อน Sprint 2
 
-### 🔴 High Priority (ต้องทำวันนี้)
+### ✅ High Priority — **ปิดครบทั้งหมดแล้ว 2026-09-29**
 
-| # | งาน | Owner | ระยะเวลา | ผลลัพธ์ |
+| # | งาน | Owner | เวลาจริง | ผลลัพธ์จริง |
 |---|---|---|---|---|
-| 1 | **สรุป T-004 (Use Case Diagram)** | ทั้งคู่ | 2 ชม. | PlantUML diagram + spec ลง Git |
-| 2 | **Merge branch เข้า main** | ทั้งคู่ | 1 ชม. | main มี commit ครบทั้ง 2 ฝั่ง |
-| 3 | **สร้าง develop branch** | kaengkarn | 0.5 ชม. | develop branch พร้อม |
-| 4 | **Daily Stand-up Log วันที่ 1** | ทั้งคู่ | 0.5 ชม. | `docs/agile/standup/2026-XX-XX.md` |
-| 5 | **Sprint 0 Retrospective** | ทั้งคู่ | 1 ชม. | `docs/agile/retro/sprint-00.md` |
+| 1 | **สรุป T-004 (Use Case Diagram)** | ทั้งคู่ | ~5 ชม. | ✅ `docs/diagrams/usecase/` 7 ไฟล์ · UC-01…UC-30 ครบ |
+| 2 | **Merge branch เข้า main** | ทั้งคู่ | ~0.5 ชม. | ✅ `7beb27b` + `7b8da7c` + `db0a513` |
+| 3 | **สร้าง develop branch** | kaengkarn | ~0.5 ชม. | ✅ `develop` @ `db0a513` push แล้ว |
+| 4 | **Daily Stand-up Log วันที่ 1** | ทั้งคู่ | ~0.5 ชม. | ✅ `2026-09-28.md` (เก่งกาญ) + `2026-09-28-sukhsorn.md` |
+| 5 | **Sprint 0 Retrospective** | ทั้งคู่ | ~1 ชม. | ✅ `retro-sprint-0-doc.md` + `sprint-00.md` |
+| 6 | **ตั้ง git identity แยกคน** *(เพิ่มที่พบตอนตรวจ)* | ทั้งคู่ | 0.2 ชม. | ◐ สุขสรรตั้งแล้ว · **รอนายเก่งกาญตั้งของตัวเอง** |
 
-### 🟡 Medium Priority (ต้องทำประเทศกรรมวาร)
+### 🟡 Medium Priority
 
-| # | งาน | Owner | ระยะเวลา | Sprint ที่ใช้ |
-|---|---|---|---|---|
-| 1 | **สร้าง Prompt Library** (P-01…P-12) | kaengkarn | 2 ชม. | Sprint 1 ใช้ได้ทันที |
-| 2 | **เตรียม AI Credit Log** | sukhsorn | 1 ชม. | บันทึกตั้งแต่ Sprint 1 |
-| 3 | **ตรวจสอบ Requirement Checklist** | ทั้งคู่ | 1 ชม. | ยืนยันงาน 62 Task ครบ |
+| # | งาน | Owner | เวลา | Sprint ที่ใช้ | สถานะ |
+|---|---|---|---|---|---|
+| 1 | **สร้าง Prompt Library** (P-01…P-12) | kaengkarn | 2 ชม. | Sprint 1 | ◐ มี P-01 แล้ว · ขาด P-02…P-12 |
+| 2 | **เตรียม AI Credit Log** | sukhsorn | 1 ชม. | บันทึกตั้งแต่ Sprint 0 | ✅ `docs/ai-credit-log.md` |
+| 3 | **ตรวจสอบ Requirement Checklist** | ทั้งคู่ | 1 ชม. | Sprint 1 | ◐ ปิด A4 / A7 / A11 แล้ว · เหลือ 8 ข้อ |
+| 4 | **แก้ชื่อผู้ commit ใน history เก่า** | ทั้งคู่ | — | — | ⛔ **ทำไม่ได้** — repo สาธารณะ + commit push แล้ว · ต้องรับทราบว่า AR-02 จะเห็น author เดียวในส่วนของ Sprint 0 |
 
 ---
 
@@ -252,24 +280,31 @@ git push origin --delete kaengkarn sukhsorn
 
 ## 🎯 ส่วนที่ 7: Sprint 1 — ความพร้อม
 
-### ✅ เงื่อนไขการเข้า Sprint 1 (ต้องผ่านก่อน)
+### ✅ เงื่อนไขการเข้า Sprint 1 — **ผ่านครบทุกข้อแล้ว**
 
 | เงื่อนไข | สถานะ | หมายเหตุ |
 |---|---|---|
-| T-004 (Use Case) สิ้นสุด | ⏳ In Progress | ต้องสรุปให้เสร็จภายในวันนี้ |
-| Branch merge เข้า main | ⏳ Ready | หลังจบที่ประชุม review ให้ทำทันที |
-| Develop branch สร้างเสร็จ | ⏳ Ready | ขึ้นอยู่กับ merge |
-| Daily Stand-up วันที่ 1 บันทึกไว้ | ⏳ Ready | ต้องมี asap |
+| T-004 (Use Case) สิ้นสุด | ✅ **ผ่าน** | UC-01…UC-30 ครบ · merge เข้า `develop` แล้ว |
+| Branch merge เข้า main | ✅ **ผ่าน** | `db0a513` · มี merge commit ครบ 3 จุด |
+| Develop branch สร้างเสร็จ | ✅ **ผ่าน** | `develop` @ `db0a513` |
+| Daily Stand-up วันที่ 1 บันทึกไว้ | ✅ **ผ่าน** | `2026-09-28.md` + `2026-09-28-sukhsorn.md` |
+| Sprint 0 Retrospective | ✅ **ผ่าน** | `retro-sprint-0-doc.md` + `sprint-00.md` |
+| ⚠️ `flutter run` บน Emulator | ◐ **ยังไม่ผ่าน** | ยังไม่มี `pubspec.yaml` — ต้องทำให้เสร็จก่อน Sprint 3 (เริ่มเขียนแอป) |
 
-### 🚀 Sprint 1 เป้าหมาย
+### 🚀 Sprint 1 เป้าหมาย — **ปรับแล้ว 2026-09-29**
 
-| Task | Owner | คะแนน | Deadline | หมายเหตุ |
+| Task | Owner | คะแนน | เดิม | สถานะจริง |
 |---|---|---|---|---|
-| **T-005** ER Diagram 3 ระดับ + Mapping | sukhsorn | 10 คะแนน | วันอังคารเย็น | ER ต้องเสร็จก่อนให้เก่งกาญเขียน DDL |
-| **T-006** Data Dictionary | sukhsorn | (รองรับ 10 คะแนน) | วันอังคารเย็น | ควบคู่กับ T-005 |
-| **T-007** `01_schema.sql` | kaengkarn | (รองรับ 10 คะแนน) | วันอังคารเย็น | รันบน Oracle 19c ผ่าน 0 error |
+| **T-005** ER Diagram 3 ระดับ + Mapping | sukhsorn | 10 คะแนน | Sprint 1 วันอังคารเย็น | ✅ **ทำเสร็จแล้วใน Sprint 0** — ย้ายเข้า Sprint 0 |
+| **T-006** Data Dictionary | sukhsorn | (รองรับ 10 คะแนน) | Sprint 1 วันอังคารเย็น | ✅ **ทำเสร็จแล้วใน Sprint 0** — ย้ายเข้า Sprint 0 |
+| **T-007** `01_schema.sql` | kaengkarn | (รองรับ 10 คะแนน) | Sprint 1 วันอังคารเย็น | ⏳ **งานเดียวที่เหลือใน Sprint 1** — รันบน Oracle 19c ผ่าน 0 error |
 
-**คะแนนที่ปิดใน Sprint 1:** ✅ **ER + Mapping = 10 คะแนน** (แรก)
+**คะแนนที่ปิดแล้ว:** ✅ **10 คะแนน (ER + Mapping)** — ปิดล่วงหน้าใน Sprint 0
+**คะแนนที่จะปิดใน Sprint 1:** T-007 รองรับคะแนนเดียวกัน แต่ต้องรอให้ ER เป็นข้อมูลอ้างอิง → **คะแนน ER ปิดได้เลยตอนนี้**
+
+> 🔎 **ข้อสังเกตสำคัญ:** เอกสารรีวิวรอบแรกวาง T-005/T-006 ไว้ใน Sprint 1 แต่สุขสรรทำเสร็จไปแล้วใน Sprint 0
+> → การวางแผนล่วงหน้าได้ผลดี แต่ **ตารางนี้ต้องอัปเดตทุกครั้งที่ตรวจสถานะจริงใน Git** ไม่ใช่อิงแผนที่ตั้งใจไว้
+> **Sprint 1 ที่เหลือ: T-007 ฝั่งนายเก่งกาญ 1 งาน** ส่วนสุขสรรควรเริ่มเตรียม Prompt Library เพื่อรองรับ Sprint 2
 
 ---
 
@@ -283,34 +318,48 @@ git push origin --delete kaengkarn sukhsorn
 | **Planning** | Task 62 รายการ ลง ClickUp | ✅ A |
 | **Documentation** | บทที่ 1-18 พร้อม ER/Mockup Checklist | ✅ A |
 | **Team Collaboration** | Branch แยกชัดเจน + Review ready | ✅ A |
-| **Agile Practice** | Daily Stand-up ยังไม่เริ่ม (อยู่ใน Plan) | 🟡 B |
-| **AI Integration** | ยังไม่ใช้ (ตั้งแต่ Sprint 1) | 🟡 B |
+| **Agile Practice** | Stand-up + Retro มีแล้ว · ต้องทำต่อเนื่อง 14 วัน | 🟡 B |
+| **AI Integration** | เริ่มใช้จริงแล้ว · มี Prompt Log + AI Credit Log | ✅ A |
 
-**Overall:** ✅ **ปิด Sprint 0 ได้สำเร็จ** (slight delay ไม่มีนัยสำคัญ)
+**Overall:** ✅ **ปิด Sprint 0 ได้สำเร็จ** — และ**ทำได้มากกว่าแผน** เพราะ T-005/T-006 เสร็จล่วงหน้า
 
 ---
 
-## 🎯 Action Items (ทำทันที)
+## 🎯 Action Items — **อัปเดตสถานะ 2026-09-29**
 
-### Urgent (วันนี้ก่อนเลิก)
+### ✅ Urgent (เดิม: วันนี้ก่อนเลิก) — **ปิดครบ**
 
-- [ ] ทั้งคู่ commit T-004 Use Case Diagram สรุปให้เสร็จ
-- [ ] git merge branch เข้า main (ตามขั้นตอน 18.9)
-- [ ] สร้าง branch develop
-- [ ] บันทึก Stand-up Log วันที่ 1
-- [ ] สรุป Sprint 0 Retrospective
+- [x] ทั้งคู่ commit T-004 Use Case Diagram สรุปให้เสร็จ
+- [x] git merge branch เข้า main (ตามขั้นตอน 18.9)
+- [x] สร้าง branch develop
+- [x] บันทึก Stand-up Log วันที่ 1
+- [x] สรุป Sprint 0 Retrospective
+- [x] **เพิ่ม:** ตั้ง `git config user.name/email` แยกคน (สุขสรรเสร็จ · รอนายเก่งกาญ)
+- [x] **เพิ่ม:** สร้าง `docs/ai-credit-log.md` (A11)
+- [x] **เพิ่ม:** อัปเดตเอกสารรีวิวนี้ให้ตรงกับสถานะจริงใน Git
 
-### Recommended (ก่อน Sprint 1)
+### 🟡 Recommended (ก่อน Sprint 1)
 
-- [ ] kaengkarn เตรียม Prompt P-01 ~ P-12 ไว้ใน `docs/ai-prompts/`
-- [ ] sukhsorn เตรียม `docs/ai-credit-log.md` สำหรับบันทึก AI ที่ใช้
-- [ ] ทั้งคู่ตรวจสอบ Requirement Checklist ว่ายังถูกต้อง
+- [ ] kaengkarn เตรียม Prompt P-02 ~ P-12 ไว้ใน `docs/ai-prompts/` (มี P-01 แล้ว)
+- [x] sukhsorn เตรียม `docs/ai-credit-log.md` สำหรับบันทึก AI ที่ใช้
+- [ ] **นายเก่งกาญ:** ตั้ง `git config user.name` / `user.email` ของตัวเอง — **สำคัญมากต่อ AR-02**
+- [ ] ทั้งคู่ตรวจสอบ Requirement Checklist ที่เหลือ A1, A2, A3, A5, A6, A8, A9, A10
+- [ ] ทั้งคู่: ส่งคำถามค้าง (Q-A…Q-I) ใน `sukhsorn-check-list.md` ให้อาจารย์ — **ติดต่อ Q-A (ตารางคะแนน) เป็นอันดับแรก**
 
-### ก่อน Sprint 2 (วันอังคารที่ 8)
+### 📋 ก่อน Sprint 2 (วันอังคารที่ 8)
 
-- [ ] ตรวจสอบ T-005, T-006, T-007 ผ่าน DoD หมด
-- [ ] Review PR ของกันและกัน (AR-02)
-- [ ] ยืนยันว่า 10 คะแนน ER ติดสำเร็จ
+- [x] ตรวจสอบ T-005, T-006 ผ่าน DoD — **เสร็จแล้วใน Sprint 0**
+- [ ] ตรวจสอบ T-007 ผ่าน DoD (นายเก่งกาญ)
+- [ ] Review PR ของกันและกัน (AR-02) — **ต้องมี author แยกกันถึงจะเป็นหลักฐานได้**
+- [x] ยืนยันว่า 10 คะแนน ER ติดสำเร็จ
+
+### 🚀 Day 2 (2026-09-29) — งานของสุขสรร
+
+- [x] อัปเดต `requirement-review-checklist.md` — ปิด A4 / A7 / A11
+- [x] เขียน Stand-up log วันที่ 2 (`2026-09-29.md`)
+- [x] บันทึก AI Credit ของวันนี้
+- [ ] เตรียม `docs/ai-prompts/` เพิ่ม (สนับสนุนงานของนายเก่งกาญ)
+- [ ] รอนายเก่งกาญส่ง T-007 `01_schema.sql` → ตรวจ ER Mapping ว่าตรงกับ DDL จริงทุกตาราง
 
 ---
 
@@ -335,5 +384,17 @@ git push origin --delete kaengkarn sukhsorn
 
 ---
 
+## 📌 บันทึกการแก้ไขเอกสารนี้
+
+| ครั้ง | วันที่ | ผู้แก้ | สิ่งที่เปลี่ยน |
+|---|---|---|---|
+| 1 | 2026-09-28 | สุขสรร + AI `[ai-assisted]` | ร่างแรก (commit `2973275`) |
+| 2 | 2026-09-29 | สุขสรร + AI `[ai-assisted]` | **ตรวจสถานะจริงใน Git แล้วแก้ 6 จุด:** T-004 เป็นเสร็จ · เพิ่ม T-005/T-006 เป็นเสร็จ · DoD ของ `flutter run` เปลี่ยนจาก ✅ เป็น ◐ · เงื่อนไข Sprint 1 ผ่านครบ · เพิ่มความเสี่ยงเรื่องชื่อผู้ commit · Action Items ติ๊กตามจริง |
+
+> **หลักการที่ใช้แก้รอบนี้:** ตารางสถานะต้องอ่านจาก `git log` / `git diff` / ไฟล์จริงเสมอ
+> ไม่ใช่จากแผนที่ตั้งใจไว้ตอนเขียนเอกสาร — เพราะรอบแรกสถานะ T-004/T-005/T-006 ผิดทั้งหมด
+
+---
+
 *เอกสารนี้เป็นส่วนหนึ่งของ Agile Retrospective และ Traceability Matrix*  
-*อ้างอิง: บทที่ 18 (Development Plan) + Requirement Review Checklist*
+*อ้างอิง: บทที่ 18 (Development Plan) + Requirement Review Checklist + `docs/ai-credit-log.md`*
