@@ -33,7 +33,7 @@
 | 1 | ฐานข้อมูล **Oracle** (ไม่ใช้ MySQL) | ✅ | ติดตั้ง `gvenzl/oracle-xe:21-slim` · เชื่อมต่อ `SHUTTLE_APP@//localhost/XEPDB1` ได้ · แก้เอกสารจาก 19c → 21c แล้ว | `docker-compose.yaml` · `docs/chapter-17-fullstack.md:17.6.4` |
 | 2 | Client **Flutter** ทุกบทบาท | ✅ | ยืนยันว่าไม่มีโฟลเดอร์ `frontend-web/` ทั้งโปรเจกต์ | `docs/chapter-17-fullstack.md` 17.0 |
 | 3 | Backend **Node.js + Express + node-oracledb** | ✅ | เตรียมโครงสร้าง `backend/` + `.env.example` เรียบร้อย | `backend/.env.example` |
-| 4 | ⛔ **ตัด React / Web ออก** | ✅ | ตัดรายการตรวจที่เกี่ยวกับ Web ออกทั้งหมด เช่น CORS, Web Mockup | `use-case.puml` บรรทัด 15 ระบุ "นอกขอบเขต" |
+| 4 | ⛔ **ตัด React / Web ออก** | ✅ | ตัดรายการตรวจที่เกี่ยวกับ Web ออกทั้งหมด เช่น CORS, Web Mockup | `usecase-00-overview.puml` ระบุ "นอกขอบเขต" |
 | 5 | ทีม **2 คน** + Code Review ทุกชิ้น (AR-02) | 🔄 | T-001, T-004 ส่งให้สุขสรรรีวิวแล้ว · **ยังไม่ push** | commit `7e0bd05` · `9201886` |
 | 6 | วันทำงาน **จันทร์–เสาร์** = ต้องมี Stand-up **14 ไฟล์** | 🔄 | สร้างแล้ว **1/14 ไฟล์** | `docs/agile/standup/2026-09-28.md` |
 | 7 | **1 Sprint = 1 วัน** → 14 Sprint | ✅ | แผนครบ Sprint 0–13 (62 Task / 178 ชม.) | `chapter-18-development-plan.md` 18.4.1 |
@@ -146,7 +146,7 @@
 | A1 | Requirement Specification + Requirement ID | แนะนำ | 🔄 | Requirement ID ครบ (M1–M3, F1, F2, B1–B3, D1–D4, R1/R4/R6) พร้อมผูก Use Case / BR / Task / Sprint ใน Traceability แล้ว · เอกสารต้นฉบับคือ `requirement-review-checklist.md` (ยังไม่ได้จัดรูปแบบเป็น Spec เฉพาะ) | Sprint 13 · รวมใน T-061 |
 | A2 | Context Diagram | แนะนำ | ⬜ | — | T-010 · Sprint 3 |
 | A3 | DFD (Lv0 / Lv1) | แนะนำ | ⬜ | — | T-010 · Sprint 3 |
-| **A4** | **Use Case Specification** | แนะนำ | ✅ | **`docs/diagrams/use-case-spec.md`** — 30 UC ครบ Precondition / Postcondition / Alternative Flow / Business Rule | **T-004 ✅ วันนี้** |
+| **A4** | **Use Case Specification** | แนะนำ | ✅ | **`docs/diagrams/usecase/usecase-spec.md`** — 30 UC ครบ Precondition / Postcondition / Alternative Flow / Business Rule (ฉบับรีวิวแล้ว ตาม AR-02) | **T-004 ✅** |
 | A5 | Sequence Diagram (Login, จอง, ยกเลิก, สแกน, ปิดรอบ) | แนะนำ | ⬜ | — | T-010 · Sprint 3 |
 | A6 | State Diagram ของ Booking | แนะนำ | ⬜ | 5 สถานะ `RESERVED → CHECKED_IN → COMPLETED / NO_SHOW / CANCELLED` นิยามแล้วใน UC-19/26/27 | Sprint 3 |
 | A7 | Data Dictionary | แนะนำ | ⬜ | — | T-006 · Sprint 1 |
@@ -154,7 +154,7 @@
 | A9 | Test Plan + Test Case | แนะนำ | ⬜ | ร่าง Test Case สำหรับ BR-01…BR-12 เขียนเป็น DoD ใน UC แล้ว | Sprint 13 |
 | A10 | คู่มือใช้งาน + คู่มือติดตั้ง | แนะนำ | ⬜ | — | T-062 · Sprint 13 |
 | **A11** | **AI Usage Credit + Prompt Log** | แนะนำ | ✅ | **`docs/ai-prompts/2026-09-28-sprint-00-P-01-requirement-to-usecase.md`** — Prompt + เวลาที่ประหยัด + 3 ข้อที่ AI ตอบผิด (AR-04/06/07) | **วันนี้ ✅** |
-| | **Use Case Diagram** | — | ✅ | `docs/diagrams/use-case.puml` — PlantUML ผ่าน syntax check · 4 actors · 30 use cases | **T-004 ✅ วันนี้** |
+| | **Use Case Diagram** | — | ✅ | `docs/diagrams/usecase/usecase-0*.puml` (7 ไฟล์) — PlantUML ผ่าน syntax check · 4 actors · 30 use cases | **T-004 ✅** |
 
 > 📊 **คะแนนถามตอบ 22 คะแนน** — checklist ระบุว่าเก็บได้จากเอกสาร ข.1 เกือบทั้งหมด
 > → ตอนนี้ **เสร็จ 2/11 (A4, A11)** · **เป็นร่าง 2/11 (A1, A8)** · เหลือ 7 รายการกระจาย Sprint 1–13
@@ -215,7 +215,7 @@
 
 | สิ่งที่ไม่ต้องทำ | ยืนยัน |
 |---|---|
-| Web / React | ✅ ไม่มีโฟลเดอร์ `frontend-web/` · ไม่มี React ใน `use-case.puml` (มีแต่บรรทัดระบุ "นอกขอบเขต") |
+| Web / React | ✅ ไม่มีโฟลเดอร์ `frontend-web/` · ไม่มี React ใน `docs/diagrams/usecase/` |
 | CORS configuration | ✅ ไม่มี |
 | SADT / IDEF0 / Petri Net | ✅ ไม่มี |
 | รายงาน 7 ข้อ (ถ้าเป็น Data Science/Mix) | ✅ เลือก 3 ข้อ R1+R4+R6 |
@@ -351,8 +351,8 @@
 
 | ไฟล์ที่ต้องรีวิว | จุดที่ต้องเช็ก | ผู้รีวิว | สถานะ |
 |---|---|---|---|
-| `docs/diagrams/use-case.puml` | 4 actors ครบไหม · 30 UC ครบไหม · `<<include>>`/`<<extend>>` ถูกไหม | สุขสรร | ⬜ |
-| `docs/diagrams/use-case-spec.md` | 5 จุดตามหัวข้อ 9 · ตัวเลข 7/4/5 จุดจอด · 30/13/12 นาที · 9 ที่นั่ง ตรงตาม PDF | สุขสรร | ⬜ |
+| `docs/diagrams/usecase/usecase-0*.puml` | 4 actors ครบไหม · 30 UC ครบไหม · `<<include>>`/`<<extend>>` ถูกไหม | สุขสรร | ✅ |
+| `docs/diagrams/usecase/usecase-spec.md` | 5 จุดตามหัวข้อ 9 · ตัวเลข 7/4/5 จุดจอด · 30/13/12 นาที · 9 ที่นั่ง ตรงตาม PDF | สุขสรร | ✅ |
 | `.env.example` + `docker-compose.yaml` | ไม่มี secret หลงเหลือ · ตัวแปรตรงกับโค้ด | สุขสรร | ⛔ รอแก้เรื่อง 6.1 |
 | `docs/agile/*` + `docs/ai-prompts/*` | รูปแบบตรงตามบทที่ 18 (AR-06/AR-04) | สุขสรร | ⬜ |
 
@@ -436,8 +436,8 @@
 
 | ไฟล์ | ขนาด | รายละเอียด |
 |---|---|---|
-| `docs/diagrams/use-case.puml` | 11 KB | Use Case Diagram (PlantUML) · 4 actors · 30 UC |
-| `docs/diagrams/use-case-spec.md` | 34 KB | Use Case Spec ครบ · BR-01…BR-12 · Traceability · 9 คำถามค้าง |
+| `docs/diagrams/usecase/usecase-0*.puml` (7 ไฟล์) | 32 KB | Use Case Diagram (PlantUML) · 4 actors · 30 UC |
+| `docs/diagrams/usecase/usecase-spec.md` | 34 KB | Use Case Spec ครบ · BR-01…BR-12 · Traceability · 9 คำถามค้าง |
 | `docs/ai-prompts/2026-09-28-sprint-00-P-01-requirement-to-usecase.md` | 6 KB | Prompt Log + AI Credit + Retro Log (AR-04/06/07) |
 | `docs/agile/standup/2026-09-28.md` | 5 KB | Stand-up ไฟล์ที่ 1/14 · Time Log · DoD check |
 | `docs/agile/retro/sprint-00.md` | 6 KB | Retro Sprint 0 · 7 Action Items |
@@ -476,7 +476,7 @@
 |---|---|---|
 | `docs/agile/standup/2026-09-28.md` | 🔴 **ทั้งสอง branch สร้างไฟล์ชื่อเดียวกัน** → add/add conflict | เปลี่ยนเป็นชื่อต่อคน: `2026-09-28-kaengkarn.md` / `2026-09-28-sukhsorn.md` |
 | `.gitignore` | 🔴 **ทั้งสอง branch สร้างใหม่จาก `/dev/null`** → ต่างกัน 124 vs 78 บรรทัด | รวมเป็นไฟล์เดียว โดยรักษาของฝั่งที่ครอบคลุมกว่า + เพิ่มรายการของอีกฝั่งที่ยังไม่มี |
-| `docs/diagrams/use-case-spec.md` (ฝั่งผม) vs `docs/diagrams/usecase/usecase-spec.md` (ฝั่งเธอ) | 🟡 path ต่างกัน ไม่ชน แต่ **เนื้อหาซ้ำและขัดกัน** | เลือกชุดมาตรฐานหนึ่งชุด แล้วลบอีกชุด |
+| `docs/diagrams/use-case-spec.md` (ฝั่งผม) vs `docs/diagrams/usecase/usecase-spec.md` (ฝั่งเธอ) | ✅ **แก้แล้ว 2026-09-29** — เลือกชุดของสุขสรร (เป็นฉบับรีวิวแล้วตาม AR-02) · ลบฉบับร่างฝั่งผมออกจาก working tree (ยังอยู่ใน git history ที่ `afc144b`) |
 
 ### 11.2 ปัญหา Use Case Numbering (ต่างกัน 27 จาก 30 ตัว)
 
