@@ -542,7 +542,9 @@ CREATE INDEX ix_booking_sched_status ON booking (sched_id, status);
 CREATE INDEX ix_booking_book_time   ON booking (book_time);
 CREATE INDEX ix_booking_cust        ON booking (cust_id, book_time);
 CREATE INDEX ix_sched_route_date    ON schedule (route_id, service_date);
-CREATE INDEX ix_schedstop_sched_seq ON schedule_stop (sched_id, stop_seq);
+-- แก้ไข 2026-09-30: ตัด ix_schedstop_sched_seq ออก — ซ้ำกับ uq_sched_seq UNIQUE (sched_id, stop_seq)
+-- ที่ Oracle สร้าง index ให้อัตโนมัติ → DDL จริงมี 8 ตัว ไม่ใช่ 9
+-- ดู docs/reviews/t-007-schema-peer-review-sukhsorn.md
 CREATE INDEX ix_tp_trip             ON trip_passenger (trip_id);
 CREATE INDEX ix_tp_booking          ON trip_passenger (booking_id);
 CREATE INDEX ix_da_emp              ON driver_assign (emp_id, sched_id);

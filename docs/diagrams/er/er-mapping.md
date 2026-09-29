@@ -121,10 +121,11 @@
 
 ---
 
-## 4. Physical : Index ที่ต้องสร้าง (9 ตัว)
+## 4. Physical : Index ที่ต้องสร้าง (8 ตัว)
 
 > สร้าง **หลัง Seed** เพื่อให้ `INSERT` เร็วขึ้น (17.4.3)
 > Task ที่รับผิดชอบ: **T-057 (Index Tuning)** + **T-007 (`01_schema.sql`)**
+> ⚠️ **แก้ไข 2026-09-30 (AR-02 review ของ T-007):** เดิมระบุ 9 ตัว — `ix_schedstop_sched_seq` ถูก **ตัดออก** เพราะซ้ำกับ `uq_sched_seq UNIQUE (sched_id, stop_seq)` ที่ Oracle สร้าง index ให้อัตโนมัติ (redundant index) ดูรายละเอียดใน [`docs/reviews/t-007-schema-peer-review-sukhsorn.md`](../../reviews/t-007-schema-peer-review-sukhsorn.md)
 
 | Index | ตาราง · คอลัมน์ | ใช้กับ Use Case / Query | รายงานที่ได้ประโยชน์ |
 |---|---|---|---|
@@ -132,13 +133,13 @@
 | `ix_booking_book_time` | `booking(book_time)` | เรียงรายการตามเวลาจอง | R2 (สำรอง) |
 | `ix_booking_cust` | `booking(cust_id, book_time)` | UC-19 รายการเดินทางของฉัน | — |
 | `ix_sched_route_date` | `schedule(route_id, service_date)` | UC-17 ค้นรอบเวลาตามวัน + เส้นทาง | R4 |
-| `ix_schedstop_sched_seq` | `schedule_stop(sched_id, stop_seq)` | UC-17 ตรวจ BR-11 (ลำดับจุดขึ้น–ลง) | R4 |
+| ~~`ix_schedstop_sched_seq`~~ | ~~`schedule_stop(sched_id, stop_seq)`~~ | ⛔ **ตัดแล้ว** — ครอบคลุมด้วย `uq_sched_seq UNIQUE (sched_id, stop_seq)` | — |
 | `ix_tp_trip` | `trip_passenger(trip_id)` | UC-24 Manifest · R1 | **R1** |
 | `ix_tp_booking` | `trip_passenger(booking_id)` | UC-25 เช็คอิน | R1 |
 | `ix_da_emp` | `driver_assign(emp_id, sched_id)` | UC-22 ตารางงานคนขับ · UC-15 ตรวจชนกัน (BR-04) | R6 |
 | `ix_va_veh` | `vehicle_assign(veh_id, sched_id)` | UC-16 ตรวจชนกันรถ (BR-04) | — |
 
-> 🎯 **เงื่อนไขรายงาน: ต้องรันได้ < 3 วินาที ที่ข้อมูล 50,000 แถว** → Index 9 ตัวนี้คือเหตุผลหลัก
+> 🎯 **เงื่อนไขรายงาน: ต้องรันได้ < 3 วินาที ที่ข้อมูล 50,000 แถว** → Index 8 ตัวนี้คือเหตุผลหลัก
 
 ---
 
@@ -208,7 +209,7 @@
 - [x] Physical Diagram ครบ (ชนิดข้อมูล Oracle + Constraint + Index)
 - [x] Mapping Conceptual → Logical อธิบายเหตุผลทุกแถว (ตารางที่ 19)
 - [x] Mapping Logical → Physical อธิบาย MySQL → Oracle ครบ (17.4.4)
-- [x] Mapping Physical → Constraint/Index ครบ (20 ตาราง / 9 Index)
+- [x] Mapping Physical → Constraint/Index ครบ (20 ตาราง / 8 Index)
 - [x] Mapping ย้อนกลับ Entity → Requirement → Use Case ครบ M1–D4, R1/R4/R6, BR-01…BR-12
 - [x] อธิบายเหตุผลที่ Rule ไหนทำที่ DB ไม่ได้
 - [x] บันทึกใน `docs/agile/ai-prompts/prompt-log.md`

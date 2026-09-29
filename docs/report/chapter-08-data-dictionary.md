@@ -22,10 +22,10 @@
 
 | ประเภท | จำนวน | รายละเอียด |
 |---|---|---|
-| ตาราง | 20 | แบ่งเป็น 4 กลุ่ม: MASTER 8, FRONT 10, BOOKING 1, TRIP 2 |
+| ตาราง | 20 | แบ่งเป็น 4 กลุ่ม: MASTER 8, FRONT 9, BOOKING 1, TRIP 2 |
 | คอลัมน์ | 102 | นับจาก `CREATE TABLE` ใน 17.4.3 ทุกตาราง |
 | Sequence | 1 | `seq_booking_code` |
-| Index (ไม่รวม PK/UNIQUE) | 9 | สร้างหลัง Seed เพื่อความเร็วในการ Insert |
+| Index (ไม่รวม PK/UNIQUE) | 8 | สร้างหลัง Seed เพื่อความเร็วในการ Insert — ~~9~~ → ตัด `ix_schedstop_sched_seq` ที่ซ้ำกับ `uq_sched_seq` (AR-02 review 2026-09-30) |
 | PRIMARY KEY | 20 | หนึ่งต่อหนึ่งตาราง (มี 3 ตารางที่ใช้ Composite PK) |
 | UNIQUE Constraint | 18 | กันซ้ำเชิงคุณค่า/ตรรกะของข้อมูล |
 | CHECK Constraint | 12 | บังคับ Business Rule ที่ฝังในฐานข้อมูล |
@@ -331,7 +331,8 @@
 | 6 | `dwell_minutes` | `NUMBER(5)` | NO | `0` | — | — | นาทีที่รถหยุดรับ-ส่งที่จุดนี้ |
 
 **UNIQUE:** (`sched_id`, `stop_seq`)
-**Index:** `ix_schedstop_sched_seq (sched_id, stop_seq)` รองรับการดึงตามลำดับจุดจอด
+**Index:** `uq_sched_seq (sched_id, stop_seq)` — ใช้ UNIQUE constraint ที่ Oracle สร้าง index ให้อัตโนมัติ รองรับการดึงตามลำดับจุดจอด
+> ~~`ix_schedstop_sched_seq`~~ ถูกตัดออกเมื่อ 2026-09-30 เพราะซ้ำกับ `uq_sched_seq` (redundant index) — ดู `docs/reviews/t-007-schema-peer-review-sukhsorn.md`
 
 ---
 
@@ -509,11 +510,15 @@
 | 2 | `ix_booking_book_time` | `booking` | `book_time` | รายงานการจองตามช่วงเวลา (R1) |
 | 3 | `ix_booking_cust` | `booking` | `cust_id, book_time` | ประวัติการจองของลูกค้าเรียงตามเวลา (UC-19) |
 | 4 | `ix_sched_route_date` | `schedule` | `route_id, service_date` | ค้นหารอบเวลาตามเส้นทางและวัน (UC-14, UC-17) + รายงาน R4 |
-| 5 | `ix_schedstop_sched_seq` | `schedule_stop` | `sched_id, stop_seq` | ดึงตารางเวลาเดินทางเรียงตามลำดับ (UC-14, UC-24, BR-02) |
+| 5 | ~~`ix_schedstop_sched_seq`~~ | ~~`schedule_stop`~~ | ~~`sched_id, stop_seq`~~ | ⛔ **ตัดแล้ว 2026-09-30** — ซ้ำกับ `uq_sched_seq` · ใช้ `uq_sched_seq` แทน (UC-14, UC-24, BR-02) |
 | 6 | `ix_tp_trip` | `trip_passenger` | `trip_id` | รายงานผู้โดยสารรายเที่ยว (R1) |
 | 7 | `ix_tp_booking` | `trip_passenger` | `booking_id` | ค้นย้อนกลับจากการจอง (UC-19, UC-21) |
 | 8 | `ix_da_emp` | `driver_assign` | `emp_id, sched_id` | ตรวจชนช่วงเวลาคนขับ (UC-15 / BR-04) + รายงาน R6 |
 | 9 | `ix_va_veh` | `vehicle_assign` | `veh_id, sched_id` | ตรวจชนช่วงเวลายานพาหนะ (UC-16 / BR-04) |
+
+> **หมายเหตุ:** ตารางนี้ลิสต์ตามเอกสารต้นฉบับ 9 รายการ แต่ DDL จริง (`01_schema.sql`) สร้าง **8 ตัว**
+> รายการที่ 5 ถูกตัดออกเพราะเป็น redundant index · ตรวจสอบแล้วว่า query ที่ระบุไว้ยังใช้ `uq_sched_seq` ได้ครบ
+> ดูหลักฐาน: [`docs/reviews/t-007-schema-peer-review-sukhsorn.md`](../reviews/t-007-schema-peer-review-sukhsorn.md)
 
 > ดัชนีทั้ง 9 ถูกสร้าง **หลัง Seed** เพื่อให้การ Insert ข้อมูลตั้งต้นเร็วขึ้น ตามคอมเมนต์ใน DDL ต้นทาง
 
