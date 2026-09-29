@@ -250,8 +250,9 @@ PDF ไม่ได้ระบุ รายละเอียดเหล่า
 - ☐ คู่มือใช้งาน + คู่มือติดตั้ง (Oracle → Backend → แอป)
 
 ### เทคโนโลยี (ต้องตรงตามที่ตกลงไว้)
-- ☐ ฐานข้อมูลเป็น **Oracle** — `01_schema.sql` รันผ่าน 0 error บน Oracle 19c
-- ☐ **ไม่มี MySQL syntax หลงเหลือ** ในโค้ด/สคริปต์ (เช่น `AUTO_INCREMENT`, `ENUM`, backtick, `NOW()`)
+- ☑ ฐานข้อมูลเป็น **Oracle** — `01_schema.sql` รันผ่าน 0 error แล้ว 2026-09-29 · **13/13 รายการ PASS**
+      (ทดสอบบน **Oracle 21c XE** — Requirement ระบุ 19c · รอยืนยัน Q14 กับอาจารย์ แต่ DDL ใช้ได้ทั้งสองเวอร์ชัน)
+- ☑ **ไม่มี MySQL syntax หลงเหลือ** ใน `database/*.sql` (ตรวจแล้ว: ใช้ `GENERATED ALWAYS AS IDENTITY` · `VARCHAR2(n CHAR)` · `TIMESTAMP` · `CREATE SEQUENCE` ครบ ไม่มี `AUTO_INCREMENT` / `ENUM` / backtick / `NOW()`)
 - ☐ Backend เป็น **Node.js + Express** ต่อฐานข้อมูลผ่าน `node-oracledb`
 - ☐ Client เป็น **Flutter** ทุกหน้าจอ — ไม่มีโฟลเดอร์ `frontend-web/`
 - ☐ Query ทุกตัวใช้ **Bind Variable** และใช้ฟีเจอร์ Oracle (`PIVOT`, `LISTAGG`, `TRUNC(...,'IW')`, Analytic Function)

@@ -57,7 +57,7 @@
 |---|---|---|---|---|
 | 1 | ~~**T-004 ยังไม่เสร็จ (Use Case Diagram)**~~ | ~~ท่าทางจะ delay เข้า Sprint 1~~ | ✅ **แก้แล้ว** | ปิด 2026-09-29 — UC-01…UC-30 ครบใน `docs/diagrams/usecase/` และ merge เข้า `develop` แล้ว ไม่กระทบ Sprint 1 |
 | 2 | **Daily Stand-up Log** | ไม่มีหลักฐาน Agile + ไม่คิด Story Point | 🟡 Medium | ✅ มีวันที่ 1 แล้ว (`2026-09-28-*.md`) · ตั้งแต่วันที่ 2 **บังคับต้องมี** `docs/agile/standup/YYYY-MM-DD.md` ทุกวัน · **ต้องครบ 14 ไฟล์** ก่อนส่งงาน |
-| 3 | **Sprint Retrospective** | ไม่มี "บันทึกการเรียนรู้" + ไม่ปรับปรุง Prompt | 🟡 Medium | ✅ Sprint 0 มีแล้ว (`retro-sprint-0-doc.md` + `sprint-00.md`) · ต้องมี `sprint-01.md`…`sprint-13.md` รวม **14 ไฟล์** ก่อนส่งงาน |
+| 3 | **Sprint Retrospective** | ไม่มี "บันทึกการเรียนรู้" + ไม่ปรับปรุง Prompt | 🟡 Medium | ✅ Sprint 0 มีแล้ว (`sprint-00.md` + `sprint-00-sukhsorn.md`) · ต้องมี `sprint-01.md`…`sprint-13.md` รวม **14 ไฟล์** ก่อนส่งงาน |
 | 4 | **ไม่ครบ Prompt Library** | ตอนใช้ AI ต้องกลับหา Prompt เดิม (AR-06) | 🟡 Medium | มีแล้ว 2 ไฟล์ (`docs/ai-prompts/2026-09-28-sprint-00-P-01-*.md` + `docs/agile/ai-prompts/prompt-log.md`) แต่ยังไม่ครบ P-01…P-12 → ให้สร้างต่อก่อน Sprint 2 |
 | 5 | ~~**ยังไม่มี AI Usage Credit / Prompt Log**~~ | ~~เสียคะแนนเอกสารการใช้ AI (AR-04)~~ | ✅ **แก้แล้ว** | ปิด 2026-09-29 — `docs/ai-credit-log.md` (7 รายการ Sprint 0 + บันทึกกรณี AI ตอบผิดตาม AR-07) · ต้องบันทึกต่อทุก Sprint และรวมเป็นภาคผนวก ค ตอน T-061 |
 | 6 | **ชื่อผู้ commit ไม่แยกกัน** | หลักฐาน AR-02 (peer review) ดูเหมือนคนคนเดียวทำงานทั้งหมด | 🔴 High | ⚠️ **พบตอนตรวจ 2026-09-29** — commit ทั้ง 2 branch เดิมใช้ author เดียวกัน `suebtas-mut` · แก้แล้วสำหรับ commit ใหม่ของสุขสรร (`Sukhsorn Maneesri`) · **นายเก่งกาญต้องตั้ง `git config user.name/email` ของตัวเองด้วย** · commit เก่าที่แก้ย้อนหลังไม่ได้ ต้องรับทราบ |
@@ -229,7 +229,7 @@ git push origin --delete kaengkarn sukhsorn
 | 2 | **Merge branch เข้า main** | ทั้งคู่ | ~0.5 ชม. | ✅ `7beb27b` + `7b8da7c` + `db0a513` |
 | 3 | **สร้าง develop branch** | kaengkarn | ~0.5 ชม. | ✅ `develop` @ `db0a513` push แล้ว |
 | 4 | **Daily Stand-up Log วันที่ 1** | ทั้งคู่ | ~0.5 ชม. | ✅ `2026-09-28.md` (เก่งกาญ) + `2026-09-28-sukhsorn.md` |
-| 5 | **Sprint 0 Retrospective** | ทั้งคู่ | ~1 ชม. | ✅ `retro-sprint-0-doc.md` + `sprint-00.md` |
+| 5 | **Sprint 0 Retrospective** | ทั้งคู่ | ~1 ชม. | ✅ `sprint-00.md` + `sprint-00-sukhsorn.md` |
 | 6 | **ตั้ง git identity แยกคน** *(เพิ่มที่พบตอนตรวจ)* | ทั้งคู่ | 0.2 ชม. | ◐ สุขสรรตั้งแล้ว · **รอนายเก่งกาญตั้งของตัวเอง** |
 
 ### 🟡 Medium Priority
@@ -288,8 +288,10 @@ git push origin --delete kaengkarn sukhsorn
 | Branch merge เข้า main | ✅ **ผ่าน** | `db0a513` · มี merge commit ครบ 3 จุด |
 | Develop branch สร้างเสร็จ | ✅ **ผ่าน** | `develop` @ `db0a513` |
 | Daily Stand-up วันที่ 1 บันทึกไว้ | ✅ **ผ่าน** | `2026-09-28.md` + `2026-09-28-sukhsorn.md` |
-| Sprint 0 Retrospective | ✅ **ผ่าน** | `retro-sprint-0-doc.md` + `sprint-00.md` |
+| Sprint 0 Retrospective | ✅ **ผ่าน** | `sprint-00.md` + `sprint-00-sukhsorn.md` |
 | ⚠️ `flutter run` บน Emulator | ◐ **ยังไม่ผ่าน** | ยังไม่มี `pubspec.yaml` — ต้องทำให้เสร็จก่อน Sprint 3 (เริ่มเขียนแอป) |
+| T-007 `01_schema.sql` ผ่าน DoD | ✅ **ผ่าน 2026-09-29** | รัน Oracle จริง 0 error · 13/13 · ดูส่วนที่ 7.1 |
+| ❓ Oracle 19c vs 21c (Q14) | ⏳ **รออาจารย์ยืนยัน** | ที่ทดสอบได้เป็น 21c XE · DDL ใช้ได้ทั้งสองเวอร์ชัน |
 
 ### 🚀 Sprint 1 เป้าหมาย — **ปรับแล้ว 2026-09-29**
 
@@ -297,14 +299,97 @@ git push origin --delete kaengkarn sukhsorn
 |---|---|---|---|---|
 | **T-005** ER Diagram 3 ระดับ + Mapping | sukhsorn | 10 คะแนน | Sprint 1 วันอังคารเย็น | ✅ **ทำเสร็จแล้วใน Sprint 0** — ย้ายเข้า Sprint 0 |
 | **T-006** Data Dictionary | sukhsorn | (รองรับ 10 คะแนน) | Sprint 1 วันอังคารเย็น | ✅ **ทำเสร็จแล้วใน Sprint 0** — ย้ายเข้า Sprint 0 |
-| **T-007** `01_schema.sql` | kaengkarn | (รองรับ 10 คะแนน) | Sprint 1 วันอังคารเย็น | ⏳ **งานเดียวที่เหลือใน Sprint 1** — รันบน Oracle 19c ผ่าน 0 error |
+| **T-007** `01_schema.sql` | kaengkarn | (รองรับ 10 คะแนน) | Sprint 1 วันอังคารเย็น | ✅ **ทำเสร็จ 2026-09-29** — `database/01_schema.sql` รันบน Oracle XE 21c ผ่าน **0 error** · ตรวจ 13 รายการ PASS ทั้งหมด (ดูส่วนที่ 9) |
 
 **คะแนนที่ปิดแล้ว:** ✅ **10 คะแนน (ER + Mapping)** — ปิดล่วงหน้าใน Sprint 0
-**คะแนนที่จะปิดใน Sprint 1:** T-007 รองรับคะแนนเดียวกัน แต่ต้องรอให้ ER เป็นข้อมูลอ้างอิง → **คะแนน ER ปิดได้เลยตอนนี้**
+**คะแนนที่ปิดใน Sprint 1:** ✅ **T-007 `01_schema.sql` ปิดแล้ว 2026-09-29** — รันผ่าน 0 error บน Oracle จริง
 
 > 🔎 **ข้อสังเกตสำคัญ:** เอกสารรีวิวรอบแรกวาง T-005/T-006 ไว้ใน Sprint 1 แต่สุขสรรทำเสร็จไปแล้วใน Sprint 0
 > → การวางแผนล่วงหน้าได้ผลดี แต่ **ตารางนี้ต้องอัปเดตทุกครั้งที่ตรวจสถานะจริงใน Git** ไม่ใช่อิงแผนที่ตั้งใจไว้
-> **Sprint 1 ที่เหลือ: T-007 ฝั่งนายเก่งกาญ 1 งาน** ส่วนสุขสรรควรเริ่มเตรียม Prompt Library เพื่อรองรับ Sprint 2
+> **Sprint 1 ปิดครบทุกงานแล้ว (T-005, T-006, T-007)** งานที่ยังค้างอยู่คือ Prompt Library (P-02…P-12) ซึ่งย้ายไปทำต่อใน Sprint 1 ได้เลย
+
+---
+
+## 🔬 ส่วนที่ 7.1: บันทึกการทำ T-007 `01_schema.sql` (2026-09-29)
+
+**เจ้าของ:** นายเก่งกาญ เชี่ยวชาญ · **ไฟล์ผลลัพธ์:** `database/01_schema.sql`, `database/99_drop_schema.sql`
+
+### ✅ ผลการรันจริงบน Oracle
+
+รันผ่าน `sqlplus` เข้า XEPDB1 **ได้ 0 error** และตรวจทานอัตโนมัติในตัวไฟล์เอง — **ผ่าน 13/13 รายการ**
+
+| รายการตรวจ | คาดหวัง | ผลจริง | สถานะ |
+|---|---|---|---|
+| ตาราง | 20 | 20 | ✅ PASS |
+| คอลัมน์ | 102 | 102 | ✅ PASS |
+| Sequence (ไม่รวม ISEQ$) | 1 | 1 | ✅ PASS |
+| Primary Key | 20 | 20 | ✅ PASS |
+| Unique | 18 | 18 | ✅ PASS |
+| Check (ชื่อ `CK_*`) | 12 | 12 | ✅ PASS |
+| Foreign Key | 27 | 27 | ✅ PASS |
+| FK แบบ CASCADE | 10 | 10 | ✅ PASS |
+| FK แบบ RESTRICT | 17 | 17 | ✅ PASS |
+| Index ที่สร้างเอง (`IX_*`) | 8 | 8 | ✅ PASS |
+| `COMMENT ON TABLE` | 20 | 20 | ✅ PASS |
+| `COMMENT ON COLUMN` | 102 | 102 | ✅ PASS |
+| Object ที่ INVALID | 0 | 0 | ✅ PASS |
+
+**เพิ่มเติม — ทดสอบพฤติกรรมจริง (functional test) แล้ว rollback:**
+
+| สิ่งที่ทดสอบ | ผล |
+|---|---|
+| `GENERATED ALWAYS AS IDENTITY` สร้างค่าให้เอง | ✅ `dept_id = 1` |
+| `seq_booking_code.NEXTVAL` เดินถูกต้อง | ✅ ได้ 1 |
+| CHECK กันจองเกิน 4 ที่นั่ง (BR-06) | ✅ ปฏิเสธ `seats = 99` → ORA-02290 |
+| จุดจอดซ้ำในเส้นทางเดียวกัน (BR-03) | ✅ ปฏิเสธ → ORA-00001 |
+| FK ต้องมีแผนกจริง | ✅ ปฏิเสธ → ORA-02291 |
+| `COMMENT ON` ภาษาไทยไม่เพี้ยน | ✅ `DUMP` ยืนยันเป็น UTF-8 ถูกต้อง · ความยาว 23 ตัวอักษร |
+
+### ⚠️ ข้อผิดพลาด 2 เรื่องที่พบตอนรันจริง (ไม่พบได้จากการอ่านเอกสาร)
+
+#### 1 · ดัชนีซ้ำ — `ORA-01408` (แก้ใน `01_schema.sql` แล้ว)
+
+DDL ต้นทางข้อ 17.4.3 และ Data Dictionary ข้อ 8.8 รายการที่ 5 สั่งสร้าง
+
+```sql
+CREATE INDEX ix_schedstop_sched_seq ON schedule_stop (sched_id, stop_seq);
+```
+
+แต่ `schedule_stop` มี `CONSTRAINT uq_sched_seq UNIQUE (sched_id, stop_seq)` อยู่แล้ว
+ซึ่งสร้าง unique index บนคอลัมน์ชุดเดียวกัน → Oracle จึงขึ้น **`ORA-01408: such column list already indexed`**
+
+> **การแก้ไข:** ตัดดัชนีตัวนี้ออก จำนวนดัชนีจึงเป็น **8** แทน 9
+> วัตถุประสงค์เดิมของดัชนี ("ดึงตารางเวลาเดินทางเรียงตามลำดับ") ถูก `uq_sched_seq` รับหน้าที่แทนได้ครบถ้วน
+> → **ต้องแก้ข้อ 8.8 ของ Data Dictionary ให้ตรงกันในรอบถัดไป** (ยังไม่ได้แก้ เพราะเป็นไฟล์ของสุขสรร)
+
+#### 2 · `COMMENT ON` ภาษาไทยต้องใช้ฐานข้อมูลชุดอักขระ AL32UTF8
+
+`01_schema.sql` มี `COMMENT ON` ภาษาไทย 122 รายการ ถ้าฐานข้อมูลไม่ได้สร้างด้วย
+`NLS_CHARACTERSET = AL32UTF8` ข้อความจะเพี้ยนหรือ error — ใส่เงื่อนไขนี้ไว้ในหัวไฟล์แล้ว
+
+### ❓ ประเด็นค้าง: Oracle 19c vs 21c (Q14)
+
+| รายการ | ข้อเท็จจริง |
+|---|---|
+| Requirement / เอกสารบทที่ 17 | ระบุ **Oracle 19c** |
+| `docker-compose.yaml` | ใช้ `gvenzl/oracle-xe:21-slim` → **21c** (Docker Hub ไม่มี 19c) |
+| ที่ทดสอบจริง | **Oracle Database 21c Express Edition Release 21.0.0.0.0** |
+| ผลกระทบต่อ DDL | **ไม่มี** — ทุกฟีเจอร์ที่ใช้ (`IDENTITY`, `VARCHAR2(n CHAR)`, `CHECK`, `COMMENT ON`) มีตั้งแต่ 12c |
+| สถานะ | ⏳ **ยังรออาจารย์ยืนยันว่าจะใช้ 19c หรือ 21c เป็นตัวส่งงาน** |
+
+> ถ้าต้องส่งงานบน 19c จริง ต้องติดตั้ง Oracle XE 19c ในเครื่อง (นอกเหนือจาก Docker)
+> แล้วรัน `99_drop_schema.sql` → `01_schema.sql` ซ้ำอีกครั้งเพื่อยืนยัน
+
+### 🧹 สคริปต์เพิ่มเติม: `database/99_drop_schema.sql`
+
+เขียนเพิ่มเพื่อให้รัน `01_schema.sql` ซ้ำได้โดยไม่ต้องลบทีละตาราง
+ระหว่างเขียนพบข้อควรรู้ 3 ข้อ (บันทึกไว้ในหัวไฟล์แล้ว):
+
+1. **ห้ามใช้ `DROP TABLE ... CASCADE CONSTRAINTS`** — Oracle จะทิ้ง identity sequence
+   (`ISEQ$...`) ค้างไว้ แล้วลบไม่ได้อีก (ORA-32794) ต้อง `DROP TABLE` ธรรมดาแทน
+2. **ห้ามเขียนคอมเมนต์ต่อท้าย `;` ในบรรทัดเดียวกัน** — SQL\*Plus parse ไม่ผ่าน (ORA-00933)
+3. **นับ CHECK ต้องกรองชื่อ `CK_*`** เพราะ Oracle เก็บ `NOT NULL` เป็น constraint ชนิด `C` ด้วย
+   (ในสคีมานี้ถ้านับรวมจะได้ 95 = 12 + 83)
 
 ---
 
@@ -343,13 +428,15 @@ git push origin --delete kaengkarn sukhsorn
 - [ ] kaengkarn เตรียม Prompt P-02 ~ P-12 ไว้ใน `docs/ai-prompts/` (มี P-01 แล้ว)
 - [x] sukhsorn เตรียม `docs/ai-credit-log.md` สำหรับบันทึก AI ที่ใช้
 - [ ] **นายเก่งกาญ:** ตั้ง `git config user.name` / `user.email` ของตัวเอง — **สำคัญมากต่อ AR-02**
+- [ ] sukhsorn: แก้ข้อ 8.8 ของ Data Dictionary — ตัดดัชนี `ix_schedstop_sched_seq` ที่ซ้ำ (ดูส่วนที่ 7.1)
 - [ ] ทั้งคู่ตรวจสอบ Requirement Checklist ที่เหลือ A1, A2, A3, A5, A6, A8, A9, A10
 - [ ] ทั้งคู่: ส่งคำถามค้าง (Q-A…Q-I) ใน `sukhsorn-check-list.md` ให้อาจารย์ — **ติดต่อ Q-A (ตารางคะแนน) เป็นอันดับแรก**
+- [ ] **Q14:** ยืนยันกับอาจารย์เรื่อง Oracle 19c vs 21c (ดูส่วนที่ 7.1)
 
 ### 📋 ก่อน Sprint 2 (วันอังคารที่ 8)
 
 - [x] ตรวจสอบ T-005, T-006 ผ่าน DoD — **เสร็จแล้วใน Sprint 0**
-- [ ] ตรวจสอบ T-007 ผ่าน DoD (นายเก่งกาญ)
+- [x] ตรวจสอบ T-007 ผ่าน DoD (นายเก่งกาญ) — **เสร็จ 2026-09-29 · ผ่าน 13/13**
 - [ ] Review PR ของกันและกัน (AR-02) — **ต้องมี author แยกกันถึงจะเป็นหลักฐานได้**
 - [x] ยืนยันว่า 10 คะแนน ER ติดสำเร็จ
 
@@ -359,7 +446,17 @@ git push origin --delete kaengkarn sukhsorn
 - [x] เขียน Stand-up log วันที่ 2 (`2026-09-29.md`)
 - [x] บันทึก AI Credit ของวันนี้
 - [ ] เตรียม `docs/ai-prompts/` เพิ่ม (สนับสนุนงานของนายเก่งกาญ)
-- [ ] รอนายเก่งกาญส่ง T-007 `01_schema.sql` → ตรวจ ER Mapping ว่าตรงกับ DDL จริงทุกตาราง
+- [x] รอนายเก่งกาญส่ง T-007 `01_schema.sql` → **ได้รับแล้ว 2026-09-29** · ตรวจ ER Mapping แล้วตรงกัน 20 ตาราง / 102 คอลัมน์
+
+### 🧑‍💻 Day 2 (2026-09-29) — งานของนายเก่งกาญ
+
+- [x] เขียน `database/01_schema.sql` (20 ตาราง / 102 คอลัมน์ / COMMENT ON 122)
+- [x] เขียน `database/99_drop_schema.sql` เพื่อรองรับการรันซ้ำ
+- [x] รันบน Oracle จริง — **0 error** · ผ่าน 13/13 · ทดสอบ identity/CHECK/FK ผ่าน
+- [x] แก้ดัชนีซ้ำที่ทำให้ `ORA-01408` (9 → 8) และบันทึกไว้ในส่วนที่ 7.1
+- [x] Merge `origin/develop` เข้า branch ตัวเองเพื่อรับงานวันที่ 2 ของสุขสรร
+- [ ] Prompt Library P-02…P-12
+- [ ] ตั้ง `git config user.name` / `user.email` ของตัวเอง (AR-02)
 
 ---
 
@@ -369,7 +466,7 @@ git push origin --delete kaengkarn sukhsorn
 |---|---|---|---|
 | Developer A | นายเก่งกาญ เชี่ยวชาญ | _______ | _______ |
 | Developer B | นางสาวสุขสรร มาณีศรี | _______ | _______ |
-| Reviewer | (Copilot / อาจารย์ที่ปรึกษา) | _______ | _______ |
+| Reviewer | **นายเก่งกาญ เชี่ยวชาญ** `[ai-assisted]` — ผู้รีวิวคือนายเก่งกาญเอง โดยใช้ AI ช่วยสรุป และตรวจสถานะจริงจาก `git log` / Oracle | _______ | 2026-09-29 |
 
 ---
 
@@ -390,6 +487,7 @@ git push origin --delete kaengkarn sukhsorn
 |---|---|---|---|
 | 1 | 2026-09-28 | สุขสรร + AI `[ai-assisted]` | ร่างแรก (commit `2973275`) |
 | 2 | 2026-09-29 | สุขสรร + AI `[ai-assisted]` | **ตรวจสถานะจริงใน Git แล้วแก้ 6 จุด:** T-004 เป็นเสร็จ · เพิ่ม T-005/T-006 เป็นเสร็จ · DoD ของ `flutter run` เปลี่ยนจาก ✅ เป็น ◐ · เงื่อนไข Sprint 1 ผ่านครบ · เพิ่มความเสี่ยงเรื่องชื่อผู้ commit · Action Items ติ๊กตามจริง |
+| 3 | 2026-09-29 | เก่งกาญ + AI `[ai-assisted]` | **ปิด T-007:** เพิ่มส่วนที่ 7.1 (ผลรัน Oracle จริง 13/13 PASS + functional test) · T-007 เป็น ✅ · เติม Action Items ของ Day 2 · ใส่ชื่อ Reviewer · **แก้ลิงก์ไฟล์ Retro ที่ชี้ไป `retro-sprint-0-doc.md` ซึ่งถูก rename เป็น `sprint-00-sukhsorn.md` แล้ว** |
 
 > **หลักการที่ใช้แก้รอบนี้:** ตารางสถานะต้องอ่านจาก `git log` / `git diff` / ไฟล์จริงเสมอ
 > ไม่ใช่จากแผนที่ตั้งใจไว้ตอนเขียนเอกสาร — เพราะรอบแรกสถานะ T-004/T-005/T-006 ผิดทั้งหมด

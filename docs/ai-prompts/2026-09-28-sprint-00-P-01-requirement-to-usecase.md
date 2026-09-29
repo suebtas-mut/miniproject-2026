@@ -64,8 +64,12 @@ Business Rule ... ใช้ PlantUML
 
 | ไฟล์ | รายละเอียด | ขนาด |
 |---|---|---|
-| `docs/diagrams/use-case.puml` | Use Case Diagram 4 actors · 30 use cases · ความสัมพันธ์ `<<include>>` / `<<extend>>` | 11,251 bytes |
-| `docs/diagrams/use-case-spec.md` | Use Case Specification ครบ 30 UC + BR-01…BR-12 + Traceability + คำถามค้าง 7 ข้อ | 33 KB |
+| `docs/diagrams/usecase/usecase-0*.puml` | Use Case Diagram 4 actors · 30 use cases · ความสัมพันธ์ `<<include>>` / `<<extend>>` | 11,251 bytes |
+| `docs/diagrams/usecase/usecase-spec.md` | Use Case Specification ครบ 30 UC + BR-01…BR-12 + Traceability + คำถามค้าง 7 ข้อ | 33 KB |
+
+> ⚠️ **หมายเหตุ 2026-09-29** — ครั้งแรก AI สร้างไฟล์ไว้ที่ `docs/diagrams/use-case.puml` และ `docs/diagrams/use-case-spec.md`
+> ต่อมานางสาวสุขสรรรีวิวและแตกเป็น 7 ไฟล์ที่ `docs/diagrams/usecase/` พร้อมแก้เนื้อหาให้ครบกว่า
+> จึง**เลือกฉบับหลังเป็นมาตรฐาน** และลบฉบับร่างออก (ยังอยู่ใน git history ที่ `afc144b`) — ตารางข้างบนอัปเดต path ให้ตรงกับสถานะปัจจุบันแล้ว
 
 ### 3.1 การตรวจสอบ (AR-05 ต้องทดสอบด้วยตนเอง)
 | รายการ | วิธีตรวจ | ผล |
