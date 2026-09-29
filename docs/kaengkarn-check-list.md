@@ -37,7 +37,7 @@
 | 5 | ทีม **2 คน** + Code Review ทุกชิ้น (AR-02) | 🔄 | T-001, T-004 ส่งให้สุขสรรรีวิวแล้ว · **ยังไม่ push** | commit `7e0bd05` · `9201886` |
 | 6 | วันทำงาน **จันทร์–เสาร์** = ต้องมี Stand-up **14 ไฟล์** | 🔄 | สร้างแล้ว **1/14 ไฟล์** | `docs/agile/standup/2026-09-28.md` |
 | 7 | **1 Sprint = 1 วัน** → 14 Sprint | ✅ | แผนครบ Sprint 0–13 (62 Task / 178 ชม.) | `chapter-18-development-plan.md` 18.4.1 |
-| 8 | รายงานที่เลือก **R1 + R4 + R6 = 24 คะแนน** | ✅ | ครบ 1 ข้อทุกกลุ่ม {R1,R2} + {R3,R4,R5} + {R6,R7} · ถูกต้องตามกฎ | `use-case-spec.md` หัวข้อ 4.8 |
+| 8 | รายงานที่เลือก **R1 + R4 + R6 = 24 คะแนน** | ✅ | ครบ 1 ข้อทุกกลุ่ม {R1,R2} + {R3,R4,R5} + {R6,R7} · ถูกต้องตามกฎ | `docs/diagrams/usecase/usecase-spec.md` หัวข้อ 8 |
 
 ### ก.1 เอกสารประกอบโครงการ (30 คะแนน)
 
@@ -150,7 +150,7 @@
 | A5 | Sequence Diagram (Login, จอง, ยกเลิก, สแกน, ปิดรอบ) | แนะนำ | ⬜ | — | T-010 · Sprint 3 |
 | A6 | State Diagram ของ Booking | แนะนำ | ⬜ | 5 สถานะ `RESERVED → CHECKED_IN → COMPLETED / NO_SHOW / CANCELLED` นิยามแล้วใน UC-19/26/27 | Sprint 3 |
 | A7 | Data Dictionary | แนะนำ | ⬜ | — | T-006 · Sprint 1 |
-| **A8** | **Traceability Matrix** | แนะนำ | 🔄 | **ร่างแล้ว** ใน `use-case-spec.md` หัวข้อ 6 (Req ↔ UC ↔ Endpoint ↔ BR ↔ Task ↔ Sprint) | เต็มรูปแบบ T-061 · Sprint 13 |
+| **A8** | **Traceability Matrix** | แนะนำ | 🔄 | **ร่างแล้ว** ใน `docs/diagrams/usecase/usecase-spec.md` หัวข้อ 10 (Traceability: Requirement → Use Case) | เต็มรูปแบบ T-061 · Sprint 13 |
 | A9 | Test Plan + Test Case | แนะนำ | ⬜ | ร่าง Test Case สำหรับ BR-01…BR-12 เขียนเป็น DoD ใน UC แล้ว | Sprint 13 |
 | A10 | คู่มือใช้งาน + คู่มือติดตั้ง | แนะนำ | ⬜ | — | T-062 · Sprint 13 |
 | **A11** | **AI Usage Credit + Prompt Log** | แนะนำ | ✅ | **`docs/ai-prompts/2026-09-28-sprint-00-P-01-requirement-to-usecase.md`** — Prompt + เวลาที่ประหยัด + 3 ข้อที่ AI ตอบผิด (AR-04/06/07) | **วันนี้ ✅** |
@@ -179,7 +179,7 @@
 > ⚠️ BR-11 / BR-12 เป็นกฎที่ **checklist ส่วน ข.2 เพิ่มเอง** (ไม่ได้มาจาก PDF) และ **แผนบทที่ 18 ยังไม่ได้ผูก Task ให้**
 > จึงเสนอให้แก้ใน Sprint 1: เพิ่มการตรวจ 2 เงื่อนไขนี้ใน T-035 (`01_schema.sql` ใช้ `CHECK` ไม่ได้ → ต้องตรวจใน Service Layer)
 
-**เพิ่มเติมจากการออกแบบ** (ไม่มีใน PDF แต่จำเป็น) — ทั้งหมดถูกนิยามใน `use-case-spec.md` หัวข้อ 5.1
+**เพิ่มเติมจากการออกแบบ** (ไม่มีใน PDF แต่จำเป็น) — ดูรายละเอียดใน `docs/diagrams/usecase/usecase-spec.md` หัวข้อ 10–11
 
 | BR | กฎ | กันปัญหาอะไร |
 |---|---|---|
