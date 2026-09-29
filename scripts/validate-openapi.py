@@ -61,11 +61,10 @@ REAL_PERMS = {
     "BK.CREATE","BK.VIEW","BK.CANCEL","QR.SCAN","TRIP.START","TRIP.END",
     "ROUTE.VIEW","ROUTE.EDIT","SCHED.EDIT","VEH.EDIT",
     "EMP.VIEW","EMP.EDIT","DEPT.EDIT","POS.EDIT","ROLE.EDIT",
-    "RPT.R1","RPT.R2","RPT.R3","RPT.R5","RPT.R6","RPT.R7",
+    "RPT.R1","RPT.R2","RPT.R3","RPT.R4","RPT.R5","RPT.R6","RPT.R7",
 }
-# R4 is a required report (UC-28, PDF 24 หน้า) but the seed skips it.
-# Kept as a known gap so the mismatch stays visible instead of being hidden.
-KNOWN_MISSING_PERMS = {"RPT.R4"}
+# R4 was a known gap (seed skipped it) — now added per instructor decision.
+KNOWN_MISSING_PERMS = set()
 used_perms = set()
 for _, _, op in eps:
     if "x-permission" in op:
