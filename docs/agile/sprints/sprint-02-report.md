@@ -2,6 +2,8 @@
 
 > **Sprint Goal (เดิม):** *"ภายในวันพุธที่ 3 ต้องมี `02_seed_master.sql` + `03_seed_front.sql` ที่รันบน Oracle 19c แล้ว `total_minutes` ตรงกับตัวอย่างในเอกสารทุกเส้นทาง · มี Mockup หน้าจอ Flutter ครบ 4 บทบาทอัปโหลดขึ้น ClickUp · และมี OpenAPI spec ของทุก Endpoint เพื่อให้ Sprint 3 เริ่มเขียน Backend ได้ทันที"*
 > **ผู้ถือบทบาท:** Scrum Master = นายเก่งกาญ เชี่ยวชาญ · Product Owner = นางสาวสุขสรร มาณีศรี
+> **Sprint 1 (ก่อนหน้า):** `2026-09-29` (Day 2) · T-005 / T-006 / T-007 · Oracle Schema 20 ตาราง
+>   ปิดย้อนหลัง 2026-09-30 — ตอนนั้นไม่มี plan / report / retro ของ Sprint 1 เลย → ดู `sprint-01-report.md` + `../retro/sprint-01.md`
 > **สถานะรายงาน:** ✅ **ปิด Sprint 2 เมื่อ 2026-09-30** · PR #4 รออาจารย์ review
 
 ---

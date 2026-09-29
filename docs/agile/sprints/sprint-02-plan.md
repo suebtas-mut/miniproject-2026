@@ -166,7 +166,9 @@
 
 ## 7. สิ่งที่ต้องเตรียมก่อน Sprint Planning (เช้าพุธ)
 
-### ต้องเสร็จคืนนี้ (สังเกตว่า Sprint 1 ยังไม่ปิด)
+### ต้องเสร็จคืนนี้
+> ✅ **Sprint 1 ปิดแล้ว** (ย้อนหลัง 2026-09-30) → `sprint-01-report.md` + `../retro/sprint-01.md`
+> · เหตุผลที่ปิดช้า: ไม่มี plan / report / retro ของ Sprint 1 ตอนนั้น · ดูหัวข้อ ❌1 ใน Retro
 
 - [x] **นายเก่งกาญ:** ตั้ง `git config user.name/user.email` ✅ ปิด 2026-09-30
 - [x] **นายเก่งกาญ:** ปิด T-007 `database/01_schema.sql` ให้ผ่าน DoD ✅ 13/13 PASS (commit `5fffd27`)

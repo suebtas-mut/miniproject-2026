@@ -431,13 +431,31 @@
 
 ---
 
+### แถวที่ 23 · Sprint 1 Close-out Report + Retro + Sprint 2 Report Update
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | Sprint 1 Close-out (ย้อนหลัง) + Sprint 2 Report Patch |
+| Agent | `@agent-doc` |
+| ผู้ใช้ควบคุม | นางสาวสุขสรร มาณีศรี |
+| Prompt | "เขียน Sprint 1 report + retro จาก standup 2026-09-29 + ai-credit-log row 11-13 + commit จริง + แก้ Sprint 2 report ให้มี Sprint 1 reference" |
+| ไฟล์ที่เปลี่ยน | `docs/agile/sprints/sprint-01-report.md` (ใหม่) · `docs/agile/retro/sprint-01.md` (ใหม่) · `docs/agile/sprints/sprint-02-plan.md` (แก้) · `docs/agile/sprints/sprint-02-report.md` (แก้) |
+| ผลลัพธ์ | ✅ **2 ไฟล์ใหม่** (sprint-01-report.md + sprint-01.md) + 2 ไฟล์แก้ (sprint-02-plan.md + sprint-02-report.md)<br>✅ Sprint 1: 20 tables / 102 cols / 13/13 PASS / 8 index / 27 FK / 122 COMMENT<br>✅ Sprint 2 report: เพิ่ม Sprint 1 reference + ใส่ note "ปิดย้อนหลัง 2026-09-30"<br>✅ Sprint 2 plan: เพิ่ม note "Sprint 1 ปิดแล้ว" + ลบข้อความ "Sprint 1 ยังไม่ปิด" |
+| การตรวจสอบ | 🔍 Validator ผ่าน (PASS) · ไม่มี BOM / ไม่มี conflict marker / ไม่มี `\u` escape ที่เหลือ |
+| 💡 ข้อสังเกตที่สำคัญ | **Sprint 1 ไม่มี report/retro จริง = ช่องว่างกระบวนการใหญ่ที่สุด** (Retro Sprint 1 ข้อ ❌1)<br>Requirement ผิด 1 จุด (ดัชนี 9→8) จับได้เพราะรันจริงบน Oracle — **หลักฐานว่าต้องรันจริงไม่ใช่เพียงอ่านเอกสาร**<br>AI ผิด 6 จุด DDL → ย้ายเข้า Prompt P-02 → ไม่เกิดซ้ำใน Sprint 2<br>SP นับสองเกณฑ์ (`chapter-18` = 10 SP vs Stand-up = 16 SP) → ต้องชัดเจนใน Sprint 3 |
+| 🐛 กรณีที่ AI ไม่ได้เจอเอง | 1. การสร้าง "plan" ย้อนหลังใน row 23 — Sprint 1 จริงๆ ไม่มี plan แยก ตัวแผนอยู่ใน `chapter-18` แล้ว<br>2. SP discrepancy ระหว่าง `chapter-18` กับ Stand-up = คนละสิ่งที่นับ → ต้องกำหนดนิยามก่อน Sprint 3 |
+| ⚠️ ข้อผิดพลาดของ AI รอบนี้ | 1. พยายามแก้ Requirement ให้ตรงโค้ด (ดัชนี 9→8) แทนที่จะระบุว่า Requirement ผิด — ต้องแก้ Requirement ไม่ใช่โค้ด<br>2. ช่องว่าง `RPT.R4` ใน permission seed ต้องการตัดสินใจของอาจารย์ ไม่ใช่เรื่องที่ AI ควรตัดสินเอง |
+| สัดส่วน AI | 85% AI / 15% คน |
+
+---
+
 ## 📊 สรุปยอด Sprint 0 – 2 (ทั้งสองฝั่งรวมกัน)
 
 | สมาชิก | จำนวนครั้งที่ใช้ AI | ไฟล์ที่ AI สร้าง/แก้ | สัดส่วน AI เฉลี่ย |
 |---|---|---|---|
-| นางสาวสุขสรร มาณีศรี | 16 | 30 | ~71% |
+| นางสาวสุขสรร มาณีศรี | 17 | 34 | ~71% |
 | นายเก่งกาญ เชี่ยวชาญ | 7 | 23+ | 74% |
-| **รวมทั้งโปรเจกต์** | **23** | **53+** | **~72%** |
+| **รวมทั้งโปรเจกต์** | **24** | **57+** | **~72%** |
 
 > ตัวเลขนี้เป็น **ค่าประมาณ** (ประมาณจากจำนวนไฟล์ที่แก้และจำนวนจุดที่คนต้องตรวจแก้ไขเอง) ไม่ใช่การจับเวลาจริง
 > **ผู้รับผิดชอบเอกสารทุกชิ้นคือคน ไม่ใช่ AI** (AR-04)
