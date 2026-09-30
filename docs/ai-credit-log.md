@@ -408,11 +408,56 @@
 | ไฟล์ที่เปลี่ยน | `docs/reviews/t-007-schema-peer-review-sukhsorn.md` (เพิ่มส่วนที่ 4) · `docs/agile/standup/2026-09-30.md` (ส่วนที่ 2) |
 | ผลลัพธ์ | ✅ **ผ่าน 21/22 ข้อ** — ตัวเลขทุกตัวที่อ้างใน commit message ตรงกับที่วัดจริง<br>✅ BR-01 (13/15) · BR-02 (ครบ 8 รอบ) · BR-04 (0 ชน) ผ่านจาก query จริง<br>✅ RBAC สอดคล้อง: 0 พนักงานไม่มี role · 0 คนขับผิด role · permission ครบ 5 โมดูล · `role_permission` 21+4+5+18 = 48 ตรง<br>❌ **`password_hash` เป็น bcrypt ที่ยาวผิด** — 15 คน ยาว 52–54 ตัว (ถูกต้องต้อง 60) และมีแค่ **4 ค่า unique** |
 | การตรวจสอบ | 🔍 **คนรัน query เองทั้งหมด 20 ชุด** แบบ read-only เพื่อไม่ลบข้อมูล seed ของเก่งกาญในฐานข้อมูลร่วม · เพิ่ม query ที่ผู้เขียนยังไม่ได้ตรวจ 5 ชุด (INVALID object · employee ไร้ role · driver_assign ผิด role · is_active · dead stop) |
-| กรณีที่ AI ไม่ได้เจอเอง | 🐛 การตรวจ `password_hash` เพียง "ขึ้นต้น `$2b$` = ปลอดภัย" ให้ผ่าน · **คนตรวจความยาวจริง** จึงพบว่าไม่มีตัวไหนครบ 60 ตัว และมีแค่ 4 ค่า unique → เป็นข้อบกพร่องที่ AI ตรวจไม่พบเอง |
+| 🐛 กรณีที่ AI ไม่ได้เจอเอง | การตรวจ `password_hash` เพียง "ขึ้นต้น `$2b$` = ปลอดภัย" ให้ผ่าน · **คนตรวจความยาวจริง** จึงพบว่าไม่มีตัวไหนครบ 60 ตัว และมีแค่ 4 ค่า unique → เป็นข้อบกพร่องที่ AI ตรวจไม่พบเอง |
 | สัดส่วน AI | 65% AI / 35% คน |
 
 ---
 
+<<<<<<< HEAD
+### แถวที่ 22 · T-014 OpenAPI Spec (ช่วยงานของนายเก่งกาญ)
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | T-014 (OpenAPI / Swagger spec ของทุก Endpoint) |
+| Agent | `@agent-doc` |
+| ผู้ใช้ควบคุม | นางสาวสุขสรร มาณีศรี *(Task นี้เดิมเป็นของนายเก่งกาญ ได้รับอนุญาตให้ช่วยทำต่อ)* |
+| Prompt | "ทำงานวันนี้ให้เสร็จ" → เขียน T-014 ต่อจาก schema ที่เพิ่ง review ผ่าน |
+| ไฟล์ที่เปลี่ยน | `docs/api/openapi.yaml` (ใหม่ · OpenAPI 3.0.3) · `scripts/validate-openapi.py` (ใหม่) · `docs/reviews/t-007-schema-peer-review-sukhsorn.md` (เพิ่มข้อ 4b) · `docs/agile/standup/2026-09-30.md` (แก้สถานะ `.env`) |
+| ผลลัพธ์ | ✅ **65 endpoint / 42 path · ครอบคลุม UC-01…UC-30 ครบ 30/30**<br>✅ มี request + response + error code + ตัวอย่าง payload ทุกตัว<br>✅ ระบุ `x-uc` · `x-permission` · `x-br` ทุก operation<br>✅ `$ref` ทั้ง 42 จุด resolve ได้ครบ<br>✅ เขียนตัวตรวจ `scripts/validate-openapi.py` เพื่อให้รันซ้ำได้ → **PASS**<br>❌ **พบช่องว่างสิทธิ์ `RPT.R4`** — โมดูล report มีแต่ R1,R2,R3,R5,R6,R7 = 6 ตัว แต่ PDF กำหนดให้มี R4 (UC-28) |
+| การตรวจสอบ | 🔍 ตัวตรวจยืนยัน: 65 endpoint · 42 path · UC 30/30 · perm 19/21 · BR 7 ตัว · `$ref` 42/42<br>🔍 **ยืนยันช่องว่าง R4 ด้วยการรัน query จริงบน `shuttle-oracle-xe`** — `select perm_code from permission where module='report'` คืน 6 แถว ไม่มี R4 · ยืนยันซ้ำด้วย `sort_no` (50,51,52,**53=R5**,54,55) ว่าข้ามเลข 53 จริง |
+| การตัดสินใจไม่แก้เอง | 🚫 **ไม่เพิ่ม `RPT.R4` เอง** เพราะกระทบทั้ง Use Case (ปิดแล้ว) และตารางสิทธิ์ (ปิดแล้ว) จึงอ้างไว้ใน `x-permission` พร้อมคำอธิบายช่องว่างในตัวสเปก และตั้งตัวตรวจให้เตือนทุกครั้ง |
+| 🐛 กรณีที่ AI ไม่ได้เจอเอง | ช่องว่าง `RPT.R4` จะ **ไม่มีใครเจอ** ถ้าไม่ได้เขียน OpenAPI วันนี้ เพราะต้อง map ทุก endpoint เข้ากับสิทธิ์จริงในตาราง → **งานเอกสารช่วยจับข้อบกพร่องของงาน seed** ได้ |
+| ⚠️ ข้อผิดพลาดของ AI รอบนี้ | รอบแรกใช้ plain scalar ที่มี `: ` ใน description 4 จุด → YAML parse ไม่ผ่าน · ต้อง quote ให้ครบ · และตัวตรวจรอบแรกตรวจ `passwordHash` แบบ substring → **จับทั้งที่อยู่ใน description ที่ถูกต้องและ plaintext `password` ใน request body ที่ถูกต้อง** → ต้องแก้ให้ตรวจเฉพาะ response ผ่าน `$ref` |
+| สัดส่วน AI | 80% AI / 20% คน |
+
+---
+
+### แถวที่ 23 · Sprint 1 Close-out Report + Retro + Sprint 2 Report Update
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | Sprint 1 Close-out (ย้อนหลัง) + Sprint 2 Report Patch |
+| Agent | `@agent-doc` |
+| ผู้ใช้ควบคุม | นางสาวสุขสรร มาณีศรี |
+| Prompt | "เขียน Sprint 1 report + retro จาก standup 2026-09-29 + ai-credit-log row 11-13 + commit จริง + แก้ Sprint 2 report ให้มี Sprint 1 reference" |
+| ไฟล์ที่เปลี่ยน | `docs/agile/sprints/sprint-01-report.md` (ใหม่) · `docs/agile/retro/sprint-01.md` (ใหม่) · `docs/agile/sprints/sprint-02-plan.md` (แก้) · `docs/agile/sprints/sprint-02-report.md` (แก้) |
+| ผลลัพธ์ | ✅ **2 ไฟล์ใหม่** (sprint-01-report.md + sprint-01.md) + 2 ไฟล์แก้ (sprint-02-plan.md + sprint-02-report.md)<br>✅ Sprint 1: 20 tables / 102 cols / 13/13 PASS / 8 index / 27 FK / 122 COMMENT<br>✅ Sprint 2 report: เพิ่ม Sprint 1 reference + ใส่ note "ปิดย้อนหลัง 2026-09-30"<br>✅ Sprint 2 plan: เพิ่ม note "Sprint 1 ปิดแล้ว" + ลบข้อความ "Sprint 1 ยังไม่ปิด" |
+| การตรวจสอบ | 🔍 Validator ผ่าน (PASS) · ไม่มี BOM / ไม่มี conflict marker / ไม่มี `\u` escape ที่เหลือ |
+| 💡 ข้อสังเกตที่สำคัญ | **Sprint 1 ไม่มี report/retro จริง = ช่องว่างกระบวนการใหญ่ที่สุด** (Retro Sprint 1 ข้อ ❌1)<br>Requirement ผิด 1 จุด (ดัชนี 9→8) จับได้เพราะรันจริงบน Oracle — **หลักฐานว่าต้องรันจริงไม่ใช่เพียงอ่านเอกสาร**<br>AI ผิด 6 จุด DDL → ย้ายเข้า Prompt P-02 → ไม่เกิดซ้ำใน Sprint 2<br>SP นับสองเกณฑ์ (`chapter-18` = 10 SP vs Stand-up = 16 SP) → ต้องชัดเจนใน Sprint 3 |
+| 🐛 กรณีที่ AI ไม่ได้เจอเอง | 1. การสร้าง "plan" ย้อนหลังใน row 23 — Sprint 1 จริงๆ ไม่มี plan แยก ตัวแผนอยู่ใน `chapter-18` แล้ว<br>2. SP discrepancy ระหว่าง `chapter-18` กับ Stand-up = คนละสิ่งที่นับ → ต้องกำหนดนิยามก่อน Sprint 3 |
+| ⚠️ ข้อผิดพลาดของ AI รอบนี้ | 1. พยายามแก้ Requirement ให้ตรงโค้ด (ดัชนี 9→8) แทนที่จะระบุว่า Requirement ผิด — ต้องแก้ Requirement ไม่ใช่โค้ด<br>2. ช่องว่าง `RPT.R4` ใน permission seed ต้องการตัดสินใจของอาจารย์ ไม่ใช่เรื่องที่ AI ควรตัดสินเอง |
+| สัดส่วน AI | 85% AI / 15% คน |
+
+---
+
+## 📊 สรุปยอด Sprint 0 – 2 (ทั้งสองฝั่งรวมกัน)
+
+| สมาชิก | จำนวนครั้งที่ใช้ AI | ไฟล์ที่ AI สร้าง/แก้ | สัดส่วน AI เฉลี่ย |
+|---|---|---|---|
+| นางสาวสุขสรร มาณีศรี | 17 | 34 | ~71% |
+| นายเก่งกาญ เชี่ยวชาญ | 7 | 23+ | 74% |
+| **รวมทั้งโปรเจกต์** | **24** | **57+** | **~72%** |
+=======
 ### แถวที่ 22 · เขียน OpenAPI Spec ครบทุก Endpoint (T-014)
 
 | คอลัมน์ | ค่า |
@@ -450,6 +495,7 @@
 | นางสาวสุขสรร มาณีศรี | 15 | 26 | ~70% |
 | นายเก่งกาญ เชี่ยวชาญ | 9 | 28+ | ~75% |
 | **รวมทั้งโปรเจกต์** | **24** | **54+** | **~72%** |
+>>>>>>> origin/develop
 
 > ตัวเลขนี้เป็น **ค่าประมาณ** (ประมาณจากจำนวนไฟล์ที่แก้และจำนวนจุดที่คนต้องตรวจแก้ไขเอง) ไม่ใช่การจับเวลาจริง
 > **ผู้รับผิดชอบเอกสารทุกชิ้นคือคน ไม่ใช่ AI** (AR-04)
