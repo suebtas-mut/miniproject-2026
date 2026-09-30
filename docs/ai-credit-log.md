@@ -413,6 +413,7 @@
 
 ---
 
+<<<<<<< HEAD
 ### แถวที่ 22 · T-014 OpenAPI Spec (ช่วยงานของนายเก่งกาญ)
 
 | คอลัมน์ | ค่า |
@@ -456,6 +457,45 @@
 | นางสาวสุขสรร มาณีศรี | 17 | 34 | ~71% |
 | นายเก่งกาญ เชี่ยวชาญ | 7 | 23+ | 74% |
 | **รวมทั้งโปรเจกต์** | **24** | **57+** | **~72%** |
+=======
+### แถวที่ 22 · เขียน OpenAPI Spec ครบทุก Endpoint (T-014)
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | T-014 — `docs/api/openapi.yaml` |
+| Agent | `@agent-doc` (ร่างสเปก) + `@agent-coder` (ตรวจเงื่อนไข P-04 ข้อ 1–9) |
+| ผู้ใช้ควบคุม | นายเก่งกาญ เชี่ยวชาญ |
+| Prompt | P-04 `rest-endpoint` (ดู `docs/ai-prompts/P-04_rest-endpoint.md`) — "สร้างสเปก OpenAPI ให้ครบทุก endpoint จาก Use Case Spec + chapter 17 + DDL" |
+| ไฟล์ที่เปลี่ยน | `docs/api/openapi.yaml` (ใหม่ · 5,600+ บรรทัด) · `docs/agile/sprints/sprint-02-plan.md` · `docs/ai-prompts/P-04_rest-endpoint.md` · `docs/ai-credit-log.md` · `docs/agile/standup/2026-09-30.md` |
+| ผลลัพธ์ | ✅ **41 paths / 59 operations / 47 schemas** · ตรงกับ 17.5.2 **ครบทุกตัว**<br>✅ ครอบคลุม UC-01…UC-30 = **29/30** · BR-01…BR-12 ครบ 12 ตัว · `operationId` ไม่ซ้ำ · ทุก operation มี 401<br>✅ Redocly lint **valid · 0 error** (4 warning = 501 ของ R2/R3/R5/R7 ตาม 17.5.2 โดยตั้งใจ)<br>✅ ยกเป็นคำถาม **Q22 / Q23 / Q24** ใน `info.description` แทนที่จะเดา endpoint (P-04 ข้อ 9) |
+| การตรวจสอบ | 🔍 สคริปต์นับเอง — operation/operationId ซ้ำ · `x-use-case` ครบทุก operation · BR ครบ · response code ครบ<br>🔍 `npx @redocly/cli lint` แก้จนเหลือ warning ที่ตั้งใจ · grep ยืนยันไม่มี `SELECT *` และไม่มี `password_hash` ใน response |
+| 🐛 ที่ AI ทำผิดและคนตรวจเจอ | 1) **เพิ่ม `GET /permission-matrix` เอง** ทั้งที่ 17.5.2 ไม่มี → นับ operation เทียบแล้วเหลือ 59 จึงตัดออก ย้าย `granted_perm_ids` ไปไว้ใน `GET /roles` แทน<br>2) **ห่อ response ซ้อนสองชั้น** ที่ `/auth/login` → Redocly เตือน example ไม่ตรง schema<br>3) **base64 ตัวอย่างไม่ตรง `format: byte`** → แก้เป็น base64 เปล่า |
+| ⚠️ ยังไม่ปิด | ⛔ **Q22 (UC-10)** — Use Case ไม่ระบุ API path และ 17.5.2 ไม่มี endpoint นี้ → คนต้องถามอาจารย์ (ห้าม AI ตัดสินเอง)<br>⛔ **Q23 / Q24** — เหมือนกัน · ⏳ รอ peer review จากสุขสรร (AR-02) |
+| สัดส่วน AI | 80% AI / 20% คน (คนต้องตรวจชื่อคอลัมน์เทียบ `01_schema.sql` จริง และตัดสินใจเรื่อง Q22–Q24) |
+
+---
+
+### แถวที่ 23 · สร้าง Figma Mockup + SVG Export (T-009 เสริม)
+
+| คอลัมน์ | ค่า |
+|---|---|
+| Task | T-009 (Figma integration + SVG assets) |
+| Agent | `@agent-mockup` + `@agent-coder` (Playwright) |
+| ผู้ใช้ควบคุม | นายเก่งกาญ เชี่ยวชาญ (ดำเนินการ Figma ผ่าน Playwright) |
+| Prompt | "เปิด Figma ด้วย PlayWright ทำ GUI ได้เลย" → สร้าง 15 SVG 390×844 → paste ลง Figma canvas → จัด layout grid + rename frames → export Figma file |
+| ไฟล์ที่เปลี่ยน | `docs/mockup/*.svg` (15 ไฟล์) · `docs/mockup/README.md` (อัปเดต Figma URL) · `docs/agile/sprints/sprint-02-plan.md` (อัปเดต DoD T-009) · `docs/agile/standup/2026-09-30.md` |
+| ผลลัพธ์ | ✅ **Figma file ครบ 15 frames** — https://www.figma.com/design/piYhTrNy60bi7IjRkgaBZN/Shuttle-Bus-System---Mockup<br>✅ SVG source ทั้ง 15 ไฟล์ commit ใน `docs/mockup/`<br>✅ Layout grid 4 บทบาท: C1–C6 (0,0) / D1–D4 (0,904) / S1–S3 (0,1808) / A1–A2 (0,2712)<br>✅ Frames ชื่อครบ: C1–C6, D1–D4, S1–S3, A1–A2<br>⚠️ PNG export ยังไม่ commit — export จาก Figma File → Export → PNG ได้ทันที |
+| การตรวจสอบ | 🔍 ตรวจผ่าน a11y tree: 15 frames visible · ชื่อ frame ตรง · X/Y position ตรง |
+| สัดส่วน AI | 85% AI / 15% คน (คนตัดสินใจ layout + verify ผลลัพธ์) |
+
+---
+
+| สมาชิก | จำนวนครั้งที่ใช้ AI | ไฟล์ที่ AI สร้าง/แก้ | สัดส่วน AI เฉลี่ย |
+|---|---|---|---|
+| นางสาวสุขสรร มาณีศรี | 15 | 26 | ~70% |
+| นายเก่งกาญ เชี่ยวชาญ | 9 | 28+ | ~75% |
+| **รวมทั้งโปรเจกต์** | **24** | **54+** | **~72%** |
+>>>>>>> origin/develop
 
 > ตัวเลขนี้เป็น **ค่าประมาณ** (ประมาณจากจำนวนไฟล์ที่แก้และจำนวนจุดที่คนต้องตรวจแก้ไขเอง) ไม่ใช่การจับเวลาจริง
 > **ผู้รับผิดชอบเอกสารทุกชิ้นคือคน ไม่ใช่ AI** (AR-04)

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<rect width="390" height="844" fill="#F6F8FC"/>
+<rect x="0.0" y="0.0" width="390.0" height="64.0" fill="#1F5FA8"/>
+<text x="16.0" y="28.0" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start" font-weight="bold">จัดการพนักงาน · Admin</text>
+<text x="16.0" y="48.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#BBD3EE" text-anchor="start" font-weight="normal">Master-Detail · Adaptive R-07</text>
+<rect x="338.0" y="18.0" width="20.0" height="20.0" fill="none" rx="4" stroke="#BBD3EE" stroke-width="1.5"/>
+<text x="348.0" y="32.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#BBD3EE" text-anchor="middle" font-weight="bold">..</text>
+<rect x="364.0" y="18.0" width="16.0" height="16.0" fill="none" rx="8" stroke="#BBD3EE" stroke-width="1.5"/>
+<rect x="16.0" y="78.0" width="120.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="28.0" y="103.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7A99" text-anchor="start" font-weight="normal">ค้นหาพนักงาน</text>
+<rect x="144.0" y="78.0" width="230.0" height="40.0" fill="#1F5FA8" rx="8"/>
+<text x="152.0" y="103.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#FFFFFF" text-anchor="start" font-weight="bold">+ เพิ่ม (UC-05)</text>
+<text x="16.0" y="130.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="bold">รายการ (15 คน)</text>
+<rect x="16.0" y="138.0" width="358.0" height="26.0" fill="#EEF3FA" rx="6"/>
+<text x="24.0" y="155.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">รหัส</text>
+<text x="80.0" y="155.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">ชื่อ</text>
+<text x="240.0" y="155.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">แผนก</text>
+<rect x="16.0" y="164.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="181.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">E001</text>
+<text x="80.0" y="181.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สมชาย ใจดี</text>
+<text x="240.0" y="181.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ขนส่ง</text>
+<rect x="16.0" y="190.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="207.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">E002</text>
+<text x="80.0" y="207.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สุดา วงศ์ทอง</text>
+<text x="240.0" y="207.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ขนส่ง</text>
+<rect x="16.0" y="216.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">E003</text>
+<text x="80.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ปิยะ บุญมี</text>
+<text x="240.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ขนส่ง</text>
+<rect x="16.0" y="242.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="259.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">E004</text>
+<text x="80.0" y="259.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ประเสริฐ ทองดี</text>
+<text x="240.0" y="259.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ขนส่ง</text>
+<rect x="16.0" y="278.0" width="358.0" height="156.0" fill="#FFFFFF" rx="10" stroke="#1F5FA8" stroke-width="1.5"/>
+<text x="30.0" y="302.0" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#12203A" text-anchor="start" font-weight="bold">E002 · สุดา วงศ์ทอง</text>
+<text x="30.0" y="308.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="normal">ชื่อ-นามสกุล</text>
+<rect x="30.0" y="314.0" width="330.0" height="38.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="42.0" y="338.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#12203A" text-anchor="start" font-weight="normal">สุดา วงศ์ทอง</text>
+<text x="30.0" y="354.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="normal">แผนก (UC-06 dropdown)</text>
+<rect x="30.0" y="360.0" width="330.0" height="38.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="42.0" y="384.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7A99" text-anchor="start" font-weight="normal">ฝ่ายขนส่ง</text>
+<text x="30.0" y="400.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="normal">ตำแหน่ง (UC-06 dropdown)</text>
+<rect x="30.0" y="406.0" width="330.0" height="38.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="42.0" y="430.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7A99" text-anchor="start" font-weight="normal">พนักงานส่งของ</text>
+<text x="30.0" y="456.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="normal">อีเมล / เบอร์โทร</text>
+<text x="360.0" y="456.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#12203A" text-anchor="end" font-weight="normal">suda@office.go.th</text>
+<text x="30.0" y="472.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#6B7A99" text-anchor="start" font-weight="normal">สถานะ</text>
+<text x="360.0" y="472.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#1C8A5A" text-anchor="end" font-weight="bold">ใช้งาน (1)</text>
+<rect x="30.0" y="492.0" width="100.0" height="36.0" fill="#1F5FA8" rx="8"/>
+<text x="80.0" y="514.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#FFFFFF" text-anchor="middle" font-weight="bold">บันทึก</text>
+<rect x="138.0" y="492.0" width="110.0" height="36.0" fill="none" rx="8" stroke="#C0392B" stroke-width="1.5"/>
+<text x="193.0" y="514.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#C0392B" text-anchor="middle" font-weight="bold">ปิดใช้งาน</text>
+<rect x="256.0" y="492.0" width="104.0" height="36.0" fill="none" rx="8" stroke="#DFE5EF" stroke-width="1.5"/>
+<text x="308.0" y="514.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7A99" text-anchor="middle" font-weight="bold">ลบ</text>
+<text x="16.0" y="542.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">R-07 Adaptive: 360px = 1 คอลัมน์ · 760px = Master + Detail พร้อมกัน</text>
+<rect x="16.0" y="560.0" width="358.0" height="40.0" fill="none" rx="8" stroke="#DFE5EF" stroke-width="1.5"/>
+<text x="195.0" y="584.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7A99" text-anchor="middle" font-weight="bold">ดูแบบ Tablet 760px (R-07)</text>
+<rect x="0.0" y="784.0" width="390.0" height="60.0" fill="#FFFFFF"/>
+<line x1="0.0" y1="784.0" x2="390.0" y2="784.0" stroke="#DFE5EF" stroke-width="1"/>
+<rect x="39.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="48.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">แดชบอร์ด</text>
+<rect x="137.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="146.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">พนักงาน</text>
+<rect x="234.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="243.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">สิทธิ์</text>
+<rect x="332.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#1F5FA8" stroke-width="1.5"/>
+<text x="341.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">รายงาน</text>
+</svg>

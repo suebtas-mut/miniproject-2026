@@ -10,7 +10,10 @@
 | ไฟล์ | รายละเอียด |
 |---|---|
 | [`mockup.html`](./mockup.html) | Wireframe แบบ interactive ครบ 15 หน้าจอ 4 บทบาท — เปิดในเบราว์เซอร์ได้ทันที ไม่ต้องติดตั้งอะไร |
+| [`mockup.html`](./mockup.html) | Wireframe แบบ interactive ครบ 15 หน้าจอ 4 บทบาท — เปิดในเบราว์เซอร์ได้ทันที ไม่ต้องติดตั้งอะไร |
 | `mockup.html` (หน้าเดียวกัน) | สลับบทบาทได้ที่แถบด้านบน · หน้าจอแสดง 2 ขนาด: **Phone 360×700** (R-08) และ **Tablet 760×520** (R-07 adaptive) |
+| `*.svg` (15 ไฟล์) | SVG source ของแต่ละหน้าจอ 390×844 — นำเข้า Figma ได้ทันที |
+| Figma file | https://www.figma.com/design/piYhTrNy60bi7IjRkgaBZN/Shuttle-Bus-System---Mockup — 15 frames วาง grid พร้อมชื่อ + ตำแหน่ง |
 | ไฟล์นี้ | Screen inventory, การเชื่อมโยง UC/BR/ตาราง, และ Design System |
 
 ## 2. ข้อกำหนดที่ยึด (ตรวจแล้วว่าครบ)
@@ -106,9 +109,9 @@
 
 | # | ข้อจำกัด | ผลต่อ DoD | แนวทางปิด |
 |---|---|---|---|
-| 1 | **ไม่มี Figma integration ในเครื่องมือที่ใช้ได้** | DoD ระบุ "อัปโหลด Figma + export PNG" — **ทำส่วนนี้ไม่ได้** | ส่งมอบเป็น wireframe HTML + เอกสารนี้แทน เปิดใน Figma ได้ด้วยการ import (ยังต้องนำเข้าและแก้เอง) |
+| 1 | ~~ไม่มี Figma integration~~ — **Figma file สร้างแล้ว** | DoD "อัปโหลด Figma + export PNG" — **Figma ครบ** | https://www.figma.com/design/piYhTrNy60bi7IjRkgaBZN/Shuttle-Bus-System---Mockup |
 | 2 | **ไม่มี ClickUp access** | DoD ระบุ "อัปโหลดขึ้น ClickUp" — **ทำส่วนนี้ไม่ได้** | สุขสรรต้อง upload เอง + แจ้งอาจารย์ด้วยลิงก์ |
-| 3 | ยังไม่มี PNG export | DoD ระบุ "export เป็น PNG" | เปิด `mockup.html` ในเบราว์เซอร์ → กด Capture/Print → Save as PDF หรือ Screenshot ทีละหน้าจอ |
+| 3 | PNG export | DoD ระบุ "export เป็น PNG" | จาก Figma: File → Export → เลือก 15 frames → PNG (หรือใช้ SVG ในโฟลเดอร์นี้) |
 | 4 | เวลาที่ใช้จริงมากกว่า 5 ชม. (ประมาณ 6) | ผิด DoR เดิม (งานไม่เกิน 3 ชม.) | บันทึกไว้ใน `docs/agile/sprints/sprint-02-plan.md` แล้ว |
 | 5 | UI ไม่มีสีจริงตาม Brand | ใช้โทนกลาง เพื่อให้เน้นโครงสร้าง | ปรับ Theme ใน Flutter Sprint 3 |
 

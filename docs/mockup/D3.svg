@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<rect width="390" height="844" fill="#F6F8FC"/>
+<rect x="0.0" y="0.0" width="390.0" height="64.0" fill="#1F5FA8"/>
+<text x="16.0" y="28.0" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start" font-weight="bold">สแกน QR เช็คอิน</text>
+<text x="16.0" y="48.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#BBD3EE" text-anchor="start" font-weight="normal">รอบ 09:30 · จุดที่ 1</text>
+<rect x="338.0" y="18.0" width="20.0" height="20.0" fill="none" rx="4" stroke="#BBD3EE" stroke-width="1.5"/>
+<text x="348.0" y="32.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#BBD3EE" text-anchor="middle" font-weight="bold">..</text>
+<rect x="364.0" y="18.0" width="16.0" height="16.0" fill="none" rx="8" stroke="#BBD3EE" stroke-width="1.5"/>
+<rect x="16.0" y="88.0" width="358.0" height="210.0" fill="#12203A" rx="12"/>
+<rect x="60.0" y="110.0" width="210.0" height="150.0" fill="none" rx="8" stroke="#2F7AD4" stroke-width="2"/>
+<line x1="60.0" y1="130.0" x2="60.0" y2="240.0" stroke="#2F7AD4" stroke-width="1" stroke-dasharray="4 6"/>
+<line x1="120.0" y1="130.0" x2="120.0" y2="240.0" stroke="#2F7AD4" stroke-width="1" stroke-dasharray="4 6"/>
+<line x1="180.0" y1="130.0" x2="180.0" y2="240.0" stroke="#2F7AD4" stroke-width="1" stroke-dasharray="4 6"/>
+<line x1="240.0" y1="130.0" x2="240.0" y2="240.0" stroke="#2F7AD4" stroke-width="1" stroke-dasharray="4 6"/>
+<text x="195.0" y="196.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#8FB6E8" text-anchor="middle" font-weight="normal">วาง QR ของผู้โดยสาร</text>
+<text x="195.0" y="220.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#8FB6E8" text-anchor="middle" font-weight="normal">ในกรอบสแกน</text>
+<text x="195.0" y="280.0" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#FFFFFF" text-anchor="middle" font-weight="bold">QR Scanner</text>
+<rect x="16.0" y="316.0" width="358.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#B26A00" stroke-width="1.2"/>
+<circle cx="36.0" cy="336.0" r="11" fill="#B26A00"/>
+<text x="36.0" y="340.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">!</text>
+<text x="56.0" y="340.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#12203A" text-anchor="start" font-weight="normal">R-05: QR Scanner ไม่ทำงานบน Emulator</text>
+<text x="16.0" y="368.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">ต้องมีช่องกรอก Token เป็นทางสำรองเสมอ</text>
+<text x="16.0" y="384.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#12203A" text-anchor="start" font-weight="bold">กรอก Token สำรอง (qr_token)</text>
+<rect x="16.0" y="394.0" width="358.0" height="42.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="30.0" y="420.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#6B7A99" text-anchor="start" font-weight="normal">เช่น BKG-2026-0001-4F2A9C</text>
+<rect x="16.0" y="448.0" width="358.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#C0392B" stroke-width="1.2"/>
+<circle cx="36.0" cy="468.0" r="11" fill="#C0392B"/>
+<text x="36.0" y="472.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">x</text>
+<text x="56.0" y="472.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#12203A" text-anchor="start" font-weight="normal">ผิดรอบเดินทาง: token นี้ไม่ใช่ของรอบ 09:30</text>
+<rect x="16.0" y="504.0" width="358.0" height="44.0" fill="#1F5FA8" rx="8"/>
+<text x="195.0" y="530.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">ยืนยันเช็คอิน</text>
+<text x="16.0" y="562.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">BR-10 สแกนซ้ำไม่ได้ · BR-09 token หมดอาย้เมื่อถึงเวลาออก</text>
+<rect x="0.0" y="784.0" width="390.0" height="60.0" fill="#FFFFFF"/>
+<line x1="0.0" y1="784.0" x2="390.0" y2="784.0" stroke="#DFE5EF" stroke-width="1"/>
+<rect x="39.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="48.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">ตารางงาน</text>
+<rect x="137.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#1F5FA8" stroke-width="1.5"/>
+<text x="146.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">สแกน</text>
+<rect x="234.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="243.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">ปิดรอบ</text>
+<rect x="332.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="341.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">โปรไฟล์</text>
+</svg>

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<rect width="390" height="844" fill="#F6F8FC"/>
+<rect x="0.0" y="0.0" width="390.0" height="64.0" fill="#1F5FA8"/>
+<text x="16.0" y="28.0" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start" font-weight="bold">จัดรอบเวลาและมอบหมาย</text>
+<text x="16.0" y="48.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#BBD3EE" text-anchor="start" font-weight="normal">UC-14 · UC-15 · UC-16</text>
+<rect x="338.0" y="18.0" width="20.0" height="20.0" fill="none" rx="4" stroke="#BBD3EE" stroke-width="1.5"/>
+<text x="348.0" y="32.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#BBD3EE" text-anchor="middle" font-weight="bold">..</text>
+<rect x="364.0" y="18.0" width="16.0" height="16.0" fill="none" rx="8" stroke="#BBD3EE" stroke-width="1.5"/>
+<rect x="16.0" y="82.0" width="358.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="30.0" y="107.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#12203A" text-anchor="start" font-weight="normal">เส้นทาง 2  ·  วันที่ 1 ก.ย. 2026</text>
+<text x="16.0" y="134.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#12203A" text-anchor="start" font-weight="bold">ช่วงเวลาออก</text>
+<rect x="16.0" y="146.0" width="49.0" height="22.0" fill="#FFFFFF" rx="11" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="40.5" y="161.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">09:30</text>
+<rect x="71.0" y="146.0" width="49.0" height="22.0" fill="#FFFFFF" rx="11" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="95.5" y="161.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">11:00</text>
+<rect x="126.0" y="146.0" width="49.0" height="22.0" fill="#FFFFFF" rx="11" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="150.5" y="161.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">13:00</text>
+<rect x="181.0" y="146.0" width="49.0" height="22.0" fill="#FFFFFF" rx="11" stroke="#1F5FA8" stroke-width="1.2"/>
+<text x="205.5" y="161.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">15:00</text>
+<rect x="16.0" y="182.0" width="358.0" height="28.0" fill="#EEF3FA" rx="6"/>
+<text x="24.0" y="199.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">รอบ</text>
+<text x="88.0" y="199.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">คนขับ</text>
+<text x="204.0" y="199.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">รถ</text>
+<text x="296.0" y="199.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">สถานะ</text>
+<rect x="16.0" y="210.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="227.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:30</text>
+<text x="88.0" y="227.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สมศักดิ์ ใจดี</text>
+<text x="204.0" y="227.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สย 2591</text>
+<text x="296.0" y="227.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1C8A5A" text-anchor="start" font-weight="bold">พร้อม</text>
+<rect x="16.0" y="238.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="255.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">11:00</text>
+<text x="88.0" y="255.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ประเสริฐ ทองดี</text>
+<text x="204.0" y="255.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">บก 1130</text>
+<text x="296.0" y="255.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#C0392B" text-anchor="start" font-weight="bold">ชนกับ 09:30!</text>
+<rect x="16.0" y="266.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="283.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">13:00</text>
+<text x="88.0" y="283.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สมศักดิ์ ใจดี</text>
+<text x="204.0" y="283.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สย 2591</text>
+<text x="296.0" y="283.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1C8A5A" text-anchor="start" font-weight="bold">พร้อม</text>
+<rect x="16.0" y="304.0" width="358.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#C0392B" stroke-width="1.2"/>
+<circle cx="36.0" cy="324.0" r="11" fill="#C0392B"/>
+<text x="36.0" y="328.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">x</text>
+<text x="56.0" y="328.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#12203A" text-anchor="start" font-weight="normal">BR-04 รถ สย 2591 ชนกับรอบ 09:30</text>
+<text x="16.0" y="360.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#12203A" text-anchor="start" font-weight="bold">พรีวิว schedule_stop (BR-02)</text>
+<rect x="16.0" y="370.0" width="358.0" height="26.0" fill="#EEF3FA" rx="6"/>
+<text x="24.0" y="387.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">จุดจอด</text>
+<text x="274.0" y="387.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">arrive_at</text>
+<rect x="16.0" y="396.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="413.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สำนักงานเขตหนองจอก</text>
+<text x="274.0" y="413.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:30</text>
+<rect x="16.0" y="422.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="439.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ตลาดน้ำ 4 ภาค</text>
+<text x="274.0" y="439.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:35</text>
+<rect x="16.0" y="448.0" width="358.0" height="26.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="465.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ห้างสรุติภัย</text>
+<text x="274.0" y="465.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:40</text>
+<text x="16.0" y="488.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">BR-02 arrive_at = depart_at + นาทีสะสม (NUMTODSINTERVAL)</text>
+<rect x="16.0" y="502.0" width="358.0" height="44.0" fill="#1F5FA8" rx="8"/>
+<text x="195.0" y="528.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">บันทึกรอบเวลา</text>
+<rect x="0.0" y="784.0" width="390.0" height="60.0" fill="#FFFFFF"/>
+<line x1="0.0" y1="784.0" x2="390.0" y2="784.0" stroke="#DFE5EF" stroke-width="1"/>
+<rect x="39.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="48.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">เส้นทาง</text>
+<rect x="137.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#1F5FA8" stroke-width="1.5"/>
+<text x="146.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">รอบเวลา</text>
+<rect x="234.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="243.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">พนักงาน</text>
+<rect x="332.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="341.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">โปรไฟล์</text>
+</svg>

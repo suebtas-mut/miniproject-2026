@@ -104,6 +104,7 @@
 
 ### เกณฑ์เฉพาะ T-009
 
+<<<<<<< HEAD
 > 🟡 **ผลจริง 2026-09-30** → `docs/mockup/mockup.html` + `docs/mockup/README.md` = **ผ่าน 3/5**
 > 15 หน้าจอครบ 4 บทบาท · ตรวจ responsive ที่ 360×700 / 760×520 จริง · ผ่าน PR #4
 
@@ -126,6 +127,34 @@
 - [ ] Code Review โดยอีกคน (AR-02) — ⏳ **PR ใหม่สำหรับ T-014** · *PR #4 (T-009 + T-007/T-008 review) merged ไปแล้ว* · ผู้เขียนร่วมกัน จึงรออาจารย์ตรวจ*
 - [ ] ⚠️ **สิทธิ์ `RPT.R4` ไม่มีจริง** — โมดูล `report` มี R1,R2,R3,R5,R6,R7 = 6 ตัว แต่ PDF + UC-28 กำหนดให้มี R4
       *ต้องเลือก (ก) เพิ่มสิทธิ์ให้ครบ 7 (รวม seed เป็น 22) หรือ (ข) ตัด R4 ออกจาก Use Case — **ถามอาจารย์ก่อน Sprint 3***
+=======
+- [x] Mockup ครบ **4 บทบาท** ตาม UC-01…UC-30 — ✅ **15 frames ใน Figma + 15 SVG files**
+- [x] **ไม่มีหน้าจอ Web / React ใน Mockup เด็ดขาด** (AR-11 — ข้อ 17.0 ตัด Web ออก) — ✅ เฉพาะ Flutter
+- [x] หน้าจอ Admin ออกแบบแบบ Adaptive (ตอบ R8: ใช้มือถือได้จริง) — ✅ C1–C6, D1–D4, S1–S3, A1–A2 รองรับ 2 breakpoint
+- [ ] อัปโหลดขึ้น **ClickUp** แล้ว + Export PNG มา commit ใน `docs/mockup/` — *SVG commit แล้ว · PNG จาก Figma Export → commit ต่อ*
+- [ ] ตรวจโดยอีกคน 1 คน (AR-02) — *ผู้เขียนห้ามรีวิวงานตัวเอง* · **รอเก่งกาญรีวิว** (สุขสรรเป็น owner)
+
+### เกณฑ์เฉพาะ T-014
+
+> ✅ **ผล 2026-09-30** — `docs/api/openapi.yaml` (OpenAPI 3.0.3) · **41 paths / 59 operations / 47 schemas**
+> Validate แล้ว: `npx @redocly/cli lint docs/api/openapi.yaml` → **valid, 0 error, 4 warning**
+> (4 warning = `operation-2xx-response` ของ R2/R3/R5/R7 ที่คืน 501 ตาม 17.5.2 โดยตั้งใจ ไม่ใช่ข้อผิดพลาด)
+
+- [x] Endpoint ครบทุกตัวที่ปรากฏใน Use Case Spec — ✅ **59/59 operations ตรงกับ 17.5.2 ทุกตัว** (ตรวจด้วยสคริปต์นับ)
+      · ครอบคลุม UC-01…UC-30 = **29/30** (ยกเว้น UC-10 = Q22 ดูหมายเหตุล่าง)
+      · BR-01…BR-12 มีครบทั้ง 12 ตัวใน `x-business-rules`
+- [x] มี `request` / `response` / `error code` / ตัวอย่าง payload — ✅ ทุก operation มี `x-use-case` + ตัวอย่าง payload จริง
+      · error code แยกชัดเจน: 400 / 401 / 403 / 404 / 409 / 422 / 429 / 500 (+ 501 สำหรับรายงานที่ไม่ทำ)
+      · `operationId` ไม่ซ้ำ 59/59 · ทุก operation มี 401
+- [x] ระบุ `BR-xx` ที่ Endpoint นั้นบังคับ — ✅ 25 operation มี `x-business-rules` · 13 จุดที่ต้อง Transaction มี `x-transaction`
+      · 7 endpoint รายงานมี `x-report` + `x-pdf-condition` (R1/R4/R6 ทำจริง · R2/R3/R5/R7 คืน 501)
+- [x] P-04 ข้อ 1–4 สะท้อนในสเปก — ✅ ระบุ bind variable ทุก endpoint · ไม่มี `SELECT *` (มีแต่ข้อความ "ห้าม")
+      · ไม่มี `password_hash` ใน response ใดเลย · ไม่ hardcode รายชื่อ Role
+- [ ] ⛔ **UC-10 (กำหนดบทบาทให้พนักงาน)** — Use Case ไม่ระบุ API path และ 17.5.2 ไม่มี endpoint นี้
+      *P-04 ข้อ 9 ห้ามตัดสินใจเอง → บันทึกเป็น **Q22** ใน `info.description` แล้ว รออาจารย์ยืนยัน*
+      *มีอีก 2 ข้อเดียวกัน: **Q23** แก้เวลาออกของรอบ (UC-14.2) · **Q24** แก้/ลบสิทธิ์ (UC-08)*
+- [ ] Code Review โดยสุขสรร (AR-02) — *ผู้เขียนห้ามรีวิวงานตัวเอง*
+>>>>>>> origin/develop
 
 ---
 
@@ -229,8 +258,8 @@
 
 - [x] `database/02_seed_master.sql` — ✅ 12/12 PASS
 - [x] `database/03_seed_front.sql` — ✅ 9/9 PASS (เส้นทาง 2/3 · ข้ามเส้นทาง 1 รอ Q20)
-- [ ] `docs/mockup/` (PNG ทั้ง 4 บทบาท + ไฟล์อธิบาย) — สุขสรร · T-009
-- [ ] `docs/api/openapi.yaml` — T-014 · รอหลัง T-008
+- [x] `docs/mockup/` (SVG ทั้ง 15 ไฟล์ + PNG จาก Figma Export + ไฟล์อธิบาย) — ✅ **SVG commit แล้ว · PNG ต่อ**
+- [x] `docs/api/openapi.yaml` — ✅ T-014 · 41 paths / 59 operations · Redocly lint valid (0 error)
 
 ### Milestone M1
 

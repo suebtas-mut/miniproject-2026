@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+<rect width="390" height="844" fill="#F6F8FC"/>
+<rect x="0.0" y="0.0" width="390.0" height="64.0" fill="#1F5FA8"/>
+<text x="16.0" y="28.0" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#FFFFFF" text-anchor="start" font-weight="bold">จัดการเส้นทาง</text>
+<text x="16.0" y="48.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#BBD3EE" text-anchor="start" font-weight="normal">UC-12 · UC-11 dropdown</text>
+<rect x="338.0" y="18.0" width="20.0" height="20.0" fill="none" rx="4" stroke="#BBD3EE" stroke-width="1.5"/>
+<text x="348.0" y="32.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#BBD3EE" text-anchor="middle" font-weight="bold">..</text>
+<rect x="364.0" y="18.0" width="16.0" height="16.0" fill="none" rx="8" stroke="#BBD3EE" stroke-width="1.5"/>
+<rect x="16.0" y="78.0" width="358.0" height="40.0" fill="#FFFFFF" rx="8" stroke="#DFE5EF" stroke-width="1"/>
+<text x="30.0" y="103.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#12203A" text-anchor="start" font-weight="normal">เส้นทาง: เส้นทาง 2  ห้าง / ตลาดใหม่</text>
+<text x="360.0" y="103.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#6B7A99" text-anchor="end" font-weight="normal">v</text>
+<rect x="16.0" y="132.0" width="358.0" height="28.0" fill="#EEF3FA" rx="6"/>
+<text x="24.0" y="149.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">#</text>
+<text x="56.0" y="149.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">จุดจอด</text>
+<text x="252.0" y="149.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">นาที</text>
+<text x="308.0" y="149.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="bold">ถึง</text>
+<rect x="16.0" y="160.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="177.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">1</text>
+<text x="56.0" y="177.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">สำนักงานเขตหนองจอก</text>
+<text x="252.0" y="177.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">0</text>
+<text x="308.0" y="177.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:30</text>
+<rect x="16.0" y="188.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="205.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">2</text>
+<text x="56.0" y="205.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ตลาดน้ำ 4 ภาค</text>
+<text x="252.0" y="205.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">5</text>
+<text x="308.0" y="205.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:35</text>
+<rect x="16.0" y="216.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">3</text>
+<text x="56.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ห้างสรุติภัย</text>
+<text x="252.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">5</text>
+<text x="308.0" y="233.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:40</text>
+<rect x="16.0" y="244.0" width="358.0" height="28.0" fill="#FFFFFF" stroke="#DFE5EF" stroke-width="1"/>
+<text x="24.0" y="261.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">4</text>
+<text x="56.0" y="261.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">ตลาดเก่า</text>
+<text x="252.0" y="261.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">3</text>
+<text x="308.0" y="261.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#12203A" text-anchor="start" font-weight="normal">09:43</text>
+<rect x="16.0" y="284.0" width="358.0" height="44.0" fill="#F0F6FF" rx="8" stroke="#1F5FA8" stroke-width="1"/>
+<text x="30.0" y="305.0" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#12203A" text-anchor="start" font-weight="bold">รวม total_minutes</text>
+<text x="360.0" y="305.0" font-family="Arial, Helvetica, sans-serif" font-size="13" fill="#1F5FA8" text-anchor="end" font-weight="bold">13 นาที</text>
+<text x="30.0" y="321.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">BR-01 = SUM(travel_minutes) · Service คำนวณ เขียนเองไม่ได้</text>
+<text x="16.0" y="340.0" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#B26A00" text-anchor="start" font-weight="bold">BR-03 ต้องเพิ่มจุดจอดก่อนหน้า/หลังจุดเดิมเท่านั้น</text>
+<rect x="16.0" y="360.0" width="175.0" height="40.0" fill="#1F5FA8" rx="8"/>
+<text x="103.5" y="384.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">เพิ่มจุดจอด</text>
+<rect x="199.0" y="360.0" width="175.0" height="40.0" fill="none" rx="8" stroke="#C0392B" stroke-width="1.5"/>
+<text x="286.5" y="384.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#C0392B" text-anchor="middle" font-weight="bold">ลบจุดจอด</text>
+<rect x="16.0" y="412.0" width="358.0" height="44.0" fill="#1F5FA8" rx="8"/>
+<text x="195.0" y="438.0" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#FFFFFF" text-anchor="middle" font-weight="bold">บันทึกและคำนวณใหม่</text>
+<text x="16.0" y="470.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="start" font-weight="normal">UC-12 R-07 adaptive: เลื่อน/ซ้ำลากเรียง stop_seq ได้</text>
+<rect x="0.0" y="784.0" width="390.0" height="60.0" fill="#FFFFFF"/>
+<line x1="0.0" y1="784.0" x2="390.0" y2="784.0" stroke="#DFE5EF" stroke-width="1"/>
+<rect x="39.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="48.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">เส้นทาง</text>
+<rect x="137.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#1F5FA8" stroke-width="1.5"/>
+<text x="146.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#1F5FA8" text-anchor="middle" font-weight="bold">รอบเวลา</text>
+<rect x="234.8" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="243.8" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">พนักงาน</text>
+<rect x="332.2" y="796.0" width="18.0" height="18.0" fill="none" rx="4" stroke="#6B7A99" stroke-width="1.5"/>
+<text x="341.2" y="830.0" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#6B7A99" text-anchor="middle" font-weight="normal">โปรไฟล์</text>
+</svg>
