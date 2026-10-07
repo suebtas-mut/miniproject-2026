@@ -1,6 +1,33 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freeModel, within, jobs, routineAnswers } from './autopilot.mjs';
+import { freeModel, within, jobs, routineAnswers, rescueAdvice } from './autopilot.mjs';
+
+test('pending approval and active worker never trigger repeated local inference', async () => {
+  let calls = 0;
+  const state = {};
+  const options = { scope: 'sprint 4', evidence: 'timeout', advise: async () => { calls++; return 'advice'; } };
+  for (let i = 0; i < 100; i++) {
+    assert.equal(await rescueAdvice(state, { ...options, pending: true }), null);
+    assert.equal(await rescueAdvice(state, { ...options, status: { type: 'busy' } }), null);
+  }
+  assert.equal(calls, 0);
+  for (let i = 0; i < 100; i++) assert.equal(await rescueAdvice(state, options), 'advice');
+  assert.equal(calls, 1);
+  const restored = JSON.parse(JSON.stringify(state));
+  await rescueAdvice(restored, options);
+  assert.equal(calls, 1);
+  await rescueAdvice(restored, { ...options, scope: 'sprint 5' });
+  assert.equal(calls, 2);
+});
+
+test('unavailable advisor empty response is cached instead of retried each poll', async () => {
+  let calls = 0;
+  const state = {};
+  const options = { scope: 'sprint 4', evidence: 'test failed', advise: async () => { calls++; return ''; } };
+  await rescueAdvice(state, options);
+  await rescueAdvice(state, options);
+  assert.equal(calls, 1);
+});
 test('unknown and paid prices cannot be free fallbacks', () => {
   for (const value of [undefined, {}, { cost: {} }, { cost: { input: 0, output: 1 } },
     { cost: { input: 0, output: 0, cache: { read: 1 } } }]) assert.equal(freeModel(value), false);
