@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { eligible } from './agent-bridge.mjs';
+import { routePermission } from './permission-workflow.mjs';
 import { rescue, canRescue } from './codex-rescue.mjs';
 import { roadmap, roadmapJob, enterStage } from './sprint-roadmap.mjs';
 
@@ -142,6 +142,29 @@ async function main() {
       child.on('close', code => { clearTimeout(timer); resolve({ pass: code === 0 && !timedOut, output, code, timedOut }); });
     });
   };
+  const permissions = async a => {
+    const queue = path.join(runtime, 'permission-workflow');
+    fs.mkdirSync(queue, { recursive: true });
+    const requests = (await api(a, '/permission')).filter(r => r.sessionID === a.sessionID);
+    for (const request of requests) {
+      const record = await routePermission({ agent: a.name, request,
+        getRecord: key => { const f = path.join(queue, key + '.json'); return fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null; },
+        putRecord: (key, value) => { const f = path.join(queue, key + '.json'); fs.writeFileSync(f + '.tmp', JSON.stringify(value, null, 2)); fs.renameSync(f + '.tmp', f); },
+        advise: ollama,
+        readFresh: async () => (await api(a, '/permission')).find(r => r.id === request.id && r.sessionID === a.sessionID),
+        reply: reply => api(a, `/permission/${request.id}/reply`, { reply }),
+      });
+      const key = 'workflow:' + record.fingerprint;
+      if (!state.handled.includes(key)) {
+        log({ event: 'permission-routed', agent: a.name, requestID: request.id, action: record.plan.action, level: record.plan.level });
+        state.handled.push(key); save();
+        if (record.plan.action === 'human') {
+          await api(a, '/tui/show-toast', { title: 'Permission needs review', message: `${a.name}: ${record.plan.reason}. See .agent-runtime/permission-workflow`, variant: 'warning', duration: 15000 }).catch(() => {});
+        }
+      }
+    }
+    return (await api(a, '/permission')).some(r => r.sessionID === a.sessionID);
+  };
   const submit = async (a, s, reason) => {
     if (s.rounds >= 6) { s.phase = 'needs-review'; s.reason = 'Six repair rounds exhausted'; return; }
     const providers = await api(a, '/provider');
@@ -205,6 +228,13 @@ Use native Windows absolute paths, never /d/... . PowerShell 5: no && or ||. Pre
         if (s.phase === 'codex-running') throw Error('Cannot change scope while a rescue is active');
         enterStage(s, 0, config.roadmap.id); save();
       }
+      try {
+        if (await permissions(a)) { s.permissionWaitingAt ??= Date.now(); save(); continue; }
+        if (s.permissionWaitingAt) {
+          s.lastDispatch += Date.now() - s.permissionWaitingAt;
+          delete s.permissionWaitingAt; save();
+        }
+      } catch (error) { s.lastError = error.message; save(); continue; }
       if (config.roadmap?.enabled && s.phase === 'local-checks-passed' && s.stageIndex < roadmap.length - 1) {
         (s.stageHistory ??= []).push({ sprint: activeJob(a).sprint, checkedAt: new Date().toISOString(), status: 'local-checks-passed-review-pending' });
         enterStage(s, s.stageIndex + 1, config.roadmap.id); save();
@@ -230,18 +260,6 @@ Use native Windows absolute paths, never /d/... . PowerShell 5: no && or ||. Pre
       }
       if (['needs-review', 'local-checks-passed', 'waiting-free-quota'].includes(s.phase)) continue;
       try {
-        const requests = await api(a, '/permission');
-        for (const request of requests.filter(r => r.sessionID === a.sessionID)) {
-          const key = a.name + ':' + request.id;
-          if (state.handled.includes(key)) continue;
-          if (eligible(request)) {
-            await api(a, `/permission/${request.id}/reply`, { reply: 'once' });
-            log({ event: 'approved-read-only', agent: a.name, requestID: request.id });
-          } else {
-            log({ event: 'human-permission', agent: a.name, requestID: request.id, permission: request.permission });
-          }
-          state.handled.push(key);
-        }
         const questions = (await api(a, '/question')).filter(r => r.sessionID === a.sessionID);
         if (questions.length) {
           // A small local model may advise; it is not allowed to grant authority through answers.
