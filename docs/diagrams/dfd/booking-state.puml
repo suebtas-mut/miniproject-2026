@@ -1,0 +1,36 @@
+@startuml booking-state
+' T-010 (Sprint 3) — A6: State Diagram ของ Booking
+' ค่า status จริงตาม 01_schema.sql ck_booking_status:
+'   reserved | checked_in | completed | cancelled | no_show
+
+title State Diagram — สถานะการจองรถ (booking.status)
+
+skinparam shadowing false
+skinparam state {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+
+[*] --> reserved : จองสำเร็จ (UC-18)\nINSERT booking + qr_token
+
+reserved --> cancelled : ผู้ใช้ยกเลิก (UC-21 / BR-08)\ncancel_time = SYSTIMESTAMP\nที่นั่งคืนเข้ารอบทันที
+reserved --> checked_in : คนขับสแกน QR ถูกต้อง (UC-25 / BR-09)\ntrip_passenger.checkin_time ถูกบันทึก
+reserved --> no_show : ปิดรอบโดยไม่มา (UC-26 / BR-10)\ntrip.status = completed
+
+checked_in --> completed : ปิดรอบการเดินทาง (UC-26)\nผู้โดยสารเดินทางถึงปลายทาง
+
+cancelled --> [*]
+completed --> [*]
+no_show --> [*]
+
+note right of reserved
+  จองซ้ำได้เฉพาะรอบที่ยังมีที่ว่าง
+  (BR-07 · นับเฉพาะ status='reserved')
+  กรองเวลาจองด้วย BR-05 (≥ 20 นาทีก่อนถึงจุดขึ้น)
+end note
+
+note left of checked_in
+  QR ใช้ได้ 1 ครั้งต่อ 1 การจอง
+  (ASM-07-3) สแกนซ้ำ → "เช็คอินไปแล้ว"
+end note
+@enduml

@@ -1,0 +1,37 @@
+@startuml sequence-01-login
+' T-010 (Sprint 3) — A5: Sequence Diagram 1/5 — Login (UC-01, M3)
+' อ้างอิง: usecase-spec.md UC-01 · openapi.yaml POST /api/auth/login
+
+title Sequence — เข้าสู่ระบบ (UC-01)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "ผู้ใช้ (ทุกบทบาท)" as User
+participant "Flutter App\n(login_page.dart)" as App
+participant "REST API\n(Node.js/Express)" as API
+database "Oracle\nemployee" as DB
+database "Oracle\nrole_permission\npermission" as Perm
+queue "JWT\n(Auth Header)" as JWT
+
+User -> App : กรอก username + password
+App -> API : POST /api/auth/login\n{username, password}
+API -> DB : SELECT * FROM employee\nWHERE username = :username (bind variable)
+alt ไม่พบผู้ใช้ หรือ is_active = 0
+  API --> App : 401 Unauthorized\n(หรือ 423 ACCOUNT_LOCKED)
+  App --> User : แสดงข้อความ "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
+else พบผู้ใช้
+  API -> API : bcrypt.compare(password, password_hash)\nครอบ try/catch (กัน hash รูปแบบผิด → 500)
+  alt รหัสผ่านไม่ถูกต้อง
+    API --> App : 401 Unauthorized
+    App --> User : แสดงข้อความเดียวกัน (ไม่บอกว่าส่วนไหนผิด)
+  else รหัสผ่านถูกต้อง
+    API -> API : ออก JWT (exp 3600 วินาที)\nเก็บ JTI สำหรับ logout blacklist
+    API -> Perm : SELECT permission ของทุก role ของผู้ใช้\n(dynamic RBAC — ไม่ hardcode)
+    Perm --> API : permissions[] + modules[]
+    API --> App : 200 {token, tokenType: Bearer,\nuser, roles[], permissions[], modules[]}
+    App -> App : flutter_secure_storage\n.saveToken(token)
+    App --> User : เปิดหน้าแรก (/) ตาม Dynamic Menu
+  end
+end
+@enduml

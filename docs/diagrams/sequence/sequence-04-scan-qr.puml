@@ -1,0 +1,42 @@
+@startuml sequence-04-scan-qr
+' T-010 (Sprint 3) — A5: Sequence Diagram 4/5 — Scan QR (UC-25, D3)
+' อ้างอิง: usecase-spec.md UC-25 · BR-09 (ผิดรอบขึ้นรถไม่ได้)
+
+title Sequence — สแกน QR ยืนยันตั๋ว (UC-25)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "คนขับรถ" as Driver
+actor "ผู้โดยสาร\n(แสดง QR)" as Cust
+participant "Flutter App\nmobile_scanner" as App
+participant "REST API" as API
+database "Oracle\nbooking" as Book
+database "Oracle\ntrip +\ntrip_passenger" as Trip
+
+Driver -> App : เปิดหน้าสแกน (ต้องมี trip status='running')
+Cust --> Driver : แสดง QR ตั๋ว (qr_token)
+App -> App : อ่าน qr_token จากกล้อง\n(debounce 2 วินาที กันอ่านซ้ำ)
+App -> API : POST /api/driver/trip/scan\n{qr_token, trip_id} (JWT)
+
+API -> Book : SELECT booking JOIN trip\nON trip.trip_id = :currentTripId\nWHERE booking.qr_token = :qr_token\n⚠ ห้าม join ด้วย sched_id เพียงอย่างเดียว
+
+alt ไม่พบ qr_token
+  API --> App : 404 "ไม่พบการจองนี้"
+else booking.sched_id ≠ trip.sched_id ของรอบที่กำลังวิ่ง
+  API --> App : 400 "QR นี้ไม่ใช่รอบที่กำลังเดินรถ"
+  note right of API : BR-09 — ผิดรอบ = ขึ้นรถไม่ได้
+  App --> Driver : แสดงผลสีแดง + สั่นเตือน
+else status = 'cancelled'
+  API --> App : 409 "การจองถูกยกเลิกแล้ว"
+else status = 'checked_in' แล้ว
+  API --> App : 409 "ผู้โดยสารเช็คอินไปแล้ว"
+  note right of API : ASM-07-3: QR ใช้ได้ 1 ครั้งต่อ 1 การจอง
+else ถูกต้อง (status='reserved' และเป็นรอบนี้)
+  API -> Book : UPDATE booking SET status='checked_in'
+  API -> Trip : INSERT trip_passenger\n(checkin_time = SYSTIMESTAMP,\nboard_seq = ลำดับการสแกน)
+  API --> App : 200 {ชื่อ-สกุล, board_stop, จำนวนที่นั่ง}
+  App --> Driver : ✓ แสดงชื่อผู้โดยสาร (เขียว)
+  Driver -> App : สแกนคนถัดไป (วนรอบ)
+end
+@enduml

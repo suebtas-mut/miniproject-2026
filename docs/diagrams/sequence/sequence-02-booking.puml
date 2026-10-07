@@ -1,0 +1,51 @@
+@startuml sequence-02-booking
+' T-010 (Sprint 3) — A5: Sequence Diagram 2/5 — Booking (UC-17, UC-18, B1)
+' อ้างอิง: usecase-spec.md UC-17/UC-18 · BR-05, BR-06, BR-07
+
+title Sequence — จองรถ (UC-17 ค้นรอบ · UC-18 ยืนยันจอง)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "ผู้ใช้บริการ" as Cust
+participant "Flutter App" as App
+participant "REST API" as API
+database "Oracle\nschedule_stop\nschedule" as Sched
+database "Oracle\nbooking" as Book
+queue "Transaction\nBEGIN … COMMIT" as TX
+
+== UC-17 : ค้นรอบว่าง ==
+
+Cust -> App : เลือกวันที่ · จุดขึ้น · จุดลง · กด "ค้นหารอบ"
+App -> API : GET /api/booking/available\n?board_stop=&alight_stop=&date= (JWT)
+API -> Sched : SELECT รอบ + เวลาถึงจุดขึ้น\n(schedule_stop JOIN schedule)
+API -> Book : นับที่นั่งจองแล้ว\nSUM(seats) WHERE status='reserved'
+API -> API : กรอง BR-05 (เหลือ ≥ 20 นาทีก่อนถึงจุดขึ้น)\n+ BR-07 (ที่ว่างพอ) + BR-11/BR-12 (ลำดับจุดจอด)
+API --> App : 200 [รอบเวลา + เหลือ X ที่นั่ง]
+App --> Cust : แสดงรายการรอบ
+
+== UC-18 : ยืนยันการจอง ==
+
+Cust -> App : เลือกรอบ · จำนวนที่นั่ง (1–4) · กด "ยืนยัน"
+App -> App : Validate BR-06 ที่ UI (เกิน 4 → ปุ่ม disabled)
+App -> API : POST /api/booking\n{sched_id, board_stop, alight_stop, seats} (JWT)
+API -> API : ตรวจซ้ำ BR-05 + BR-06 ฝั่ง Server\n(seats ต้อง BETWEEN 1 AND 4)
+API -> TX : BEGIN
+API -> Sched : SELECT schedule FOR UPDATE NOWAIT\n(ล็อกแถวกันจองชน)
+alt ORA-00054 (ถูกล็อกโดย transaction อื่น)
+  API -> TX : ROLLBACK
+  API --> App : 409 Conflict (ไม่ค้างรอ)
+else ล็อกสำเร็จ
+  API -> Book : นับ SUM(seats) WHERE sched_id + status='reserved'
+  alt ที่นั่งไม่พอ (BR-07)
+    API -> TX : ROLLBACK
+    API --> App : 409 SEAT_FULL + จำนวนที่เหลือ
+    App --> Cust : "ที่นั่งเต็ม เหลือ X ที่นั่ง"
+  else ที่นั่งว่างพอ
+    API -> Book : INSERT booking\nbooking_code (seq_booking_code)\n+ qr_token (สุ่ม · เดาไม่ได้) · status='reserved'
+    API -> TX : COMMIT
+    API --> App : 201 {booking_id, booking_code, qr_token, status}
+    App --> Cust : แสดง QR Code ตั๋ว (UC-20)
+  end
+end
+@enduml
