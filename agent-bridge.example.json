@@ -1,0 +1,12 @@
+{
+  "maxMinutes": 60,
+  "maxReviews": 20,
+  "agents": [
+    {
+      "name": "kaengkarn",
+      "url": "http://127.0.0.1:4096",
+      "directory": "D:/data/shuttle-kaengkarn",
+      "sessionID": "ses_f1502269fffeuDgXRsvTdT3RKF"
+    }
+  ]
+}

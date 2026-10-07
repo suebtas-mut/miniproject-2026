@@ -27,6 +27,7 @@ service-account*.json
 # 2) Node.js / Backend (Node.js 20 LTS + Express 4)
 # ---------------------------------------------------------------------
 node_modules/
+.agent-runtime/
 backend/node_modules/
 backend/coverage/
 npm-debug.log*
