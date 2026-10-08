@@ -1,12 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../core/providers.dart';
+import 'auth_controller.dart';
 
-/// T-017 (Sprint 4) จะทำหน้า Login เต็มรูปแบบ — เอกสารนี้เป็นตัวอย่าง
-/// การใช้ dio + secure storage ตาม T-013 เท่านั้น
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -31,41 +27,21 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _loading = true);
-    try {
-      final api = ref.read(apiClientProvider);
-      final res = await api.dio.post('/api/auth/login', data: {
-        'username': _usernameCtrl.text.trim(),
-        'password': _passwordCtrl.text,
-      });
-      final token = res.data['token'] as String?;
-      if (token == null || token.isEmpty) {
-        throw const FormatException('ไม่ได้รับ token จากเซิร์ฟเวอร์');
-      }
-      await ref.read(tokenStorageProvider).saveToken(token);
-      if (!mounted) return;
-      context.go('/');
-    } on DioException catch (e) {
-      if (!mounted) return;
-      final status = e.response?.statusCode;
-      final message = status == 401
-          ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
-          : status == 423
-              ? 'บัญชีถูกปิดใช้งาน กรุณาติดต่อผู้ดูแล'
-              : 'เข้าสู่ระบบไม่สำเร็จ (สถานะ $status)';
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
-    } on FormatException catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+    final controller = ref.read(authControllerProvider.notifier);
+    controller.clearMessage();
+    await controller.login(
+      username: _usernameCtrl.text.trim(),
+      password: _passwordCtrl.text,
+    );
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final message = ref.watch(
+      authControllerProvider.select((state) => state.message),
+    );
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -87,6 +63,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),
+                  if (message != null) ...[
+                    _MessageBanner(message: message),
+                    const SizedBox(height: 16),
+                  ],
                   TextFormField(
                     controller: _usernameCtrl,
                     decoration: const InputDecoration(
@@ -135,6 +115,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MessageBanner extends StatelessWidget {
+  const _MessageBanner({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const Key('login-message'),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: scheme.onErrorContainer, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+          ),
+        ],
       ),
     );
   }

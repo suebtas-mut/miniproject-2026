@@ -1,13 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatelessWidget {
+import '../auth/account_menu.dart';
+import '../auth/auth_controller.dart';
+import '../auth/auth_models.dart';
+
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    // T-023 — ซ่อนการ์ดโมดูลที่ผู้ใช้ไม่มีสิทธิ์เข้าถึง
+    final accessible = ref.watch(
+        authControllerProvider.select((state) => state.accessibleModules));
     return Scaffold(
-      appBar: AppBar(title: const Text('ระบบรถรับส่ง — สำนักงานเขตหนองจอก')),
+      appBar: AppBar(
+        title: const Text('ระบบรถรับส่ง — สำนักงานเขตหนองจอก'),
+        actions: const [AccountMenu()],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -29,31 +40,36 @@ class HomePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const _ModuleCard(
-            icon: Icons.badge_outlined,
-            title: 'ข้อมูลหลัก',
-            subtitle: 'พนักงาน · แผนก · ตำแหน่ง · บทบาท · สิทธิ์',
-          ),
-          const _ModuleCard(
-            icon: Icons.route_outlined,
-            title: 'เส้นทางและรอบเวลา',
-            subtitle: 'จุดจอด · เส้นทาง · รถ · ตารางเดินรถ',
-          ),
-          const _ModuleCard(
-            icon: Icons.event_seat_outlined,
-            title: 'จองรถ',
-            subtitle: 'เลือกจุดขึ้น–ลง · เลือกเวลา · QR ตั๋ว',
-          ),
-          const _ModuleCard(
-            icon: Icons.drive_eta_outlined,
-            title: 'งานคนขับ',
-            subtitle: 'ตารางงาน · เริ่ม/ปิดรอบ · สแกน QR',
-          ),
-          const _ModuleCard(
-            icon: Icons.bar_chart_outlined,
-            title: 'รายงาน',
-            subtitle: 'R1 จำนวนคนขึ้น–ลง · R4 ยอดรายวัน · R6 สถิติคนขับ',
-          ),
+          if (accessible.contains('master'))
+            const _ModuleCard(
+              icon: Icons.badge_outlined,
+              title: 'ข้อมูลหลัก',
+              subtitle: 'พนักงาน · แผนก · ตำแหน่ง · บทบาท · สิทธิ์',
+            ),
+          if (accessible.contains('front'))
+            const _ModuleCard(
+              icon: Icons.route_outlined,
+              title: 'เส้นทางและรอบเวลา',
+              subtitle: 'จุดจอด · เส้นทาง · รถ · ตารางเดินรถ',
+            ),
+          if (accessible.contains('booking'))
+            const _ModuleCard(
+              icon: Icons.event_seat_outlined,
+              title: 'จองรถ',
+              subtitle: 'เลือกจุดขึ้น–ลง · เลือกเวลา · QR ตั๋ว',
+            ),
+          if (accessible.contains('driver'))
+            const _ModuleCard(
+              icon: Icons.drive_eta_outlined,
+              title: 'งานคนขับ',
+              subtitle: 'ตารางงาน · เริ่ม/ปิดรอบ · สแกน QR',
+            ),
+          if (accessible.contains('report'))
+            const _ModuleCard(
+              icon: Icons.bar_chart_outlined,
+              title: 'รายงาน',
+              subtitle: 'R1 จำนวนคนขึ้น–ลง · R4 ยอดรายวัน · R6 สถิติคนขับ',
+            ),
         ],
       ),
     );
@@ -61,7 +77,8 @@ class HomePage extends StatelessWidget {
 }
 
 class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({required this.icon, required this.title, required this.subtitle});
+  const _ModuleCard(
+      {required this.icon, required this.title, required this.subtitle});
 
   final IconData icon;
   final String title;

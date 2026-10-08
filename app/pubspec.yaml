@@ -30,6 +30,8 @@ dependencies:
 
   # Charting (reports R1/R4/R6 — Sprint 12/13)
   fl_chart: ^0.68.0
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.4.2
 
 dev_dependencies:
   flutter_test:

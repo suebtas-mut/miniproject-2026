@@ -4,6 +4,14 @@
          Cleartext HTTP is NOT enabled here — release keeps the Android default
          (cleartext blocked; see debug/profile source sets for the dev-only policy). -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- กล้องสำหรับสแกน QR ขึ้นรถ (T-050 / UC-25, mobile_scanner) —
+         runtime permission จัดการโดย mobile_scanner (หน้าจอ D3 แสดงสถานะ
+         ไม่ได้รับอนุญาต + ทางสำรอง "กรอก Token เอง") -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- ไม่บังคับกล้อง — อุปกรณ์ไร้กล้อง (Emulator) ติดตั้งได้และใช้
+         "กรอก Token เอง" ตามความเสี่ยง R5 -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <application
         android:label="shuttle_app"
         android:name="${applicationName}"

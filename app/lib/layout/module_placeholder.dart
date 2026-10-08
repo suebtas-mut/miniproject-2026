@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../features/auth/account_menu.dart';
+
 /// หน้า placeholder ชั่วคราวของแต่ละโมดูล จนกว่าจะทำหน้าจริงใน Sprint ถัดไป
 class ModulePlaceholder extends StatelessWidget {
   const ModulePlaceholder({
@@ -17,7 +19,10 @@ class ModulePlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        title: Text(title),
+        actions: const [AccountMenu()],
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
@@ -29,7 +34,8 @@ class ModulePlaceholder extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.construction, size: 48, color: theme.colorScheme.primary),
+                    Icon(Icons.construction,
+                        size: 48, color: theme.colorScheme.primary),
                     const SizedBox(height: 16),
                     Text(title, style: theme.textTheme.titleLarge),
                     const SizedBox(height: 8),
