@@ -52,8 +52,8 @@ INSERT INTO app_role (role_name, description) VALUES ('CUSTOMER', 'ผู้ใ�
 
 
 -- ==================================================================
---  4) permission  —  21 สิทธิ์ แบ่งตาม module (8.3.5)
---     นับ: master 5 + front 4 + booking 3 + driver 3 + report 6 = 21
+--  4) permission  —  22 สิทธิ์ แบ่งตาม module (8.3.5)
+--     นับ: master 5 + front 4 + booking 3 + driver 3 + report 7 = 22
 --  module ตาม COMMENT: master | front | booking | driver | report
 --  screen_key ใช้สร้าง Dynamic Menu (P-05 : ห้าม hardcode สิทธิ์ในโค้ด)
 -- ==================================================================
@@ -80,9 +80,10 @@ INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUE
 INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R1',      'รายงาน 1 จำนวนคนขึ้น-ลง',   'report',  'RPT_R1',       50);
 INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R2',      'รายงาน 2 สรุปรอบเวลา',     'report',  'RPT_R2',       51);
 INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R3',      'รายงาน 3 ผู้โดยสารประจำรถ',  'report',  'RPT_R3',       52);
-INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R5',      'รายงาน 5 จุดจอดที่มีผู้โดยสาร', 'report', 'RPT_R5',       53);
-INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R6',      'รายงาน 6 สถิติคนขับ',     'report',  'RPT_R6',       54);
-INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R7',      'รายงาน 7 สถิติยานพาหนะ',  'report',  'RPT_R7',       55);
+INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R4',      'รายงาน 4 จำนวนผู้ใช้รายวันรายเส้นทาง', 'report', 'RPT_R4',       53);
+INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R5',      'รายงาน 5 จุดจอดที่มีผู้โดยสาร', 'report', 'RPT_R5',       54);
+INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R6',      'รายงาน 6 สถิติคนขับ',     'report',  'RPT_R6',       55);
+INSERT INTO permission (perm_code, perm_name, module, screen_key, sort_no) VALUES ('RPT.R7',      'รายงาน 7 สถิติยานพาหนะ',  'report',  'RPT_R7',       56);
 
 
 -- ==================================================================
@@ -234,14 +235,14 @@ WITH actual AS (
          (SELECT COUNT(*) FROM employee) FROM dual
   UNION ALL SELECT 'APP_ROLE',      4,
          (SELECT COUNT(*) FROM app_role) FROM dual
-  UNION ALL SELECT 'PERMISSION',    21,
+  UNION ALL SELECT 'PERMISSION',    22,
          (SELECT COUNT(*) FROM permission) FROM dual
-  -- ADMIN ควรได้ 21 (ทุกสิทธิ์)
-  UNION ALL SELECT 'RP_ADMIN',      21,
+  -- ADMIN ควรได้ 22 (ทุกสิทธิ์ รวม RPT.R4)
+  UNION ALL SELECT 'RP_ADMIN',      22,
          (SELECT COUNT(*) FROM role_permission rp JOIN app_role r ON r.role_id = rp.role_id
           WHERE r.role_name = 'ADMIN') FROM dual
-  -- STAFF ได้ 18 = master 4 (ไม่รวม ROLE.EDIT) + front 4 + booking 3 + report 6 + TRIP.START 1
-  UNION ALL SELECT 'RP_STAFF',      18,
+  -- STAFF ได้ 19 = master 4 (ไม่รวม ROLE.EDIT) + front 4 + booking 3 + report 7 + TRIP.START 1
+  UNION ALL SELECT 'RP_STAFF',      19,
          (SELECT COUNT(*) FROM role_permission rp JOIN app_role r ON r.role_id = rp.role_id
           WHERE r.role_name = 'STAFF') FROM dual
   UNION ALL SELECT 'RP_DRIVER',     5,

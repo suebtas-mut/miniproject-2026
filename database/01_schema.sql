@@ -9,9 +9,9 @@
 --    3) docs/diagrams/er/er-03..05-physical-*.puml — Physical ER
 --
 --  สิ่งที่ไฟล์นี้สร้าง:
---    ตาราง 20 · คอลัมน์ 102 · Sequence 1 · Index 8 (ดัชนีที่ 9 ตาม 8.8 ถูกตัดเพราะซ้ำ)
---    Constraint 77 = PK 20 + UNIQUE 18 + CHECK 12 + FK 27 (CASCADE 10 / RESTRICT 17)
---    COMMENT ON 122 = TABLE 20 + COLUMN 102
+--    ตาราง 21 · คอลัมน์ 110 · Sequence 1 · Index 8 (ดัชนีที่ 9 ตาม 8.8 ถูกตัดเพราะซ้ำ)
+--    Constraint 78 = PK 21 + UNIQUE 18 + CHECK 12 + FK 27 (CASCADE 10 / RESTRICT 17)
+--    COMMENT ON 131 = TABLE 21 + COLUMN 110
 --
 --  วิธีรัน (SQL*Plus / SQLcl)
 --    sqlplus shuttle_app/<รหัสผ่าน>@localhost:1521/XEPDB1 @01_schema.sql
@@ -299,6 +299,25 @@ CREATE TABLE trip_passenger (
 
 
 -- ==================================================================
+--  กลุ่ม AUDIT  (1 ตาราง / 8 คอลัมน์)  —  T-042 Sprint 9
+--  เก็บ log ทุก write request (POST/PUT/PATCH/DELETE) ผ่าน middleware/audit.js
+--  · ไม่เก็บ request body / header / token — กัน secret รั่วลงตาราง
+--  · ไม่ทำ FK → employee เพราะ audit ต้องอยู่แม้ลบพนักงานออกจากระบบ
+-- ==================================================================
+CREATE TABLE audit_log (
+  audit_id    NUMBER(10)     GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1),
+  method      VARCHAR2(10 CHAR)  NOT NULL,   -- POST | PUT | PATCH | DELETE
+  path        VARCHAR2(500 CHAR) NOT NULL,   -- originalUrl (ค่า query ของ token/password ถูก mask แล้ว)
+  status_code NUMBER(3),                     -- HTTP status ที่ตอบกลับ
+  duration_ms NUMBER(10),                    -- เวลาประมวลผล (มิลลิวินาที)
+  emp_id      NUMBER(10),                    -- รหัสผู้ใช้จาก JWT (NULL = ยังไม่ Login) — ไม่ทำ FK
+  ip          VARCHAR2(45 CHAR),             -- รองรับ IPv6 (45 ตัวอักษร)
+  created_at  TIMESTAMP      DEFAULT SYSTIMESTAMP NOT NULL,
+  CONSTRAINT pk_audit_log PRIMARY KEY (audit_id)
+);
+
+
+-- ==================================================================
 --  Index  (8 ดัชนี — จาก 9 รายการในข้อ 8.8 ตัดออก 1 รายการที่ซ้ำ)
 --  หมายเหตุ: 17.4.3 เขียนกำกับว่า "สร้างหลัง Seed เพื่อให้ Insert เร็ว"
 --  ที่นี่สร้างไว้ในไฟล์เดียวกันเพื่อความครบถ้วนของสคีมา
@@ -323,7 +342,7 @@ CREATE INDEX ix_va_veh              ON vehicle_assign (veh_id, sched_id);
 
 
 -- ==================================================================
---  COMMENT ON TABLE  —  ครบ 20 ตาราง  (ข้อ 8.9)
+--  COMMENT ON TABLE  —  ครบ 21 ตาราง  (ข้อ 8.9)
 -- ==================================================================
 COMMENT ON TABLE  department          IS 'แผนก/หน่วยงานในสำนักงาน';
 COMMENT ON TABLE  job_position        IS 'ตำแหน่งงานของพนักงาน';
@@ -345,6 +364,7 @@ COMMENT ON TABLE  vehicle_assign      IS 'การจัดคู่ยาน�
 COMMENT ON TABLE  booking             IS 'การจองรถของผู้ใช้บริการ มี 5 สถานะ';
 COMMENT ON TABLE  trip                IS 'การเดินรถจริงในแต่ละรอบ (คนขับกดเริ่ม/ปิด)';
 COMMENT ON TABLE  trip_passenger      IS 'รายละเอียดผู้โดยสารรายคนต่อรอบ — จำเป็นสำหรับรายงาน 1,2,3,5';
+COMMENT ON TABLE  audit_log           IS 'บันทึกการเปลี่ยนแปลงข้อมูลทุก write request (T-042) — ไม่เก็บ secret';
 
 
 -- ==================================================================
@@ -482,10 +502,23 @@ COMMENT ON COLUMN trip_passenger.alight_time       IS 'เวลาที่ล�
 
 
 -- ==================================================================
+--  COMMENT ON COLUMN  —  กลุ่ม AUDIT  (8 คอลัมน์ — T-042)
+-- ==================================================================
+COMMENT ON COLUMN audit_log.audit_id    IS 'รหัสแถว log เลขกำเนิดอัตโนมัติ';
+COMMENT ON COLUMN audit_log.method      IS 'HTTP method ที่เป็นการเขียนข้อมูล (POST/PUT/PATCH/DELETE)';
+COMMENT ON COLUMN audit_log.path        IS 'URI ของคำขอ (ค่า query ของ token/password ถูก mask เป็น ***)';
+COMMENT ON COLUMN audit_log.status_code IS 'HTTP status ที่ตอบกลับ';
+COMMENT ON COLUMN audit_log.duration_ms IS 'เวลาประมวลผลคำขอ (มิลลิวินาที)';
+COMMENT ON COLUMN audit_log.emp_id      IS 'รหัสผู้ใช้จาก JWT (NULL = ยังไม่ Login) — ไม่ทำ FK เพื่อให้ log อยู่แม้ลบพนักงาน';
+COMMENT ON COLUMN audit_log.ip          IS 'IP ของผู้เรียก (รองรับ IPv6)';
+COMMENT ON COLUMN audit_log.created_at  IS 'เวลาที่บันทึก log';
+
+
+-- ==================================================================
 --  ตรวจสอบผลหลังรัน
---  ค่าที่คาดหวัง:  TABLE 20 / COLUMN 102 / SEQUENCE 1 / PK 20 / UK 18
+--  ค่าที่คาดหวัง:  TABLE 21 / COLUMN 110 / SEQUENCE 1 / PK 21 / UK 18
 --                CHECK 12 / FK 27 / CASCADE 10 / IX_CUSTOM 8
---                T_COMMENT 20 / C_COMMENT 102
+--                T_COMMENT 21 / C_COMMENT 110
 -- ==================================================================
 -- ==================================================================
 --  ตรวจสอบผลหลังรัน  (STATUS ต้องเป็น PASS ทุกแถว)
@@ -493,13 +526,13 @@ COMMENT ON COLUMN trip_passenger.alight_time       IS 'เวลาที่ล�
 COLUMN object_type FORMAT A12
 COLUMN result       FORMAT A8
 WITH actual AS (
-  SELECT 'TABLE'      AS object_type, 20 AS expected,
+  SELECT 'TABLE'      AS object_type, 21 AS expected,
          (SELECT COUNT(*) FROM user_tables WHERE table_name NOT LIKE 'BIN$%') AS got FROM dual
-  UNION ALL SELECT 'COLUMN',    102,
+  UNION ALL SELECT 'COLUMN',    110,
          (SELECT COUNT(*) FROM user_tab_columns) FROM dual
   UNION ALL SELECT 'SEQUENCE',    1,
          (SELECT COUNT(*) FROM user_sequences WHERE sequence_name NOT LIKE 'ISEQ$%') FROM dual
-  UNION ALL SELECT 'PK',         20,
+  UNION ALL SELECT 'PK',         21,
          (SELECT COUNT(*) FROM user_constraints WHERE constraint_type = 'P') FROM dual
   UNION ALL SELECT 'UK',         18,
          (SELECT COUNT(*) FROM user_constraints WHERE constraint_type = 'U') FROM dual
@@ -518,9 +551,9 @@ WITH actual AS (
           WHERE constraint_type = 'R' AND delete_rule = 'NO ACTION') FROM dual
   UNION ALL SELECT 'IX_CUSTOM',   8,
          (SELECT COUNT(*) FROM user_indexes WHERE index_name LIKE 'IX\_%' ESCAPE '\') FROM dual
-  UNION ALL SELECT 'T_COMMENT',  20,
+  UNION ALL SELECT 'T_COMMENT',  21,
          (SELECT COUNT(*) FROM user_tab_comments WHERE comments IS NOT NULL) FROM dual
-  UNION ALL SELECT 'C_COMMENT', 102,
+  UNION ALL SELECT 'C_COMMENT', 110,
          (SELECT COUNT(*) FROM user_col_comments WHERE comments IS NOT NULL) FROM dual
   UNION ALL SELECT 'INVALID_OBJ', 0,
          (SELECT COUNT(*) FROM user_objects WHERE status <> 'VALID') FROM dual
