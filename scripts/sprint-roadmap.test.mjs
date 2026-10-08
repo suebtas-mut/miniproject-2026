@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { roadmap, roadmapJob, enterStage } from './sprint-roadmap.mjs';
+import { roadmap, roadmapJob, enterStage, lastStageIndex } from './sprint-roadmap.mjs';
 
 test('every sprint has independent evidence, full regression checks and explicit ownership', () => {
-  assert.deepEqual(roadmap.map(s => s.sprint), [4,5,6,7,8,9,10,11,12,13]);
+  assert.deepEqual(roadmap.map(s => s.sprint), [4,5,6,7,8,9,10,11,12,13,14]);
   for (const agent of ['kaengkarn', 'sukhsorn']) {
     const reports = new Set();
-    for (let i = 0; i < roadmap.length; i++) {
+    for (let i = 0; i <= lastStageIndex(agent); i++) {
       const job = roadmapJob(agent, i, { required: ['baseline'], command: 'test all' });
       assert.equal(job.command, 'test all');
       assert.ok(job.required.includes('baseline'));
@@ -14,9 +14,13 @@ test('every sprint has independent evidence, full regression checks and explicit
       assert.match(job.scope, /Stop after THIS sprint/);
       assert.match(job.scope, /\/api\/v1/);
     }
-    assert.equal(reports.size, 10);
+    assert.equal(reports.size, agent === 'kaengkarn' ? 11 : 10);
   }
-  assert.throws(() => roadmapJob('kaengkarn', 10, {}));
+  assert.throws(() => roadmapJob('kaengkarn', 11, {}));
+  assert.throws(() => roadmapJob('sukhsorn', 10, {}));
+  const audit = roadmapJob('kaengkarn', 10, { required: [] });
+  assert.ok(audit.required.includes('docs/security/next-security-sprint-plan.md'));
+  assert.ok(audit.required.includes('docs/security/sprint14-baseline-audit.md'));
 });
 
 test('advancing a sprint preserves paid rescue counters and existing history', () => {

@@ -2,6 +2,7 @@
 // อ้างอิง: docs/chapter-17-fullstack.md 17.5.3 (Thin Mode ไม่ต้อง Instant Client)
 const oracledb = require('oracledb');
 const env = require('./env');
+const { log } = require('../middleware/logger');
 
 oracledb.autoCommit = false; // จัดการ Transaction เอง (commit/rollback)
 
@@ -65,4 +66,40 @@ async function checkDbHealth() {
   }
 }
 
-module.exports = { initPool, closePool, getPool, query, checkDbHealth };
+// สร้าง runner สำหรับงานที่ต้อง commit/rollback (17.5.3)
+// - fn(conn) ทำ SQL หลาย statements บน connection เดียวกัน
+// - สำเร็จ = commit, throw = rollback แล้วโยน error ต่อ, close เสมอ (finally)
+// แยกเป็น factory เพื่อให้ test inject pool ปลอมได้ (rollback logic ตัวจริง)
+function createTransactionRunner(getPoolFn) {
+  return async function withTransaction(fn) {
+    const currentPool = getPoolFn();
+    if (!currentPool) throw new Error('Oracle pool not initialized — call initPool() first');
+    const conn = await currentPool.getConnection();
+    try {
+      const result = await fn(conn);
+      await conn.commit();
+      return result;
+    } catch (err) {
+      try {
+        await conn.rollback();
+      } catch (rollbackErr) {
+        log('error', `Transaction rollback failed: ${rollbackErr.message}`);
+      }
+      throw err;
+    } finally {
+      await conn.close();
+    }
+  };
+}
+
+const withTransaction = createTransactionRunner(getPool);
+
+module.exports = {
+  initPool,
+  closePool,
+  getPool,
+  query,
+  checkDbHealth,
+  withTransaction,
+  createTransactionRunner,
+};

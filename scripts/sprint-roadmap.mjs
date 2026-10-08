@@ -17,17 +17,22 @@ export const roadmap = scopes.map(([sprint, backend, flutter]) => ({
   kaengkarn: backend,
   sukhsorn: flutter,
 }));
+roadmap.push({ sprint: 14, kaengkarn: 'SEC14-01..08: Execute cybersecurity audit round 1 across all Kaengkarn deliverables through Sprint 13. Read docs/agile/sprints/sprint-14-security-plan.md first and follow its local-only scope and evidence requirements. Inventory attack surface, test authentication/authorization/ownership, input and SQL binding, sensitive outputs, business-state controls; review dependencies, SQL scripts and automation trust boundaries. Fix confirmed in-scope defects with regression tests. Write docs/security/sprint14-baseline-audit.md and an evidence-driven docs/security/next-security-sprint-plan.md. Do not execute future security rounds, scan external hosts, use shared Oracle, or claim mock tests certify security.' });
+
+export function lastStageIndex(agent) {
+  return roadmap.findLastIndex(stage => typeof stage[agent] === 'string');
+}
 
 export function roadmapJob(agent, index, base) {
   const stage = roadmap[index];
-  if (!stage || !['kaengkarn', 'sukhsorn'].includes(agent)) throw Error('Invalid roadmap stage or agent');
+  if (!stage || !['kaengkarn', 'sukhsorn'].includes(agent) || !stage[agent]) throw Error('Invalid roadmap stage or agent');
   const n = String(stage.sprint).padStart(2, '0');
   const handoff = `docs/agent-handoffs/sprint${n}-${agent}.md`;
   const test = agent === 'kaengkarn' ? `backend/tests/sprint${n}.test.js` : `app/test/sprint${n}_test.dart`;
   return { ...base, sprint: stage.sprint, scope: `Sprint ${stage.sprint}: ${stage[agent]}
 Read only relevant sections of docs/chapter-18-development-plan.md, docs/api/openapi.yaml, docs/chapter-17-fullstack.md, usecase-spec and database/01_schema.sql. API prefix is /api/v1 and response contracts must match OpenAPI. Preserve existing dirty files. Backend stream owns all API/SQL implementations (including T-029/T-039/T-053/T-055); Flutter stream owns client and documentation. Do not edit peer workspace. Existing unresolved Q-A/Q-B/Q-F/Q14/Q20/Q22/Q23/Q24 are not permission to invent requirements; implement unaffected work and list blocked acceptance criteria in the handoff, without repeatedly asking already-pending questions.
 Add meaningful regression tests in ${test}; do not use trivial existence tests or weaken existing tests. Complete ${handoff} with tasks, changed files, exact commands/results, contract decisions and unresolved checks. Record real results only; passing local tests does not mean human review, live integration or all requirements passed. No commits or pushes by worker; coordinator handles reviewed delivery. Stop after THIS sprint batch; the controller dispatches the next one.`,
-    required: [...base.required, test, handoff],
+    required: [...base.required, ...(stage.sprint === 14 ? ['docs/security/sprint14-baseline-audit.md', 'docs/security/next-security-sprint-plan.md'] : []), test, handoff],
   };
 }
 

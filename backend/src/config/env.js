@@ -2,11 +2,25 @@
 // T-011: Backend setup + config
 require('dotenv').config();
 
+function parseDurationSeconds(value, fallback) {
+  const match = /^(\d+)\s*([smhd]?)$/.exec(String(value).trim());
+  if (!match) return fallback;
+  const units = { '': 1, s: 1, m: 60, h: 3600, d: 86400 };
+  return Number(match[1]) * units[match[2]];
+}
+
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT) || 3000,
   appName: process.env.APP_NAME || 'shuttle-bus-backend',
   logLevel: process.env.LOG_LEVEL || 'debug',
+
+  // T-015: JWT config — ห้าม hardcode secret (P-12); ถ้าไม่มี JWT_SECRET ให้ fail ตอนใช้
+  jwt: {
+    secret: process.env.JWT_SECRET || '',
+    expiresIn: process.env.JWT_EXPIRES_IN || '2h',
+    issuer: process.env.JWT_ISSUER || 'shuttle-bus-backend',
+  },
 
   db: {
     user: process.env.DB_USER || 'SHUTTLE_APP',
@@ -21,5 +35,8 @@ const env = {
 };
 
 env.db.connectString = `${env.db.host}:${env.db.port}/${env.db.serviceName}`;
+
+// OpenAPI: expires_in เป็นวินาที (ตัวอย่าง 7200 = 2 ชั่วโมง ตาม UC-01)
+env.jwt.expiresInSeconds = parseDurationSeconds(env.jwt.expiresIn, 7200);
 
 module.exports = env;

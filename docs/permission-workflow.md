@@ -31,3 +31,24 @@ While permission is pending, the controller does not invoke Codex rescue, advanc
 Codex rescue retains the existing total two-call / one-per-worker budget across all sprints. This workflow does not wake an existing VS Code conversation; actual automatic repair uses the separately configured bundled App Server. The permission UI itself remains the place for a human to approve consequential requests.
 
 Validation: 20 controller/workflow tests passed, including 100 repeated polls with one advisory call, no authority granted by model output, stale-request rejection, normal delivery without repeat replies, secret-file classification, command chaining rejection, workspace enforcement and revalidation of changed npm lifecycle hooks. Live high-risk approvals were not manufactured for testing.
+# Flutter SDK source reads
+
+With `sdkRead.enabled` and an explicitly configured `sdkRead.sourceRoot`, the
+supervisor can approve a read-only `.dart` source inspection once. It retrieves
+the actual pending tool call, checks the real file path stays inside that SDK
+source tree without junction redirection, and accepts only the read tool or a
+small PowerShell grammar (`Get-Content`, bounded array slices, literal labels,
+and optional `Select-Object -Skip ... -First ...`). It revalidates the tool call
+before replying. External edits, SDK execution, shell chaining, redirection and
+other external paths remain outside this rule. Policy v3 reevaluates requests
+previously held under the earlier external-directory rule.
+
+This is deterministic authorization for the user's approved SDK-reading scope;
+it needs no model inference. Ollama advice remains advisory for unknown actions.
+
+Policy v4 also supports explicit `sdkRead.dependencySourceRoots` for reviewed
+dependency source directories, currently go_router 14.8.1 `lib/src`. It expands
+only the literal `$env:LOCALAPPDATA` prefix in quoted Get-Content paths; arbitrary
+variable interpolation and command substitution remain disallowed. It does not
+grant access to all of Pub Cache.
+

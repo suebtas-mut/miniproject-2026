@@ -1,6 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freeModel, within, jobs, routineAnswers, rescueAdvice } from './autopilot.mjs';
+import { freeModel, within, jobs, routineAnswers, rescueAdvice, recoverTimedOutTurn } from './autopilot.mjs';
+
+test('timeout recovery rechecks work, survives restart, and stops at a bounded stage budget', () => {
+  let s = { stageIndex: 5, rounds: 2 };
+  assert.equal(recoverTimedOutTurn(s, 123), true);
+  assert.equal(s.phase, 'working'); assert.equal(s.lastDispatch, 123); assert.equal(s.rounds, 2);
+  s = JSON.parse(JSON.stringify(s));
+  assert.equal(recoverTimedOutTurn(s), true);
+  assert.equal(recoverTimedOutTurn(s), false); assert.equal(s.phase, 'needs-review');
+  s.stageIndex = 6;
+  assert.equal(recoverTimedOutTurn(s), true);
+  assert.equal(recoverTimedOutTurn({ rounds: 6 }), false);
+  assert.equal(recoverTimedOutTurn({ rounds: 1, localSessionID: 'local' }), false);
+});
 
 test('pending approval and active worker never trigger repeated local inference', async () => {
   let calls = 0;
