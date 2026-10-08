@@ -1,0 +1,2426 @@
+openapi: 3.0.3
+
+info:
+  title: SHUTTLE BUS API
+  version: 1.0.0
+  description: |
+    REST API สำหรับระบบจองรถตู้รับ–ส่งนักศึกษา มหาวิทยาลัยเทคโนโลยีมหาคร (ลาดกระบัง)
+    หลักฐานประกอบ Sprint 2 — T-014
+
+    ## ที่มาของสเปกนี้
+    ทุก endpoint ในไฟล์นี้ผูกกับหลักฐาน 3 ชั้น และ **ตรวจสอบย้อนกลับได้**:
+
+    | ชั้น | แหล่งอ้างอิง | สถานะ |
+    |---|---|---|
+    | Use Case | `docs/diagrams/usecase/usecase-spec.md` (UC-01…UC-30) | ✅ ปิดแล้ว (T-004) |
+    | Database | `database/01_schema.sql` (20 ตาราง) | ✅ ผ่าน AR-02 13/13 (T-007) |
+    | Seed | `database/02_seed_master.sql` + `03_seed_front.sql` | ✅ ผ่าน AR-02 21/22 (T-008) |
+
+    ## กฎที่ยึดในการออกแบบ
+    1. **ชื่อฟิลด์ตรงกับคอลัมน์จริงทุกตัว** — อ่านจาก `USER_TAB_COLUMNS` บน Oracle XE 21c โดยตรง
+       (เช่น `stop_seq` ไม่ใช่ `no`, `sched_id` ไม่ใช่ `schedule_id`, `is_active` เป็นตัวเลข 0/1 ไม่ใช่ boolean)
+    2. **ค่า enum ตรงกับ CHECK constraint จริง**
+       - `booking.status` ∈ `reserved, checked_in, completed, cancelled, no_show`
+       - `trip.status` ∈ `running, completed`
+       - `*.is_active` ∈ `0, 1`
+    3. **ทุก endpoint มี `x-uc` ระบุ Use Case** และ endpoint ที่บังคับกฎต้องมี `x-br` — ให้ตรวจได้ว่าไม่มี API ส่วนไหนลอย ไม่ผูกกับอะไรเลย
+    4. **สิทธิ์ผูกกับ `permission.perm_code` จริง 21 ตัว** ไม่ใช้ชื่อสิทธิ์สมมติ
+    5. รหัสผ่านไม่เคยส่งออก — มีแต่ `password_hash` ในตาราง และ API นี้ไม่มี field ใดคืนค่านั้น
+
+    ## สิ่งที่ยังไม่กำหนด (รออาจารย์ตอบ — ดู Q-*)
+    - **Q-B / Q-18** เวลาเส้นทางที่ 3 → seed ใช้ 15 นาที + `TODO(Q-B)` ส่วน endpoint รายงานจะอ่านค่าจาก
+      `route.total_minutes` อยู่แล้ว จึง**ไม่ต้องแก้ API** เมื่ออาจารย์ตอบ
+    - **Q-14** Oracle 19c หรือ 21c → ไม่กระทบ API (ทั้งสองรุ่นใช้ driver เดียวกัน)
+    - **Q-20** เส้นทาง 1 ซ้ำจุด → ยังไม่มีข้อมูล จึงยังไม่มี endpoint ที่ต้องแก้
+
+  contact:
+    name: ทีม Mini Project 2026
+    url: https://github.com/suebtas-mut/miniproject-2026
+
+servers:
+  - url: http://localhost:3000
+    description: เครื่องนักศึกษา (Node.js + node-oracledb)
+  - url: http://localhost:8080
+    description: รันบน Flutter Emulator / Android Debug Bridge
+
+tags:
+  - name: M3 Auth
+    description: เข้า–ออก–เปลี่ยนรหัส (UC-01…UC-03)
+  - name: M1 Master - Employee
+    description: พนักงาน / แผนก / ตำแหน่ง (UC-04…UC-06)
+  - name: M2 Master - RBAC
+    description: บทบาท / สิทธิ์ / Permission Matrix (UC-07…UC-10)
+  - name: F1 Front - Route
+    description: จุดหยุด / เส้นทาง (UC-11…UC-12)
+  - name: F2 Front - Schedule
+    description: ยานยนต์ / ตารางเวลา / Manifest (UC-13…UC-16)
+  - name: B Booking
+    description: จองที่นั่ง / QR (UC-17…UC-21)
+  - name: D Driver
+    description: งานคนขับ (UC-22…UC-26)
+  - name: R Report
+    description: รายงาน R1/R4/R6 + export (UC-27…UC-30)
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ============================================================
+  # M3 — AUTH (UC-01 … UC-03)
+  # ============================================================
+  /api/auth/login:
+    post:
+      tags: [M3 Auth]
+      summary: เข้าสู่ระบบ (UC-01)
+      description: |
+        ตรวจ `username` + `password` กับตาราง `employee`
+
+        **BR-SEC-1** — เทียบด้วย bcrypt เท่านั้น ห้ามเทียบรหัสผ่านตรง ๆ เด็ดขาด
+
+        > ⚠️ **ข้อควรระวังจาก AR-02 ของ T-008:** ค่า `password_hash` ใน seed ปัจจุบันยาว 52–54 ตัว
+        > ซึ่ง **ไม่ใช่ bcrypt ที่ถูกต้อง (ต้อง 60 ตัว)** และมีเพียง 4 ค่า unique
+        > → ต้อง **ครอบ try/catch** รอบ bcrypt.compare ไว้ มิฉะนั้น library บางตัวจะ `throw`
+        > ทำให้ API ตอบ **500** แทน **401**
+        > รายละเอียดและวิธีแก้: `docs/reviews/t-007-schema-peer-review-sukhsorn.md` ส่วนที่ 4
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              admin:
+                summary: ผู้ดูแลระบบ (จาก seed)
+                value: { username: admin, password: any }
+      responses:
+        '200':
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '423':
+          description: บัญชีถูกปิดใช้งาน (`employee.is_active = 0`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { code: ACCOUNT_LOCKED, message: 'บัญชีถูกปิดใช้งาน กรุณาติดต่อผู้ดูแล' }
+        '500':
+          description: bcrypt ตรวจไม่ได้ (ดูคำเตือนใน description) — ต้องถูกจับเป็น 401 ไม่ใช่หลุดเป็น 500
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/auth/logout:
+    post:
+      tags: [M3 Auth]
+      summary: ออกจากระบบ (UC-02)
+      description: เพิ่ม JTI ของ token ลงตาราง `token_blacklist` เพื่อไม่ให้ใช้ซ้ำได้
+      operationId: logout
+      responses:
+        '204': { description: ออกจากระบบสำเร็จ }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/change-password:
+    post:
+      tags: [M3 Auth]
+      summary: เปลี่ยนรหัสผ่าน (UC-03)
+      description: |
+        ต้องยืนยันรหัสผ่านเดิม และรหัสใหม่ต้องผ่านเงื่อนไขความยาวขั้นต่ำ 8 ตัวอักษร
+        เมื่อสำเร็จจะ **ยกเลิก token เดิมทั้งหมด** ของผู้ใช้
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [oldPassword, newPassword]
+              properties:
+                oldPassword: { type: string, format: password, example: oldPassword }
+                newPassword: { type: string, format: password, minLength: 8, example: newPassword }
+      responses:
+        '204': { description: เปลี่ยนรหัสผ่านสำเร็จ }
+        '400':
+          description: รหัสใหม่ยาวไม่ถึง 8 ตัวอักษร หรือรหัสใหม่เหมือนรหัสเดิม
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/me:
+    get:
+      tags: [M3 Auth]
+      summary: ข้อมูลผู้ใช้ปัจจุบัน
+      description: ใช้หลัง login เพื่อให้แอปสร้าง Dynamic Menu ตาม `permission.module` (5 โมดูล)
+      operationId: getMe
+      responses:
+        '200':
+          description: ข้อมูลผู้ใช้
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ============================================================
+  # M1 — MASTER: EMPLOYEE / DEPARTMENT / POSITION (UC-04 … UC-06)
+  # ============================================================
+  /api/departments:
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายชื่อแผนก (UC-05)
+      description: |
+        ชื่อแผนกใน seed เป็น **ค่าสมมติสำหรับการทดสอบเท่านั้น** เพราะ PDF ไม่ได้ระบุไว้
+        (ข้อสังเกตข้อ 3 จาก AR-02 ของ T-008)
+      operationId: listDepartments
+      parameters:
+        - $ref: '#/components/parameters/ActiveOnly'
+      responses:
+        '200':
+          description: รายชื่อแผนก
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Department' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [M1 Master - Employee]
+      summary: เพิ่มแผนก (UC-05)
+      operationId: createDepartment
+      x-uc: UC-05
+      x-permission: DEPT.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deptName]
+              properties:
+                deptName: { type: string, maxLength: 100, example: วิศวกรรมซอฟต์แวร์ }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Department' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: ชื่อแผนกซ้ำ (`uq_department_name`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/departments/{deptId}:
+    parameters: [{ $ref: '#/components/parameters/DeptId' }]
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายละเอียดแผนก (UC-05)
+      operationId: getDepartment
+      responses:
+        '200':
+          description: รายละเอียดแผนก
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Department' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [M1 Master - Employee]
+      summary: แก้ไขแผนก (UC-05)
+      operationId: updateDepartment
+      x-uc: UC-05
+      x-permission: DEPT.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deptName]
+              properties:
+                deptName: { type: string, maxLength: 100 }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Department' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: ชื่อแผนกซ้ำ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [M1 Master - Employee]
+      summary: ปิดใช้งานแผนก (UC-05)
+      description: |
+        **ไม่ใช้ hard delete** — เปลี่ยนเป็น `is_active = 0` เพราะตารางลูกอ้างอิงอยู่แล้ว
+        ข้อสังเกตจาก AR-02: seed ไม่มีแผนกที่ `is_active = 0`
+        → แนะนำให้เพิ่มข้อมูล 1 รายการเพื่อทดสอบ branch นี้
+      operationId: deactivateDepartment
+      x-uc: UC-05
+      x-permission: DEPT.EDIT
+      responses:
+        '204': { description: ปิดใช้งานสำเร็จ }
+        '409':
+          description: ยังมีพนักงานในแผนกนี้ (`fk_employee_dept`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/positions:
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายชื่อตำแหน่ง (UC-06)
+      operationId: listPositions
+      parameters:
+        - name: deptId
+          in: query
+          schema: { type: integer, format: int64 }
+          description: กรองเฉพาะตำแหน่งของแผนกที่ระบุ
+      responses:
+        '200':
+          description: รายชื่อตำแหน่ง
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/JobPosition' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [M1 Master - Employee]
+      summary: เพิ่มตำแหน่ง (UC-06)
+      operationId: createPosition
+      x-uc: UC-06
+      x-permission: POS.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [positionName, deptId]
+              properties:
+                positionName: { type: string, maxLength: 100, example: อาจารย์ประจำหลักสูตร }
+                deptId: { type: integer, format: int64, example: 1 }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPosition' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ไม่พบ `deptId`
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/positions/{positionId}:
+    parameters:
+      - name: positionId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายละเอียดตำแหน่ง (UC-06)
+      operationId: getPosition
+      responses:
+        '200':
+          description: รายละเอียดตำแหน่ง
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPosition' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [M1 Master - Employee]
+      summary: แก้ไขตำแหน่ง (UC-06)
+      operationId: updatePosition
+      x-uc: UC-06
+      x-permission: POS.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [positionName, deptId]
+              properties:
+                positionName: { type: string, maxLength: 100 }
+                deptId: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/JobPosition' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [M1 Master - Employee]
+      summary: ปิดใช้งานตำแหน่ง (UC-06)
+      operationId: deactivatePosition
+      x-uc: UC-06
+      x-permission: POS.EDIT
+      responses:
+        '204': { description: ปิดใช้งานสำเร็จ }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/employees:
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายชื่อพนักงานทั้งหมด (UC-04)
+      description: หน้า A1 ของ Mockup — seed มี 15 คน
+      operationId: listEmployees
+      parameters:
+        - $ref: '#/components/parameters/ActiveOnly'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: search
+          in: query
+          schema: { type: string }
+          description: ค้นหาจาก `emp_code` / `first_name` / `last_name` / `username`
+        - name: deptId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: positionId
+          in: query
+          schema: { type: integer, format: int64 }
+        - name: roleId
+          in: query
+          schema: { type: integer, format: int64 }
+          description: กรองตามบทบาท
+      responses:
+        '200':
+          description: รายชื่อพนักงาน (แบบแบ่งหน้า)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PagedEmployeeList' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [M1 Master - Employee]
+      summary: เพิ่มพนักงาน (UC-04)
+      description: |
+        `password` ที่รับเข้าจะถูก **hash ด้วย bcrypt ทันที** แล้วเก็บลง `employee.password_hash`
+        — ไม่มีทางที่รหัสผ่านต้นฉบับจะถูกบันทึก
+      operationId: createEmployee
+      x-uc: UC-04
+      x-permission: EMP.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeCreate' }
+      responses:
+        '201':
+          description: สร้างสำเร็จ (ไม่คืน `passwordHash`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: "`emp_code` หรือ `username` ซ้ำ"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/employees/{empId}:
+    parameters:
+      - name: empId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [M1 Master - Employee]
+      summary: ดูรายละเอียดพนักงาน (UC-04)
+      operationId: getEmployee
+      responses:
+        '200':
+          description: รายละเอียดพนักงาน
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [M1 Master - Employee]
+      summary: แก้ไขพนักงาน (UC-04)
+      operationId: updateEmployee
+      x-uc: UC-04
+      x-permission: EMP.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EmployeeUpdate' }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: "`username` ซ้ำ"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [M1 Master - Employee]
+      summary: ปิดใช้งานพนักงาน (UC-04.3)
+      description: เปลี่ยนเป็น `is_active = 0` ไม่ลบจริง เพราะตาราง `driver_assign` / `trip` อ้างอิงอยู่
+      operationId: deactivateEmployee
+      x-uc: UC-04.3
+      x-permission: EMP.EDIT
+      responses:
+        '204': { description: ปิดใช้งานสำเร็จ }
+        '409':
+          description: พนักงานคนนี้ยังมีตารางเวลาที่กำลังใช้งานอยู่
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/employees/{empId}/roles:
+    parameters:
+      - name: empId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      tags: [M1 Master - Employee]
+      summary: กำหนดบทบาทของพนักงาน (UC-10)
+      description: |
+        เขียนลงตาราง `employee_role` (seed มี 15 แถว = 15 พนักงาน 1 บทบาทต่อคน)
+        เป็น **PUT แบบเต็ม (replace all)** ไม่ใช่ PATCH เพิ่มทีละรายการ
+      operationId: setEmployeeRoles
+      x-uc: UC-10
+      x-permission: ROLE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleIds]
+              properties:
+                roleIds:
+                  type: array
+                  minItems: 1
+                  items: { type: integer, format: int64 }
+                  example: [3]
+      responses:
+        '200':
+          description: กำหนดบทบาทสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  empId: { type: integer, format: int64 }
+                  roleIds:
+                    type: array
+                    items: { type: integer, format: int64 }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ============================================================
+  # M2 — MASTER: RBAC (UC-07 … UC-10)
+  # ============================================================
+  /api/roles:
+    get:
+      tags: [M2 Master - RBAC]
+      summary: ดูรายชื่อบทบาท (UC-07)
+      description: seed มี 4 บทบาท ADMIN / STAFF / CUSTOMER / DRIVER พร้อมจำนวนสิทธิ์ 21/18/5/4
+      operationId: listRoles
+      responses:
+        '200':
+          description: รายชื่อบทบาท
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Role' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [M2 Master - RBAC]
+      summary: เพิ่มบทบาท (UC-07)
+      operationId: createRole
+      x-uc: UC-07
+      x-permission: ROLE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleName]
+              properties:
+                roleName: { type: string, maxLength: 50, example: MANAGER }
+                description: { type: string, maxLength: 200 }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: "`role_name` ซ้ำ"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/roles/{roleId}:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [M2 Master - RBAC]
+      summary: ดูรายละเอียดบทบาท (UC-07)
+      operationId: getRole
+      responses:
+        '200':
+          description: รายละเอียดบทบาท
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [M2 Master - RBAC]
+      summary: แก้ไขบทบาท (UC-07)
+      operationId: updateRole
+      x-uc: UC-07
+      x-permission: ROLE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [roleName]
+              properties:
+                roleName: { type: string, maxLength: 50 }
+                description: { type: string, maxLength: 200 }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Role' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [M2 Master - RBAC]
+      summary: ปิดใช้งานบทบาท (UC-07)
+      operationId: deactivateRole
+      x-uc: UC-07
+      x-permission: ROLE.EDIT
+      responses:
+        '204': { description: ปิดใช้งานสำเร็จ }
+        '409':
+          description: ยังมีพนักงานใช้บทบาทนี้อยู่
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/permissions:
+    get:
+      tags: [M2 Master - RBAC]
+      summary: ดูรายชื่อสิทธิ์ทั้งหมด (UC-08)
+      description: |
+        seed มี **21 สิทธิ์** แบ่งตาม 5 โมดูล — ใช้ตัวนี้สร้างหน้า Permission Matrix (UC-09)
+
+        | โมดูล | จำนวน | รหัส |
+        |---|---|---|
+        | `master` | 5 | `EMP.VIEW` `EMP.EDIT` `DEPT.EDIT` `POS.EDIT` `ROLE.EDIT` |
+        | `front` | 4 | `ROUTE.VIEW` `ROUTE.EDIT` `SCHED.EDIT` `VEH.EDIT` |
+        | `booking` | 3 | `BK.CREATE` `BK.VIEW` `BK.CANCEL` |
+        | `driver` | 3 | `QR.SCAN` `TRIP.START` `TRIP.END` |
+        | `report` | 6 | `RPT.R1` `RPT.R2` `RPT.R3` `RPT.R5` `RPT.R6` `RPT.R7` |
+
+        > ⚠️ **ช่องว่างที่พบระหว่างเขียนสเปกนี้ (ต้องแจ้งอาจารย์ / แก้ใน T-008)**
+        >
+        > โมดูล `report` มีรหัสข้าม **R4** ไป (`RPT.R1, R2, R3, R5, R6, R7` = 6 ตัว)
+        > แต่ **R4 เป็นรายงานที่ PDF และ Use Case ระบุไว้ชัดเจน** (UC-28 · "สรุปยอดผู้ใช้รายวันรายเส้นทาง")
+        > → ตอนนี้ **ไม่มีสิทธิ์ใดอนุญาตให้เปิดรายงาน R4 ได้**
+        >
+        > สเปกนี้จึงอ้าง `RPT.R4` ไว้ใน `x-permission` ของ `GET /api/reports/r4`
+        > เพื่อให้ช่องว่างนี้ **มองเห็นได้ชัด** แทนที่จะแอบเปลี่ยนชื่อสิทธิ์ให้เข้ากับที่มีอยู่
+        > ตัวตรวจ `scripts/validate-openapi.py` จะเตือนเรื่องนี้ทุกครั้งที่รัน
+        >
+        > **สองทางที่ต้องเลือก:** (ก) เพิ่ม `RPT.R4` ให้ครบ 7 รายการ หรือ
+        > (ข) ถ้า R4 ถูกตัดออกจากขอบเขตจริง → ต้องแก้ `usecase-spec.md` และ PDF mapping ให้ตรงกัน
+      operationId: listPermissions
+      parameters:
+        - name: module
+          in: query
+          schema: { $ref: '#/components/schemas/PermissionModule' }
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: รายชื่อสิทธิ์
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Permission' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/roles/{roleId}/permissions:
+    parameters:
+      - name: roleId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [M2 Master - RBAC]
+      summary: ดูสิทธิ์ของบทบาท (UC-09)
+      description: ใช้แสดงตารางติ๊กของหน้า Permission Matrix
+      operationId: getRolePermissions
+      responses:
+        '200':
+          description: สิทธิ์ของบทบาท
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roleId: { type: integer, format: int64, example: 1 }
+                  roleName: { type: string, example: ADMIN }
+                  permIds:
+                    type: array
+                    items: { type: integer, format: int64 }
+                    description: seed ของ ADMIN มีทั้งหมด 21
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [M2 Master - RBAC]
+      summary: บันทึก Permission Matrix (UC-09)
+      description: |
+        เขียนทับทั้งตาราง `role_permission` ของบทบาทนี้ (seed รวม 48 แถว)
+
+        **BR-SEC-2** — บัญชี ADMIN ต้องมีสิทธิ์ครบ 21 เสมอ ห้ามติดถอดจนตัวเองล็อกออกจากระบบ
+      operationId: setRolePermissions
+      x-uc: UC-09
+      x-permission: ROLE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [permIds]
+              properties:
+                permIds:
+                  type: array
+                  items: { type: integer, format: int64 }
+                  example: [1, 2, 3]
+      responses:
+        '200':
+          description: บันทึกสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roleId: { type: integer, format: int64 }
+                  permCount: { type: integer, example: 3 }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: ถอดสิทธิ์ของ ADMIN ออกจนไม่ครบ 21 รายการ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: ADMIN_PERM_INCOMPLETE
+                message: 'ADMIN ต้องมีสิทธิ์ครบทั้ง 21 รายการ'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ============================================================
+  # F1 — FRONT: STOP / ROUTE (UC-11 … UC-12)
+  # ============================================================
+  /api/stops:
+    get:
+      tags: [F1 Front - Route]
+      summary: ดูรายชื่อจุดหยุด (UC-11)
+      description: seed มี 6 จุด · จุดที่ 3 (โรงพยาบาลหนองจอก) ยังไม่ถูกใช้ในเส้นทางใด
+      operationId: listStops
+      parameters:
+        - $ref: '#/components/parameters/ActiveOnly'
+        - name: search
+          in: query
+          schema: { type: string }
+          description: ค้นหาจาก `stop_name` หรือ `address`
+      responses:
+        '200':
+          description: รายชื่อจุดหยุด
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Stop' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [F1 Front - Route]
+      summary: เพิ่มจุดหยุด (UC-11)
+      description: ใส่พิกัด `latitude` / `longitude` เพื่อใช้แสดงบนแผนที่
+      operationId: createStop
+      x-uc: UC-11
+      x-permission: ROUTE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StopInput' }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Stop' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: "`stop_name` ซ้ำ"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/stops/{stopId}:
+    parameters:
+      - name: stopId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [F1 Front - Route]
+      summary: ดูรายละเอียดจุดหยุด (UC-11)
+      operationId: getStop
+      responses:
+        '200':
+          description: รายละเอียดจุดหยุด
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Stop' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [F1 Front - Route]
+      summary: แก้ไขจุดหยุด (UC-11)
+      operationId: updateStop
+      x-uc: UC-11
+      x-permission: ROUTE.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StopInput' }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Stop' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [F1 Front - Route]
+      summary: ปิดใช้งานจุดหยุด (UC-11)
+      operationId: deactivateStop
+      x-uc: UC-11
+      x-permission: ROUTE.EDIT
+      responses:
+        '204': { description: ปิดใช้งานสำเร็จ }
+        '409':
+          description: ยังมีเส้นทางหรือตารางเวลาที่อ้างอิงจุดนี้อยู่
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/routes:
+    get:
+      tags: [F1 Front - Route]
+      summary: ดูรายชื่อเส้นทาง (UC-12)
+      description: |
+        seed มี **2 เส้นทาง** (เส้นทางที่ 2 = 13 นาที, เส้นทางที่ 3 = 15 นาที)
+        เส้นทางที่ 1 **ยังไม่ถูก seed** เพราะชื่อจุดซ้ำชน `uq_route_stop_uk` — รอคำตอบ Q-20
+      operationId: listRoutes
+      parameters:
+        - $ref: '#/components/parameters/ActiveOnly'
+        - name: includeStops
+          in: query
+          schema: { type: boolean, default: false }
+          description: รวมจุดหยุดและ `travelMinutes` ของแต่ละจุด
+      responses:
+        '200':
+          description: รายชื่อเส้นทาง
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Route' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [F1 Front - Route]
+      summary: เพิ่มเส้นทาง (UC-12)
+      description: |
+        สร้างเส้นทางพร้อมจุดหยุดในคำสั่งเดียว (transaction เดียว)
+
+        **BR-01** — `totalMinutes` **ต้องเท่ากับผลรวม `travelMinutes` ของทุกจุดเสมอ**
+        API จะคำนวณให้จาก `stops` แล้วเทียบกับค่าที่ส่งมา
+        ถ้าไม่ตรงจะตอบ 422 แทนที่จะบันทึกค่าที่ขัดแย้ง
+      operationId: createRoute
+      x-uc: UC-12
+      x-permission: ROUTE.EDIT
+      x-br: [BR-01]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RouteInput' }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Route' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422':
+          description: 'BR-01 ไม่ผ่าน — `totalMinutes` ไม่เท่าผลรวมเวลาเดินทางของทุกจุด'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: BR01_TOTAL_MISMATCH
+                message: 'totalMinutes (10) ไม่เท่าผลรวม travelMinutes (13)'
+                details: { expected: 13, received: 10 }
+        '409':
+          description: 'มีจุดหยุดซ้ำในเส้นทางนี้ (`uq_route_stop_uk`)'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: DUPLICATE_STOP_IN_ROUTE
+                message: 'จุดหยุดซ้ำภายในเส้นทางเดียวกัน'
+
+  /api/routes/{routeId}:
+    parameters:
+      - name: routeId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [F1 Front - Route]
+      summary: ดูรายละเอียดเส้นทาง (UC-12)
+      operationId: getRoute
+      responses:
+        '200':
+          description: รายละเอียดเส้นทาง
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Route' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [F1 Front - Route]
+      summary: แก้ไขเส้นทาง (UC-12)
+      operationId: updateRoute
+      x-uc: UC-12
+      x-permission: ROUTE.EDIT
+      x-br: [BR-01]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RouteInput' }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Route' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422':
+          description: 'BR-01 ไม่ผ่าน'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ============================================================
+  # F2 — FRONT: VEHICLE / SCHEDULE (UC-13 … UC-16)
+  # ============================================================
+  /api/vehicle-types:
+    get:
+      tags: [F2 Front - Schedule]
+      summary: ดูประเภทรถ (UC-13)
+      description: seed มี 3 ประเภท · ความจุเป็นตัวกำหนด **BR-06 (ที่นั่ง 1–4)**
+      operationId: listVehicleTypes
+      responses:
+        '200':
+          description: ประเภทรถ
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/VehicleType' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [F2 Front - Schedule]
+      summary: เพิ่มประเภทรถ (UC-13)
+      operationId: createVehicleType
+      x-uc: UC-13
+      x-permission: VEH.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [typeName, capacity]
+              properties:
+                typeName: { type: string, maxLength: 50, example: รถตู้ 15 ที่นั่ง }
+                capacity: { type: integer, minimum: 1, example: 15 }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VehicleType' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/vehicles:
+    get:
+      tags: [F2 Front - Schedule]
+      summary: ดูรายชื่อรถ (UC-13)
+      description: seed มี 7 คัน
+      operationId: listVehicles
+      parameters:
+        - $ref: '#/components/parameters/ActiveOnly'
+        - name: vtypeId
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: รายชื่อรถ
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Vehicle' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [F2 Front - Schedule]
+      summary: เพิ่มรถ (UC-13)
+      operationId: createVehicle
+      x-uc: UC-13
+      x-permission: VEH.EDIT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plateNo, vtypeId]
+              properties:
+                plateNo: { type: string, maxLength: 20, example: 2-AB-1234 }
+                vtypeId: { type: integer, format: int64, example: 1 }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vehicle' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: "`plate_no` ซ้ำ"
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/schedules:
+    get:
+      tags: [F2 Front - Schedule]
+      summary: ดูตารางเวลา (UC-14)
+      description: |
+        หน้า S1 ของ Mockup — seed มี 8 รอบ (4 เวลา × 2 เส้นทาง)
+        รอบละ: 09:30 / 11:00 / 13:00 / 15:00
+      operationId: listSchedules
+      parameters:
+        - name: serviceDate
+          in: query
+          schema: { type: string, format: date }
+          description: กรองตามวันให้บริการ (seed ใช้ 2026-10-01)
+        - name: routeId
+          in: query
+          schema: { type: integer, format: int64 }
+        - $ref: '#/components/parameters/ActiveOnly'
+        - name: availableOnly
+          in: query
+          schema: { type: boolean, default: false }
+          description: เฉพาะรอบที่ยังมีที่นั่งว่าง
+      responses:
+        '200':
+          description: ตารางเวลา
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Schedule' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [F2 Front - Schedule]
+      summary: สร้างตารางเวลา (UC-14)
+      description: |
+        สร้างรอบเดินทางพร้อมเวลาถึงทุกจุด
+
+        **BR-02** — `arriveAt` ของจุดสุดท้าย **ต้องเท่ากับ `departAt + totalMinutes` เสมอ**
+        API จะคำนวณจาก `routeStop.travelMinutes` ทั้งหมด (seed ผ่าน BR-02 ครบ 8 รอบ)
+      operationId: createSchedule
+      x-uc: UC-14
+      x-permission: SCHED.EDIT
+      x-br: [BR-02]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScheduleInput' }
+      responses:
+        '201':
+          description: สร้างสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Schedule' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '422':
+          description: 'BR-02 ไม่ผ่าน — เวลาถึงจุดสุดท้ายไม่ตรงกับ `departAt + totalMinutes`'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: BR02_ARRIVE_MISMATCH
+                message: 'arriveAt จุดสุดท้ายต้องเท่ากับ departAt + totalMinutes'
+                details: { expected: '2026-10-01T09:43:00', received: '2026-10-01T09:40:00' }
+        '409':
+          description: 'มีรอบของเส้นทาง+วัน+เวลานี้อยู่แล้ว'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/schedules/{schedId}:
+    parameters:
+      - name: schedId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [F2 Front - Schedule]
+      summary: ดูรายละเอียดรอบเดินทาง (UC-14)
+      operationId: getSchedule
+      responses:
+        '200':
+          description: รายละเอียดรอบเดินทาง
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Schedule' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [F2 Front - Schedule]
+      summary: ยกเลิกรอบเดินทาง (UC-14)
+      operationId: cancelSchedule
+      x-uc: UC-14
+      x-permission: SCHED.EDIT
+      responses:
+        '204': { description: ยกเลิกสำเร็จ }
+        '409':
+          description: มีการจองอยู่แล้ว ต้องแจ้งผู้จองก่อน
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/schedules/{schedId}/manifest:
+    get:
+      tags: [F2 Front - Schedule]
+      summary: ดู Manifest ของรอบ (UC-15)
+      description: |
+        รายชื่อผู้โดยสารที่ลงจองไว้ เรียงตาม **จุดขึ้น (`boardSeq`)**
+        ใช้ร่วมกันระหว่างหน้า S1 (Staff) และ D2 (Driver)
+      operationId: getScheduleManifest
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/BookingStatus' }
+          description: กรองเฉพาะสถานะ (ค่าเริ่มต้นแสดงเฉพาะ `reserved` และ `checked_in`)
+      responses:
+        '200':
+          description: Manifest
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Manifest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/schedules/{schedId}/assignments:
+    parameters:
+      - name: schedId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    put:
+      tags: [F2 Front - Schedule]
+      summary: กำหนดคนขับและรถ (UC-16)
+      description: |
+        เขียนลง `driver_assign` และ `vehicle_assign` (seed มี 8 แถวต่อตาราง)
+
+        **BR-04** — คนขับและรถ **ต้องไม่ซ้ำกันในเวลาทับซ้อน**
+        ตรวจด้วยช่วงเวลา `[departAt, departAt + totalMinutes]` ของทุกรอบ
+        (seed ผ่าน BR-04 — ไม่พบการชนกันเลย)
+      operationId: setScheduleAssignments
+      x-uc: UC-16
+      x-permission: SCHED.EDIT
+      x-br: [BR-04]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [empId, vehId]
+              properties:
+                empId:
+                  type: integer
+                  format: int64
+                  description: ต้องเป็นพนักงานที่มี `role_name = 'DRIVER'`
+                vehId: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: กำหนดสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  schedId: { type: integer, format: int64 }
+                  driver: { $ref: '#/components/schemas/EmployeeBrief' }
+                  vehicle: { $ref: '#/components/schemas/Vehicle' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '400':
+          description: พนักงานคนนี้ไม่มีบทบาท DRIVER
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: NOT_A_DRIVER
+                message: 'พนักงานที่เลือกไม่มีบทบาท DRIVER'
+        '409':
+          description: 'BR-04 ไม่ผ่าน — คนขับหรือรถถูกจองไว้กับรอบอื่นในช่วงเวลาเดียวกัน'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: BR04_DRIVER_CONFLICT
+                message: 'คนขับชนกับรอบที่ 2 (11:00)'
+                details: { conflictSchedId: 2, conflictDepartAt: '2026-10-01T11:00:00' }
+
+  # ============================================================
+  # B — BOOKING (UC-17 … UC-21)
+  # ============================================================
+  /api/schedules/{schedId}/seats:
+    get:
+      tags: [B Booking]
+      summary: ดูที่นั่งที่ว่าง (UC-17)
+      description: |
+        หน้า C2 ของ Mockup — แผนผังที่นั่งพร้อมสถานะ
+
+        **BR-06** — จำนวนที่นั่งที่จองได้ต้องอยู่ในช่วง **1–4 คน/รอบ**
+        (ตรวจจาก `CK_BOOKING_SEATS: seats BETWEEN 1 AND 4`)
+        และรวมกันแล้วต้องไม่เกิน `vehicle_type.capacity` ของรถที่ถูกจัดให้
+      operationId: getSeatAvailability
+      x-uc: UC-17
+      x-br: [BR-06]
+      parameters:
+        - name: serviceDate
+          in: query
+          schema: { type: string, format: date }
+          description: วันที่ต้องตรงกับ `schedule.service_date`
+      responses:
+        '200':
+          description: ที่นั่งว่าง
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SeatMap' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/bookings:
+    get:
+      tags: [B Booking]
+      summary: ดูประวัติการจองของฉัน (UC-19)
+      description: หน้า C3 — ดูเฉพาะ `booking` ของ `employee` ที่ login อยู่
+      operationId: listMyBookings
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/BookingStatus' }
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ประวัติการจอง
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Booking' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [B Booking]
+      summary: จองที่นั่ง (UC-18)
+      description: |
+        **BR-06** — `seats` ต้องอยู่ในช่วง 1–4 (`CK_BOOKING_SEATS`)
+        และที่นั่งที่เหลือต้องพอ
+
+        **BR-07** — จุดขึ้นต้องมาก่อนจุดลง
+        ตรวจด้วย `boardStop.stop_seq < alightStop.stop_seq` บน `route_stop`
+
+        หมายเหตุ: seed ยังไม่มีข้อมูล `booking` (0 แถว) เพราะ T-008 ครอบคลุมเฉพาะ master + front
+        → **BR-06 / BR-07 ยังพิสูจน์จากข้อมูลจริงไม่ได้** จนกว่าจะมี booking seed
+      operationId: createBooking
+      x-uc: UC-18
+      x-permission: BK.CREATE
+      x-br: [BR-06, BR-07]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookingCreate' }
+      responses:
+        '201':
+          description: จองสำเร็จ — คืน `qrToken` ไว้สร้าง QR Code
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: 'ที่นั่งเต็มแล้ว'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: SEATS_FULL
+                message: 'ที่นั่งเต็มแล้ว'
+        '422':
+          description: 'ข้อมูลผิดเงื่อนไข — เกิน 4 ที่นั่ง / จุดขึ้นอยู่หลังจุดลง / ไม่พบรอบ'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: BR06_SEATS_RANGE
+                message: 'จองได้ 1-4 ที่นั่งต่อครั้ง'
+              examples:
+                seats:
+                  value: { code: BR06_SEATS_RANGE, message: 'จองได้ 1-4 ที่นั่งต่อครั้ง', details: { min: 1, max: 4, received: 5 } }
+                stopOrder:
+                  value: { code: BR07_STOP_ORDER, message: 'จุดขึ้นต้องอยู่ก่อนจุดลง', details: { boardSeq: 5, alightSeq: 2 } }
+
+  /api/bookings/{bookingCode}:
+    parameters:
+      - name: bookingCode
+        in: path
+        required: true
+        schema: { type: string }
+        description: รหัสการจองที่ผู้ใช้แสดงเป็น QR (เช่น `BK-20261001-0001`)
+    get:
+      tags: [B Booking]
+      summary: ดูรายละเอียดการจอง + QR (UC-20)
+      description: หน้า C4 — คืนข้อมูลสำหรับสร้าง QR Code พร้อมเวลาที่จองไว้
+      operationId: getBooking
+      responses:
+        '200':
+          description: รายละเอียดการจอง
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Booking' }
+        '403':
+          description: เป็นการจองของผู้อื่น
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/bookings/{bookingCode}/cancel:
+    parameters:
+      - name: bookingCode
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [B Booking]
+      summary: ยกเลิกการจอง (UC-21)
+      description: |
+        เขียน `status = 'cancelled'` และบันทึก `cancel_time`
+
+        อนุญาตให้ยกเลิกได้เฉพาะสถานะ `reserved` เท่านั้น
+        ถ้า `checked_in` แล้วต้องให้คนขับจัดการผ่าน UC-25 แทน
+      operationId: cancelBooking
+      x-uc: UC-21
+      x-permission: BK.CANCEL
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, maxLength: 200 }
+      responses:
+        '204': { description: ยกเลิกสำเร็จ }
+        '409':
+          description: 'สถานะปัจจุบันไม่อนุญาตให้ยกเลิก'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: CANCEL_NOT_ALLOWED
+                message: 'ยกเลิกไม่ได้ เนื่องจากเช็คอินแล้ว'
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ============================================================
+  # D — DRIVER (UC-22 … UC-26)
+  # ============================================================
+  /api/driver/today:
+    get:
+      tags: [D Driver]
+      summary: รอบเดินทางของวันนี้ (UC-22)
+      description: |
+        หน้า D1 ของ Mockup — ดูเฉพาะรอบที่ `driver_assign.emp_id` = ตัวเอง
+        seed มี 8 รอบ · คนขับ 6 คน · วันที่ตัวอย่าง 2026-10-01
+      operationId: getDriverToday
+      x-uc: UC-22
+      parameters:
+        - name: serviceDate
+          in: query
+          schema: { type: string, format: date }
+          description: ค่าเริ่มต้น = วันนี้
+      responses:
+        '200':
+          description: รอบเดินทางของวันนี้
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  serviceDate: { type: string, format: date }
+                  trips:
+                    type: array
+                    items: { $ref: '#/components/schemas/DriverTripBrief' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: บัญชีนี้ไม่มีบทบาท DRIVER
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/driver/trips:
+    post:
+      tags: [D Driver]
+      summary: เริ่มเดินทาง (UC-23)
+      description: |
+        ปุ่ม **"เริ่มการเดินทาง"** บนหน้า D1
+
+        สร้างแถวใน `trip` ด้วย `status = 'running'` และบันทึก `start_time`
+        (`CK_TRIP_STATUS` อนุญาตเฉพาะ `running` / `completed`)
+
+        **ต้องเรียกจาก D1 เท่านั้น** และต้องเป็นรอบที่ถูกจัดคนขับไว้
+      operationId: startTrip
+      x-uc: UC-23
+      x-permission: TRIP.START
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [schedId, vehId]
+              properties:
+                schedId: { type: integer, format: int64 }
+                vehId:
+                  type: integer
+                  format: int64
+                  description: ต้องตรงกับ `vehicle_assign` ของรอบนั้น
+      responses:
+        '201':
+          description: เริ่มเดินทางสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Trip' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: 'รอบนี้ถูกเริ่มเดินทางแล้ว หรือรถไม่ตรงกับที่จัดไว้'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/driver/trips/{tripId}/manifest:
+    parameters:
+      - name: tripId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    get:
+      tags: [D Driver]
+      summary: ดูรายชื่อผู้โดยสารบนรถ (UC-24)
+      description: |
+        หน้า D2 Manifest — คนขับต้องเห็นทุกคนที่อยู่บนรถ **ตามลำดับจุดขึ้น**
+        เพื่อให้เช็คอินได้ถูกคน
+      operationId: getDriverManifest
+      x-uc: UC-24
+      responses:
+        '200':
+          description: รายชื่อผู้โดยสาร
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DriverManifest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/driver/bookings/scan:
+    post:
+      tags: [D Driver]
+      summary: สแกน QR เช็คอิน (UC-25)
+      description: |
+        หน้า D3 — คนขับสแกน QR ที่ลูกค้าแสดง
+
+        - ตรวจ `qrToken` ว่าตรงกับการจองนั้นจริง
+        - ตรวจว่าเป็นการจองของรอบที่กำลังเดินทางอยู่
+        - เขียน `booking.status` → `checked_in`, `trip_passenger.checkin_time`, `checkin_stop_id`, `board_seq`
+
+        **BR-09** — หนึ่ง QR สแกนได้ครั้งเดียว
+        (ถ้าสแกนซ้ำต้องตอบ 409 ไม่ใช่เขียนทับ)
+      operationId: scanCheckin
+      x-uc: UC-25
+      x-permission: QR.SCAN
+      x-br: [BR-09]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [qrToken, tripId]
+              properties:
+                qrToken: { type: string, example: 9f2c1a7e4b6d8f0a }
+                tripId: { type: integer, format: int64 }
+                stopId:
+                  type: integer
+                  format: int64
+                  description: จุดที่กำลังจะให้ลง
+      responses:
+        '200':
+          description: เช็คอินสำเร็จ
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CheckinResult' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: 'BR-09 — QR นี้ถูกสแกนไปแล้ว'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example:
+                code: BR09_ALREADY_CHECKED_IN
+                message: 'QR นี้ถูกเช็คอินไปแล้ว'
+                details: { checkinTime: '2026-10-01T09:38:00' }
+        '404':
+          description: ไม่พบ `qrToken`
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/driver/trips/{tripId}/end:
+    parameters:
+      - name: tripId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    post:
+      tags: [D Driver]
+      summary: จบเดินทาง (UC-26)
+      description: |
+        เปลี่ยน `trip.status` จาก `running` → `completed` และบันทึก `end_time`
+
+        **BR-10** — จบได้เฉพาะรอบที่ `status = 'running'`
+        และการจองที่ยัง `reserved` จะถูกเปลี่ยนเป็น `no_show`
+      operationId: endTrip
+      x-uc: UC-26
+      x-permission: TRIP.END
+      x-br: [BR-10]
+      responses:
+        '204': { description: จบเดินทางสำเร็จ }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: 'BR-10 — รอบนี้ยังไม่ได้เริ่ม หรือจบไปแล้ว'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ============================================================
+  # R — REPORT (UC-27 … UC-30)
+  # ============================================================
+  /api/reports/r1:
+    get:
+      tags: [R Report]
+      summary: รายงานสรุปการเดินทางรายวัน (UC-27)
+      description: |
+        **R1** — ตาม PDF: จำนวนรอบ · จำนวนผู้โดยสาร · อัตราการมาจริง
+
+        เปอร์เซ็นต์การมาจริง = `completed ÷ (completed + no_show) × 100`
+        — **ต้องตัดส่วน `cancelled` ออก** ไม่เช่นนั้นตัวเลขจะเพี้ยน
+
+        เมื่อ Q-20 ถูกตอบแล้วและมีการ seed booking/trip จะตรวจสอบได้จริง
+        ปัจจุบัน `booking` = 0 แถว จึงคืนค่า 0
+      operationId: reportR1
+      x-uc: UC-27
+      x-permission: RPT.R1
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: routeId
+          in: query
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: ผลรายงาน R1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  from: { type: string, format: date }
+                  to: { type: string, format: date }
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        serviceDate: { type: string, format: date }
+                        routeId: { type: integer, format: int64 }
+                        routeName: { type: string }
+                        totalTrips: { type: integer, example: 4 }
+                        totalPassengers: { type: integer, example: 12 }
+                        completed: { type: integer, example: 11 }
+                        noShow: { type: integer, example: 1 }
+                        attendanceRate:
+                          type: number
+                          format: float
+                          example: 91.67
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r4:
+    get:
+      tags: [R Report]
+      summary: รายงานยอดผู้โดยสารแยกตามช่วงเวลา (UC-28)
+      description: |
+        **R4** — ตาม PDF: แยกยอดผู้โดยสารเป็นช่วงเวลา
+        (เช้า / บ่าย / เย็น) เพื่อดูว่ารอบไหนคนนิยม
+
+        > ⚠️ **ยังเปิดใช้งานไม่ได้** — ตาราง `permission` **ไม่มี `RPT.R4`**
+        > (โมดูล `report` มีแต่ R1, R2, R3, R5, R6, R7) แม้ PDF จะกำหนดให้มี R4
+        > ต้องเพิ่มสิทธิ์ก่อน จึงจะเรียก endpoint นี้ผ่านการตรวจสิทธิ์ได้
+        > ดูรายละเอียดที่ `GET /api/permissions`
+      operationId: reportR4
+      x-uc: UC-28
+      x-permission: RPT.R4
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R4
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportR4' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r6:
+    get:
+      tags: [R Report]
+      summary: รายงานการใช้งานรถ (UC-29)
+      description: '**R6** — ตาม PDF: สถิติการใช้งานรถแต่ละคัน'
+      operationId: reportR6
+      x-uc: UC-29
+      x-permission: RPT.R6
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R6
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        vehId: { type: integer, format: int64 }
+                        plateNo: { type: string, example: 2-AB-1234 }
+                        totalTrips: { type: integer, example: 4 }
+                        totalPassengers: { type: integer, example: 12 }
+                        totalMinutes:
+                          type: integer
+                          description: ผลรวม `route.total_minutes` ของทุกรอบที่ใช้รถคันนี้
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r2:
+    get:
+      tags: [R Report]
+      summary: รายงานยอดจองรายวัน
+      operationId: reportR2
+      x-uc: UC-28
+      x-permission: RPT.R2
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R2
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportGeneric' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r3:
+    get:
+      tags: [R Report]
+      summary: รายงานยอดยกเลิก
+      operationId: reportR3
+      x-uc: UC-28
+      x-permission: RPT.R3
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R3
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportGeneric' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r5:
+    get:
+      tags: [R Report]
+      summary: รายงานอัตราการมาจริง
+      operationId: reportR5
+      x-uc: UC-28
+      x-permission: RPT.R5
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R5
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportGeneric' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/r7:
+    get:
+      tags: [R Report]
+      summary: รายงานเวลาเดินทางจริงเทียบตาราง
+      description: |
+        **R7** — เทียบ `trip.start_time` / `end_time` จริง กับ `schedule.depart_at`
+        เพื่อดูว่าตารางเดินทางตรงกับความจริงแค่ไหน
+
+        > ⚠️ **Q-B / Q-18** — ถ้าเวลาเดินทางจริง (R7) ไม่ตรงกับ `route.total_minutes`
+        > จะเป็นหลักฐานยืนยันว่าค่าใน PDF ต้องแก้
+        > ปัจจุบันใช้ 15 นาทีสำหรับเส้นทางที่ 3 พร้อม `TODO(Q-B)` ใน seed
+      operationId: reportR7
+      x-uc: UC-28
+      x-permission: RPT.R7
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: true
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: ผลรายงาน R7
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportGeneric' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/reports/{reportId}/export:
+    parameters:
+      - name: reportId
+        in: path
+        required: true
+        schema: { type: string, enum: [r1, r2, r3, r4, r5, r6, r7] }
+      - name: format
+        in: query
+        schema: { type: string, enum: [csv, xlsx], default: csv }
+    get:
+      tags: [R Report]
+      summary: ส่งออกรายงานเป็นไฟล์ (UC-30)
+      description: |
+        **UC-30** — ส่งออกรายงานเป็น CSV / Excel
+        เป็น requirement ที่ระบุชัดเจนใน PDF และเป็นหน้าจอสุดท้ายของ Mockup (หน้า report-r1)
+
+        ใช้สิทธิ์ของรายงานเดียวกัน (`RPT.R{n}`) ไม่ใช่สิทธิ์แยก
+      operationId: exportReport
+      x-uc: UC-30
+      responses:
+        '200':
+          description: ไฟล์รายงาน
+          headers:
+            Content-Disposition:
+              schema: { type: string }
+              example: 'attachment; filename="R1_20261001-20261007.csv"'
+          content:
+            text/csv:
+              schema: { type: string }
+              example: 'service_date,route_name,total_trips,total_passengers,attendance_rate'
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT จาก `POST /api/auth/login`
+        สิทธิ์ใน token อ้างอิง `permission.perm_code` 21 ตัวจริงในตาราง
+
+  parameters:
+    DeptId:
+      name: deptId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+    ActiveOnly:
+      name: activeOnly
+      in: query
+      schema: { type: boolean, default: true }
+      description: กรองเฉพาะรายการที่ `is_active = 1`
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+
+  responses:
+    Unauthorized:
+      description: ไม่ได้เข้าสู่ระบบ · token หมดอายุ · หรือถูกเพิกถอน
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: UNAUTHORIZED, message: 'กรุณาเข้าสู่ระบบ' }
+    Forbidden:
+      description: ไม่มีสิทธิ์ (ตรวจจาก `role_permission`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: FORBIDDEN, message: 'ไม่มีสิทธิ์เข้าถึงส่วนนี้', details: { required: 'EMP.EDIT' } }
+    NotFound:
+      description: ไม่พบข้อมูล
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { code: NOT_FOUND, message: 'ไม่พบข้อมูลที่ระบุ' }
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: รหัส error แบบคงที่ ให้ client ตรวจสอบได้โดยไม่ต้องแปลงข้อความ
+          example: BR01_TOTAL_MISMATCH
+        message:
+          type: string
+          description: ข้อความสำหรับแสดงผลต่อผู้ใช้ (ภาษาไทย)
+        details:
+          type: object
+          additionalProperties: true
+          description: รายละเอียดเพิ่มเติม เช่น ค่าที่คาดหวังกับค่าที่ได้รับ
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+          description: ตรงกับ `employee.username` (seed มี 15 บัญชี)
+        password:
+          type: string
+          format: password
+          description: |
+            รหัสผ่านตรง ๆ — **จะถูก hash ด้วย bcrypt เท่านั้น**
+            ไม่มีการส่งรหัสผ่านเป็น hash ใน request เพื่อความปลอดภัย
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: "JWT สำหรับส่งใน header `Authorization: Bearer <token>`"
+        tokenType: { type: string, example: Bearer }
+        expiresIn:
+          type: integer
+          description: อายุ token เป็นวินาที
+          example: 3600
+        user:
+          $ref: '#/components/schemas/Employee'
+        roles:
+          type: array
+          items: { type: string }
+          description: seed มี ADMIN / STAFF / CUSTOMER / DRIVER
+          example: [ADMIN]
+        permissions:
+          type: array
+          items: { $ref: '#/components/schemas/Permission' }
+          description: ใช้สร้าง Dynamic Menu — ADMIN ได้ครบ 21 รายการ
+        modules:
+          type: array
+          items: { $ref: '#/components/schemas/PermissionModule' }
+          description: โมดูลที่ผู้ใช้มีสิทธิ์อย่างน้อย 1 รายการ — seed ครบ 5 โมดูล
+
+    Department:
+      type: object
+      properties:
+        deptId: { type: integer, format: int64, example: 1 }
+        deptName: { type: string, example: วิศวกรรมซอฟต์แวร์ }
+        createdAt: { type: string, format: date-time }
+
+    JobPosition:
+      type: object
+      properties:
+        positionId: { type: integer, format: int64, example: 1 }
+        positionName: { type: string, example: อาจารย์ประจำหลักสูตร }
+        deptId: { type: integer, format: int64, example: 1 }
+        deptName: { type: string, example: วิศวกรรมซอฟต์แวร์ }
+        isActive: { type: integer, enum: [0, 1] }
+
+    Employee:
+      type: object
+      description: |
+        **ไม่มี `passwordHash` ใน schema นี้โดยเด็ดขาด**
+        เพราะ `employee.password_hash` เป็นข้อมูลลับที่ไม่ควรออกจาก server
+      properties:
+        empId: { type: integer, format: int64, example: 1 }
+        empCode: { type: string, example: E001 }
+        firstName: { type: string, example: สุขสรร }
+        lastName: { type: string, example: มาณีศรี }
+        phone: { type: string, nullable: true, example: '080-000-0001' }
+        email: { type: string, format: email, nullable: true }
+        deptId: { type: integer, format: int64, nullable: true, example: 1 }
+        deptName: { type: string, nullable: true }
+        positionId: { type: integer, format: int64, nullable: true, example: 1 }
+        positionName: { type: string, nullable: true }
+        username: { type: string, example: admin }
+        isActive: { type: integer, enum: [0, 1] }
+        createdAt: { type: string, format: date-time }
+        roles:
+          type: array
+          items: { type: string }
+
+    EmployeeBrief:
+      type: object
+      description: ข้อมูลย่อสำหรับฝังใน Manifest และรายงาน
+      properties:
+        empId: { type: integer, format: int64 }
+        empCode: { type: string }
+        fullName: { type: string, example: สุขสรร มาณีศรี }
+
+    EmployeeCreate:
+      type: object
+      required: [empCode, firstName, lastName, username, password, positionId, roleIds]
+      properties:
+        empCode: { type: string, maxLength: 20, example: E016 }
+        firstName: { type: string, maxLength: 50 }
+        lastName: { type: string, maxLength: 50 }
+        phone: { type: string, maxLength: 20, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        deptId: { type: integer, format: int64, nullable: true }
+        positionId: { type: integer, format: int64 }
+        username: { type: string, maxLength: 50 }
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: |
+            รหัสผ่านตรง ๆ จะถูก **hash ด้วย bcrypt (cost 10)** ทันทีที่รับ
+            และเก็บลง `employee.password_hash`
+            ค่าที่ hash แล้วต้องยาว 60 ตัวอักษรเสมอ
+            (ดูข้อควรระวังเรื่อง seed ที่ยาวไม่ถูกต้องในคำอธิบายของ `login`)
+        roleIds:
+          type: array
+          minItems: 1
+          items: { type: integer, format: int64 }
+          example: [1]
+
+    EmployeeUpdate:
+      type: object
+      properties:
+        firstName: { type: string, maxLength: 50 }
+        lastName: { type: string, maxLength: 50 }
+        phone: { type: string, maxLength: 20, nullable: true }
+        email: { type: string, format: email, nullable: true }
+        deptId: { type: integer, format: int64, nullable: true }
+        positionId: { type: integer, format: int64 }
+        username: { type: string, maxLength: 50 }
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: ถ้าไม่ส่งค่านี้ = ไม่เปลี่ยนรหัสผ่าน · ถ้าส่ง = hash ใหม่ด้วย bcrypt
+        roleIds:
+          type: array
+          items: { type: integer, format: int64 }
+
+    PagedEmployeeList:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Employee' }
+        total: { type: integer, example: 15 }
+        page: { type: integer, example: 1 }
+        pageSize: { type: integer, example: 50 }
+
+    PermissionModule:
+      type: string
+      enum: [master, front, booking, driver, report]
+      description: 5 โมดูลตาม Dynamic Menu — seed มีครบทั้ง 5 โมดูล
+
+    Permission:
+      type: object
+      properties:
+        permId: { type: integer, format: int64, example: 1 }
+        permCode:
+          type: string
+          description: รหัสสิทธิ์จริงในตาราง `permission` — 21 ตัว
+          example: EMP.EDIT
+        permName: { type: string, example: แก้ไขข้อมูลพนักงาน }
+        module: { $ref: '#/components/schemas/PermissionModule' }
+        screenKey:
+          type: string
+          nullable: true
+          description: ผูกกับหน้าจอใน Mockup เพื่อให้ frontend ซ่อน/แสดงปุ่มตรงกัน
+        sortNo: { type: integer, example: 1 }
+
+    Role:
+      type: object
+      properties:
+        roleId: { type: integer, format: int64, example: 1 }
+        roleName: { type: string, example: ADMIN }
+        description: { type: string, nullable: true }
+        isActive: { type: integer, enum: [0, 1] }
+        permCount:
+          type: integer
+          description: "จำนวนสิทธิ์ของบทบาท — seed: ADMIN 21 · STAFF 18 · DRIVER 5 · CUSTOMER 4 (รวม 48)"
+          example: 21
+        empCount:
+          type: integer
+          description: "จำนวนพนักงานที่มีบทบาทนี้ — seed: ADMIN 1 · CUSTOMER 6 · DRIVER 6 · STAFF 2"
+          example: 1
+
+    Stop:
+      type: object
+      properties:
+        stopId: { type: integer, format: int64, example: 1 }
+        stopName: { type: string, example: มหาวิทยาลัยเทคโนโลยีมหาคร }
+        address: { type: string, nullable: true }
+        latitude: { type: number, format: double, nullable: true, example: 13.6475 }
+        longitude: { type: number, format: double, nullable: true, example: 100.9847 }
+        isActive: { type: integer, enum: [0, 1] }
+
+    StopInput:
+      type: object
+      required: [stopName]
+      properties:
+        stopName: { type: string, maxLength: 100 }
+        address: { type: string, maxLength: 300, nullable: true }
+        latitude: { type: number, format: double, nullable: true }
+        longitude: { type: number, format: double, nullable: true }
+
+    RouteStop:
+      type: object
+      description: จุดหยุดของเส้นทาง (`route_stop`) — seed มี 9 แถว
+      properties:
+        stopSeq:
+          type: integer
+          description: ลำดับจุด (คอลัมน์ชื่อ `STOP_SEQ` ไม่ใช่ `no`)
+          example: 1
+        stopId: { type: integer, format: int64, example: 1 }
+        stopName: { type: string }
+        travelMinutes:
+          type: integer
+          description: เวลาจากจุดก่อนหน้าถึงจุดนี้ (นาที)
+          example: 5
+
+    RouteInput:
+      type: object
+      required: [routeName, stops]
+      properties:
+        routeName: { type: string, maxLength: 100, example: เส้นทางที่ 4 }
+        description: { type: string, maxLength: 300, nullable: true }
+        totalMinutes:
+          type: integer
+          description: |
+            ต้องเท่ากับผลรวม `travelMinutes` ของทุกจุด (**BR-01**)
+            ถ้าไม่ส่งมา API จะคำนวณให้
+        stops:
+          type: array
+          minItems: 2
+          description: ต้องมีจุดหยุดอย่างน้อย 2 จุด และ **ห้ามซ้ำภายในเส้นทาง** (`uq_route_stop_uk`)
+          items:
+            type: object
+            required: [stopId, travelMinutes]
+            properties:
+              stopId: { type: integer, format: int64, example: 1 }
+              travelMinutes: { type: integer, minimum: 0, example: 5 }
+
+    Route:
+      allOf:
+        - $ref: '#/components/schemas/RouteInput'
+        - type: object
+          properties:
+            routeId: { type: integer, format: int64, example: 1 }
+            isActive: { type: integer, enum: [0, 1] }
+            stops:
+              type: array
+              items: { $ref: '#/components/schemas/RouteStop' }
+            stopCount:
+              type: integer
+              description: "จำนวนจุดหยุด — seed: เส้นทางที่ 2 = 3 จุด, เส้นทางที่ 3 = 4 จุด"
+
+    VehicleType:
+      type: object
+      properties:
+        vtypeId: { type: integer, format: int64, example: 1 }
+        typeName: { type: string, example: รถตู้ 15 ที่นั่ง }
+        capacity:
+          type: integer
+          description: ความจุที่นั่ง — ใช้คำนวณที่ว่างใน UC-17
+          example: 15
+        isActive: { type: integer, enum: [0, 1] }
+
+    Vehicle:
+      type: object
+      properties:
+        vehId: { type: integer, format: int64, example: 1 }
+        plateNo: { type: string, example: 2-AB-1234 }
+        vtypeId: { type: integer, format: int64, example: 1 }
+        typeName: { type: string, example: รถตู้ 15 ที่นั่ง }
+        capacity: { type: integer, example: 15 }
+        isActive: { type: integer, enum: [0, 1] }
+
+    ScheduleStop:
+      type: object
+      description: เวลาถึงแต่ละจุด (`schedule_stop`) — seed มี 36 แถว
+      properties:
+        stopSeq: { type: integer, example: 1 }
+        stopId: { type: integer, format: int64, example: 1 }
+        stopName: { type: string }
+        arriveAt: { type: string, format: date-time }
+        dwellMinutes:
+          type: integer
+          description: เวลาหยุดรับ-ส่งผู้โดยสาร (นาที)
+          example: 1
+
+    ScheduleInput:
+      type: object
+      required: [routeId, serviceDate, departAt]
+      properties:
+        routeId: { type: integer, format: int64, example: 1 }
+        serviceDate:
+          type: string
+          format: date
+          description: คอลัมน์ `SERVICE_DATE` เป็นชนิด `DATE` (ไม่มีเวลา)
+        departAt:
+          type: string
+          format: date-time
+          description: 'ตัวอย่างจาก seed: 2026-10-01T09:30:00'
+        stops:
+          type: array
+          description: |
+            เวลาถึงที่แต่ละจุด · ถ้าไม่ส่งมา API จะคำนวณจาก `route_stop.travelMinutes`
+            ต้องสอดคล้องกับ **BR-02**
+          items:
+            type: object
+            required: [stopId, arriveAt]
+            properties:
+              stopId: { type: integer, format: int64 }
+              arriveAt: { type: string, format: date-time }
+              dwellMinutes: { type: integer, minimum: 0, default: 0 }
+
+    Schedule:
+      allOf:
+        - $ref: '#/components/schemas/ScheduleInput'
+        - type: object
+          properties:
+            schedId: { type: integer, format: int64, example: 1 }
+            isActive: { type: integer, enum: [0, 1] }
+            routeName: { type: string }
+            totalMinutes: { type: integer, example: 13 }
+            stopCount: { type: integer, example: 3 }
+            seatsTotal:
+              type: integer
+              description: ความจุรถที่จัดให้รอบนี้
+            seatsBooked: { type: integer }
+            seatsAvailable: { type: integer }
+            driver: { $ref: '#/components/schemas/EmployeeBrief' }
+            vehicle: { $ref: '#/components/schemas/Vehicle' }
+            stops:
+              type: array
+              items: { $ref: '#/components/schemas/ScheduleStop' }
+
+    SeatMap:
+      type: object
+      description: แผนผังที่นั่งสำหรับหน้า C2
+      properties:
+        schedId: { type: integer, format: int64 }
+        totalSeats: { type: integer, example: 15 }
+        bookedSeats: { type: integer, example: 4 }
+        availableSeats: { type: integer, example: 11 }
+        maxSeatsPerBooking:
+          type: integer
+          description: จำนวนที่นั่งสูงสุดต่อการจอง (BR-06 = 4)
+          example: 4
+        seats:
+          type: array
+          items:
+            type: object
+            properties:
+              seatNo: { type: integer, example: 1 }
+              status: { type: string, enum: [available, reserved, checked_in, occupied] }
+
+    BookingStatus:
+      type: string
+      enum: [reserved, checked_in, completed, cancelled, no_show]
+      description: ตรงกับ `CK_BOOKING_STATUS` ในฐานข้อมูลทุกค่า
+
+    BookingCreate:
+      type: object
+      required: [schedId, boardStopId, alightStopId, seats]
+      properties:
+        schedId: { type: integer, format: int64 }
+        boardStopId:
+          type: integer
+          format: int64
+          description: จุดขึ้น
+        alightStopId:
+          type: integer
+          format: int64
+          description: จุดลง · ต้องอยู่หลัง `boardStopId` ในลำดับเส้นทาง (**BR-07**)
+        seats:
+          type: integer
+          minimum: 1
+          maximum: 4
+          description: 'จำนวนที่นั่ง **1–4** ตาม `CK_BOOKING_SEATS` (BR-06)'
+          example: 2
+
+    Booking:
+      allOf:
+        - $ref: '#/components/schemas/BookingCreate'
+        - type: object
+          properties:
+            bookingId: { type: integer, format: int64 }
+            bookingCode:
+              type: string
+              description: รหัสการจองที่ใช้เป็น QR
+              example: BK-20261001-0001
+            custId: { type: integer, format: int64 }
+            customerName: { type: string }
+            status: { $ref: '#/components/schemas/BookingStatus' }
+            bookTime: { type: string, format: date-time }
+            qrToken:
+              type: string
+              description: |
+                โทเคนสำหรับ QR Code (UC-20) และใช้ตรวจตอนคนขับสแกน (UC-25)
+                **ต้องเป็นค่าสุ่มที่คาดเดาไม่ได้** เพราะใช้ยืนยันตัวตนผู้โดยสาร
+            cancelTime: { type: string, format: date-time, nullable: true }
+            boardStopName: { type: string }
+            alightStopName: { type: string }
+            routeName: { type: string }
+            departAt: { type: string, format: date-time }
+            serviceDate: { type: string, format: date }
+
+    ManifestPassenger:
+      type: object
+      properties:
+        bookingId: { type: integer, format: int64 }
+        bookingCode: { type: string, example: BK-20261001-0001 }
+        customerName: { type: string }
+        seats: { type: integer, example: 2 }
+        boardSeq: { type: integer, example: 1 }
+        boardStopName: { type: string }
+        alightSeq: { type: integer, example: 3 }
+        alightStopName: { type: string }
+        status: { $ref: '#/components/schemas/BookingStatus' }
+        checkedIn: { type: boolean, description: เช็คอินแล้วหรือยัง }
+
+    Manifest:
+      type: object
+      description: ใช้ร่วมกันระหว่างหน้า S1 (Staff) และ D2 (Driver)
+      properties:
+        schedId: { type: integer, format: int64 }
+        routeName: { type: string }
+        serviceDate: { type: string, format: date }
+        departAt: { type: string, format: date-time }
+        totalPassengers: { type: integer, example: 12 }
+        totalSeats: { type: integer, example: 12 }
+        passengers:
+          type: array
+          items: { $ref: '#/components/schemas/ManifestPassenger' }
+
+    DriverTripBrief:
+      type: object
+      properties:
+        schedId: { type: integer, format: int64 }
+        routeId: { type: integer, format: int64 }
+        routeName: { type: string }
+        departAt: { type: string, format: date-time }
+        totalMinutes: { type: integer, example: 13 }
+        stopCount: { type: integer, example: 3 }
+        status: { type: string, enum: [upcoming, running, completed] }
+        plateNo: { type: string }
+        passengerCount: { type: integer }
+
+    Trip:
+      type: object
+      properties:
+        tripId: { type: integer, format: int64 }
+        schedId: { type: integer, format: int64 }
+        driverId: { type: integer, format: int64 }
+        vehId: { type: integer, format: int64 }
+        startTime: { type: string, format: date-time }
+        endTime: { type: string, format: date-time, nullable: true }
+        status: { type: string, enum: [running, completed] }
+
+    DriverManifest:
+      allOf:
+        - $ref: '#/components/schemas/Manifest'
+        - type: object
+          properties:
+            tripId: { type: integer, format: int64 }
+            tripStatus: { type: string, enum: [running, completed] }
+            plateNo: { type: string }
+            stops:
+              type: array
+              description: จุดหยุดของรอบ ใช้แสดงว่าขณะนี้รถอยู่จุดไหน
+              items: { $ref: '#/components/schemas/ScheduleStop' }
+
+    CheckinResult:
+      type: object
+      properties:
+        bookingCode: { type: string, example: BK-20261001-0001 }
+        customerName: { type: string }
+        seats: { type: integer, example: 2 }
+        boardStopName: { type: string }
+        checkinTime: { type: string, format: date-time }
+        boardSeq: { type: integer, example: 1 }
+        message: { type: string, example: เช็คอินสำเร็จ }
+
+    ReportR4:
+      type: object
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        rows:
+          type: array
+          items:
+            type: object
+            properties:
+              period:
+                type: string
+                enum: [morning, afternoon, evening]
+                description: ช่วงเวลา
+              totalPassengers: { type: integer, example: 12 }
+              avgPerTrip:
+                type: number
+                format: float
+                example: 3.0
+
+    ReportGeneric:
+      type: object
+      description: โครงรายงานกลางสำหรับ R2/R3/R5/R7
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        totals:
+          type: object
+          additionalProperties: true
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true

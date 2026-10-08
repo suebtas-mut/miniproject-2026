@@ -1,0 +1,44 @@
+@startuml sequence-03-cancel
+' T-010 (Sprint 3) — A5: Sequence Diagram 3/5 — Cancel Booking (UC-21, B3)
+' อ้างอิง: usecase-spec.md UC-21 · BR-08 · ASM-07-2
+
+title Sequence — ยกเลิกการจอง (UC-21)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "ผู้ใช้บริการ" as Cust
+participant "Flutter App\n(my_booking)" as App
+participant "REST API" as API
+database "Oracle\nbooking" as Book
+queue "Transaction\nBEGIN … COMMIT" as TX
+
+Cust -> App : เปิด "การเดินทางของฉัน" → แตะ "ยกเลิก"
+App -> App : แสดง Dialog ยืนยัน\n"ต้องการยกเลิกการจองนี้?"
+Cust -> App : ยืนยัน
+App -> API : POST /api/booking/:id/cancel (JWT)
+
+API -> Book : SELECT booking WHERE booking_id = :id (bind)
+alt ไม่ใช่การจองของตัวเอง
+  API --> App : 403 Forbidden
+else status ไม่ใช่ 'reserved'
+  API --> App : 409 (checked_in/completed/cancelled ยกเลิกไม่ได้)
+else เป็นของตัวเองและ status='reserved'
+  API -> API : ตรวจ ASM-07-2:\nเวลาถึงจุดขิ้น − ตอนนี้ ≥ 20 นาที?
+  alt เลยกำหนด 20 นาทีแล้ว
+    API --> App : 400 "เลยกำหนดเวลายกเลิกแล้ว"
+    App --> Cust : แสดงข้อความแจ้งเตือน
+  else ยังยกเลิกได้
+    API -> TX : BEGIN
+    API -> Book : UPDATE booking\nSET status='cancelled', cancel_time=SYSTIMESTAMP\nWHERE booking_id = :id
+    API -> TX : COMMIT
+    note right of Book
+      BR-08: ที่นั่งถูก "คืน" แบบไม่ต้องแก้อะไร —
+      นับที่ว่างด้วย SUM(seats) เฉพาะ status='reserved'
+      รายการ cancelled ไม่ถูกนับ → ที่นั่งว่างทันที
+    end note
+    API --> App : 204 No Content
+    App --> Cust : รายการย้ายไปแท็บ "ยกเลิก"
+  end
+end
+@enduml

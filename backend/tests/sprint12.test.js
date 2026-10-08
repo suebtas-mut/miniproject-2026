@@ -40,7 +40,7 @@ const GUARD_MSG = 'ไม่มีสิทธิ์เข้าถึงส่�
 const VALIDATION_MSG = 'ข้อมูลที่ส่งมาไม่ถูกต้อง';
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
-const readText = (rel) => fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8');
+const readText = (rel) => fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8').replace(/\r\n/g, '\n');
 const OPENAPI = () => readText('docs/api/openapi.yaml');
 const VIEWS_05 = () => readText('database/05_views_report.sql');
 const SEED_02 = () => readText('database/02_seed_master.sql');

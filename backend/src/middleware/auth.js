@@ -3,7 +3,7 @@
 // - requirePermission: โหลดสิทธิ์จาก DB ทุก request (ไม่ cache, ไม่ hardcode role — UC-09)
 // - loginRateLimiter: 5 ครั้งผิดติดต่อกัน / 15 นาที → 429 TOO_MANY_ATTEMPTS (OpenAPI Login 429)
 const { HttpError, errorBody } = require('./errorHandler');
-const { verifyToken, markerJti } = require('../utils/token');
+const { verifyToken, markerJti, revokedByMarker } = require('../utils/token');
 
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_MAX_ATTEMPTS = 5;
@@ -72,7 +72,7 @@ function createAuthMiddleware({ repos }) {
       if (exact) throw new HttpError(401, 'กรุณาเข้าสู่ระบบใหม่', { code: 'TOKEN_REVOKED' });
 
       const marker = revokedRows.find((row) => row.JTI === markerJti(payload.empId));
-      if (marker && marker.REVOKED_AT && payload.iat < Math.floor(new Date(marker.REVOKED_AT).getTime() / 1000)) {
+      if (marker && marker.REVOKED_AT && revokedByMarker(payload, marker.REVOKED_AT)) {
         throw new HttpError(401, 'กรุณาเข้าสู่ระบบใหม่', { code: 'TOKEN_REVOKED' });
       }
 

@@ -1,0 +1,39 @@
+@startuml sequence-05-complete-trip
+' T-010 (Sprint 3) — A5: Sequence Diagram 5/5 — Complete Trip (UC-26, D4)
+' อ้างอิง: usecase-spec.md UC-26 · BR-10 (No Show)
+
+title Sequence — ปิดรอบการเดินทางและสรุปยอด (UC-26)
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+actor "คนขับรถ" as Driver
+participant "Flutter App" as App
+participant "REST API" as API
+database "Oracle\ntrip" as Trip
+database "Oracle\nbooking" as Book
+database "Oracle\ntrip_passenger" as Pass
+queue "Transaction\nBEGIN … COMMIT" as TX
+
+Driver -> App : กด "ปิดรอบการเดินทาง" (ถึงจุดปลายทาง)
+App -> App : แสดง Dialog "ยืนยันการปิดรอบ?"
+Driver -> App : ยืนยัน
+App -> API : POST /api/driver/trip/:tripId/complete (JWT)
+
+API -> API : ตรวจว่า trip.status = 'running'
+alt trip ไม่ใช่สถานะ running
+  API --> App : 409 "รอบนี้ถูกปิดไปแล้ว"
+else ถูกต้อง
+  API -> TX : BEGIN
+  API -> Trip : UPDATE trip SET status='completed',\nend_time=SYSTIMESTAMP
+  API -> Book : UPDATE booking SET status='no_show'\nWHERE sched_id = :schedId AND status='reserved'
+  note right of Book : BR-10 — ผู้จองที่ไม่มา (ไม่เคย checked_in)\nถูกเปลี่ยนเป็น no_show ใน Transaction เดียวกัน
+  API -> TX : COMMIT
+
+  API -> Trip : SELECT COUNT ผู้โดยสาร trip_passenger ของรอบนี้
+  API -> Book : SELECT รายชื่อ status='no_show' ของรอบนี้
+  API -> Pass : นับขึ้นจริง/ลงจริง รายจุดจอด (join schedule_stop)
+  API --> App : 200 {total_bookings, boarded,\nalighted, no_show: [รายชื่อ]}
+  App --> Driver : หน้าสรุปยอด:\nผู้โดยสารทั้งหมด · ขึ้นจริง · ลงจริง · No Show
+end
+@enduml

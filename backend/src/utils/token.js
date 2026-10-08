@@ -22,7 +22,7 @@ function markerJti(empId) {
 }
 
 function signToken({ empId, jti }) {
-  return jwt.sign({ empId, jti }, getJwtSecret(), {
+  return jwt.sign({ empId, jti, issuedAtMs: Date.now() }, getJwtSecret(), {
     expiresIn: env.jwt.expiresInSeconds,
     issuer: env.jwt.issuer,
   });
@@ -33,4 +33,12 @@ function verifyToken(token) {
   return jwt.verify(token, getJwtSecret(), { issuer: env.jwt.issuer, algorithms: ['HS256'] });
 }
 
-module.exports = { getJwtSecret, newJti, markerJti, signToken, verifyToken };
+function revokedByMarker(payload, revokedAt) {
+  const time = new Date(revokedAt).getTime();
+  if (!Number.isFinite(time)) return true;
+  if (Number.isFinite(payload.issuedAtMs)) return payload.issuedAtMs <= time;
+  // Old tokens only have second precision: revoke the ambiguous same-second case.
+  return payload.iat <= Math.floor(time / 1000);
+}
+
+module.exports = { getJwtSecret, newJti, markerJti, signToken, verifyToken, revokedByMarker };

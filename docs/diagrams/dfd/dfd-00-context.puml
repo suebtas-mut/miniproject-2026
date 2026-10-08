@@ -1,0 +1,54 @@
+@startuml dfd-00-context
+' T-010 (Sprint 3) — A2: Context Diagram
+' อ้างอิง: usecase-spec.md UC-01..UC-30
+' Crosscheck กับ dfd-01-level0.puml: context แสดงเฉพาะระบบ + external actors เท่านั้น
+' — data stores (D1..D4 / 20 ตาราง Oracle) อยู่ในระบบ จึงแสดงที่ DFD Lv0 ไม่แสดงที่นี่
+
+title Context Diagram — ระบบรถรับส่ง (Shuttle Bus System)
+
+skinparam shadowing false
+skinparam roundCorner 10
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+skinparam rectangle {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam database {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+
+actor "ผู้ใช้บริการ\n(Customer)" as Cust
+actor "พนักงาน/ผู้ดูแลระบบ\n(Staff / Admin)" as Staff
+actor "คนขับรถ\n(Driver)" as Driver
+
+rectangle "ระบบ SHUTTLE BUS\n(Flutter App + REST API : Node.js/Express\n+ ข้อมูลภายในระบบ)" as SYS {
+  note as N1
+    ขอบเขตระบบ: แอป Flutter เดียวสำหรับ 4 บทบาท
+    + REST API 65 endpoint (docs/api/openapi.yaml)
+    + Data stores (D1..D4 · 20 ตาราง Oracle)
+      แสดงที่ DFD Level 0 — ไม่ใช่ entity ภายนอก
+  end note
+}
+
+ Cust --> SYS : ค้นหารอบ · จอง/ยกเลิก · แสดง QR ตั๋ว
+ Cust <-- SYS : สถานะการจอง · QR Code
+
+ Staff --> SYS : Login · จัดการพนักงาน/สิทธิ์/เส้นทาง/รอบ/รถ
+ Staff <-- SYS : ข้อมูลสรุป · รายงาน R1 / R4 / R6
+
+ Driver --> SYS : ตารางงาน · เริ่ม/ปิดรอบ · สแกน QR
+ Driver <-- SYS : ตารางงานรายวัน · Manifest · ผลการสแกน
+
+ note bottom
+   Balance check กับ dfd-01-level0.puml:
+   · Cust ↔ SYS = Cust ↔ P4 (ค้น/จอง/ยกเลิก/QR)
+   · Staff ↔ SYS = Staff ↔ P1 (Login) + P2 + P3 + P6
+   · Driver ↔ SYS = Driver ↔ P5
+   · SYS ↔ DB (Oracle) เลิกแสดงที่ context —
+     แทนด้วย D1..D4 ภายในระบบที่ DFD Lv0
+ end note
+@enduml

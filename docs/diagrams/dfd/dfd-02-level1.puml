@@ -1,0 +1,84 @@
+@startuml dfd-02-level1
+' T-010 (Sprint 3) — A3: DFD Level 1
+' แตก P1 (ยืนยันตัวตน) · P4 (จองรถ) · P5 (คนขับ) ที่ซับซ้อนที่สุด
+' P2/P3/P6 เป็น CRUD/รายงานตรงตัว ไม่แตกย่อย (ดู DFD Lv0)
+
+title DFD Level 1 — P1 ยืนยันตัวตน · P4 การจอง · P5 งานคนขับ
+
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam database {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "ผู้ใช้ทุกบทบาท" as User
+actor "ผู้ใช้บริการ" as Cust
+actor "คนขับรถ" as Driver
+
+' ---------------- P1 breakdown ----------------
+rectangle "P1 ยืนยันตัวตนและสิทธิ์" {
+  rectangle "P1.1\nตรวจรหัสผ่าน\nPOST /api/auth/login" as P11
+  rectangle "P1.2\nออก/ตรวจ JWT\n+ token_blacklist" as P12
+  rectangle "P1.3\nโหลดสิทธิ์ Dynamic\n(RBAC จากตาราง)" as P13
+}
+
+' ---------------- P4 breakdown ----------------
+rectangle "P4 จัดการการจอง" {
+  rectangle "P4.1\nค้นรอบว่าง\nBR-05 · BR-07" as P41
+  rectangle "P4.2\nจองที่นั่ง\nBR-06 · FOR UPDATE NOWAIT" as P42
+  rectangle "P4.3\nสร้าง QR ตั๋ว\n(seq_booking_code + qr_token)" as P43
+  rectangle "P4.4\nยกเลิกการจอง\nBR-08 คืนที่นั่ง" as P44
+}
+
+' ---------------- P5 breakdown ----------------
+rectangle "P5 งานคนขับ" {
+  rectangle "P5.1\nตารางงานรายวัน\n+ เริ่มรอบ (Conflict Alert)" as P51
+  rectangle "P5.2\nสแกน QR ยืนยันตั๋ว\nBR-09 ผิดรอบไม่ขึ้นได้" as P52
+  rectangle "P5.3\nปิดรอบ + สรุป\nBR-10 นับ No Show" as P53
+}
+
+database "D1 บุคคล/สิทธิ์" as D1
+database "D2 เส้นทาง/รอบ/รถ" as D2
+database "D3 booking" as D3
+database "D4 trip + trip_passenger" as D4
+
+ User --> P11 : username/password
+ P11 --> D1 : SELECT employee (bind) → bcrypt.compare (try/catch)
+ P11 --> P12 : รหัสผ่านถูกต้อง
+ P12 --> P13 : ออก JWT
+ P13 --> D1 : SELECT role_permission + permission\n(ไม่ hardcode สิทธิ์)
+ P13 --> User : token + roles + permissions + modules
+
+ Cust --> P41 : จุดขึ้น–ลง + วันที่
+ P41 --> D2 : schedule_stop + ยอดจอง (SUM seats, status='reserved')
+ P41 --> D3 : นับที่นั่งว่าง
+ P41 --> Cust : รายการรอบ + เหลือ X ที่นั่ง
+ Cust --> P42 : sched_id + seats (1–4)
+ P42 --> D2 : SELECT schedule ... FOR UPDATE NOWAIT\n(ถูก lock → ORA-00054 → 409)
+ P42 --> D3 : INSERT booking → COMMIT
+ P42 --> P43 : จองสำเร็จ
+ P43 --> D3 : UPDATE qr_token (สุ่ม · เดาไม่ได้)
+ P43 --> Cust : QR ตั๋ว (UC-20)
+ Cust --> P44 : booking_id
+ P44 --> D3 : UPDATE status='cancelled', cancel_time\nคืนที่นั่งตามจำนวน (BR-08)
+
+ Driver --> P51 : เลือกเวลา/รอบ
+ P51 --> D2 : driver_assign + schedule
+ P51 --> D4 : INSERT trip (status='running')\nตรวจ trip ค้าง = Conflict Alert
+ Driver --> P52 : qr_token (จากกล้อง mobile_scanner)
+ P52 --> D3 : ตรวจ booking ของ qr_token นั้น
+ P52 --> D4 : INSERT trip_passenger (checkin_time, board_seq)
+ P52 --> Driver : ✓ ชื่อผู้โดยสาร / ✗ ผิดรอบ (BR-09)
+ Driver --> P53 : ยืนยันปิดรอบ
+ P53 --> D4 : UPDATE trip status='completed', end_time
+ P53 --> D3 : UPDATE booking → 'no_show' (BR-10)
+ P53 --> Driver : สรุปยอด + รายชื่อ No Show
+@enduml

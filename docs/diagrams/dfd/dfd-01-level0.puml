@@ -1,0 +1,57 @@
+@startuml dfd-01-level0
+' T-010 (Sprint 3) — A3: DFD Level 0 (Context ย่อยออกเป็น 6 _processes)
+' กลุ่มตารางตาม 01_schema.sql: D1 (8) + D2 (9) + D3 (1) + D4 (2) = 20 ตาราง
+
+title DFD Level 0 — ระบบรถรับส่ง
+
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor #F7F9FC
+  BorderColor #4A6FA5
+}
+skinparam database {
+  BackgroundColor #E8F5E9
+  BorderColor #2E7D32
+}
+skinparam actor {
+  BackgroundColor #FFF4E6
+  BorderColor #B8860B
+}
+
+actor "ผู้ใช้บริการ" as Cust
+actor "พนักงาน/Admin" as Staff
+actor "คนขับรถ" as Driver
+
+rectangle "P1\nยืนยันตัวตนและ\nจัดการสิทธิ์\n(UC-01..03, 07..10)" as P1
+rectangle "P2\nจัดการข้อมูลหลัก\nพนักงาน/แผนก/ตำแหน่ง\n(UC-04..06)" as P2
+rectangle "P3\nจัดการเส้นทาง\nรอบเวลา และรถ\n(UC-11..16)" as P3
+rectangle "P4\nจัดการการจองรถ\n(UC-17..21)" as P4
+rectangle "P5\nประมวลผลงานคนขับ\nเริ่ม/สแกน/ปิดรอบ\n(UC-22..26)" as P5
+rectangle "P6\nสรุปงานและ\nรายงาน R1/R4/R6\n(UC-27..30)" as P6
+
+database "D1\nข้อมูลบุคคลและสิทธิ์ (8 ตาราง)\ndepartment · job_position · employee\napp_role · permission · role_permission\nemployee_role · token_blacklist" as D1
+database "D2\nข้อมูลเส้นทางและรถ (9 ตาราง)\nstop · route · route_stop\nvehicle_type · vehicle\nschedule · schedule_stop\ndriver_assign · vehicle_assign" as D2
+database "D3\nการจอง (1 ตาราง)\nbooking" as D3
+database "D4\nการเดินทาง (2 ตาราง)\ntrip · trip_passenger" as D4
+
+ Cust --> P4 : เลือกจุดขึ้น–ลง · จำนวนที่นั่ง · ยกเลิก
+ Cust <-- P4 : QR ตั๋ว · สถานะการจอง
+ Staff --> P1 : username/password (Login)
+ Staff --> P2 : เพิ่ม/แก้ไข/ปิดพนักงาน สิทธิ์
+ Staff --> P3 : จัดการเส้นทาง/จุดจอด/รอบ/รถ/มอบหมาย
+ Staff <-- P6 : รายงาน R1/R4/R6 (ตาราง+กราฟ)
+ Driver --> P5 : เริ่มรอบ · สแกน QR · ปิดรอบ
+ Driver <-- P5 : ตารางงาน · Manifest · ผลสแกน · สรุป
+
+ P1 <--> D1 : ตรวจรหัสผ่าน (bcrypt) · ออก JWT\nโหลด permission (dynamic RBAC)
+ P2 <--> D1 : CRUD บุคคลและสิทธิ์
+ P3 <--> D2 : CRUD เส้นทาง/รอบ/รถ · BR-01/02/04
+ P4 <--> D2 : ค้นรอบว่าง (BR-05, BR-07)
+ P4 <--> D3 : INSERT/UPDATE booking (BR-06, BR-08)
+ P5 <--> D2 : อ่านรอบ/มอบหมาย
+ P5 <--> D3 : ตรวจสิทธิ์ QR · เปลี่ยน status
+ P5 <--> D4 : INSERT trip/trip_passenger (BR-09, BR-10)
+ P6 <--> D2 : อ่านรอบ/รถ
+ P6 <--> D3 : นับยอดจอง
+ P6 <--> D4 : นับคนขึ้น/ลงจริง (R1, R4)
+@enduml
